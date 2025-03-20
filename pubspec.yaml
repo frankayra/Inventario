@@ -9,8 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_map: ^8.1.1
-  flutter_map_mbtiles: ^1.0.4
+  flutter_map: ^6.0.0
+  flutter_map_mbtiles: ^1.0.0
   latlong2: 0.9.1
 
 dev_dependencies:
@@ -20,3 +20,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/tiles/partedelahabana.mbtiles
+    - assets/tiles/tiles.mbtiles
