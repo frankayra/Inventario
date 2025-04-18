@@ -5,39 +5,37 @@ import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
-import 'utiles/copy_to_internal_disk.dart';
+import 'utiles/file_management.dart';
 import 'presentation/Screens/offline_map_screen.dart';
 import 'presentation/Screens/form_screen.dart';
+import 'package:file_picker/file_picker.dart';
+
+class AppContext {
+  static const mapName = 'managua1.mbtiles';
+  static const assetsMapPath = 'assets/tiles/$mapName';
+  static late String destinationPath;
+  static Future<void> initializeVariables() async {
+    // Variables que se inicializan al inicio de la aplicacion
+    // Se pueden usar en cualquier parte de la aplicacion
+    destinationPath =
+        '${(await getApplicationDocumentsDirectory()).path}/$mapName';
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppContext.initializeVariables();
 
-  final Directory documentsDir = await getApplicationDocumentsDirectory();
-  final String destinationPath = '${documentsDir.path}/habana.mbtiles';
-  await copyMbtilesToDocuments('assets/tiles/habana.mbtiles');
+  await copyMbtilesToDocuments(AppContext.assetsMapPath, AppContext.mapName);
 
-  // Verificar si ya existe para evitar copiarlo de nuevo
-  if (!await File(destinationPath).exists()) {
+  // Verificar si el mapa esta en el lugar correcto
+  if (!await File(AppContext.destinationPath).exists()) {
     throw Exception(
-      'El archivo mapa.mbtiles no se encontró en $destinationPath',
+      'El archivo mapa.mbtiles no se encontró en ${AppContext.destinationPath}',
     );
   }
 
-  runApp(MyApp());
-}
-
-//
-//
-//
-//
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(title: 'Inventario', home: MyScafold());
-  }
+  runApp(MyScafold());
 }
 
 //
@@ -55,6 +53,42 @@ class MyScafold extends StatefulWidget {
 class _MyScafoldState extends State<MyScafold> {
   late Future<MbTilesTileProvider> _tileProviderFuture;
   int _selectedIndex = 0;
+  String? _map_path;
+  File? _map_file;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Inventario',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              Icon(Icons.home_filled),
+              Text(' Inventario'),
+              ElevatedButton(
+                onPressed: _selectFile,
+                child: Icon(Icons.file_open),
+              ),
+            ],
+          ),
+        ),
+        body:
+            _selectedIndex == 0
+                ? OfflineMapScreen(mbtilesFilePath: AppContext.destinationPath)
+                : EdificacionForm(), // Reemplaza con tu otro widget
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
+            BottomNavigationBarItem(icon: Icon(Icons.widgets), label: 'Otro'),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.blue,
+          onTap: _onItemTapped,
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -64,8 +98,7 @@ class _MyScafoldState extends State<MyScafold> {
 
   Future<MbTilesTileProvider> _initializeTileProvider() async {
     final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/habana.mbtiles';
-    return MbTilesTileProvider.fromPath(path: path);
+    return MbTilesTileProvider.fromPath(path: AppContext.destinationPath);
   }
 
   void _onItemTapped(int index) {
@@ -74,25 +107,20 @@ class _MyScafoldState extends State<MyScafold> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(children: [Icon(Icons.home_filled), Text(' Inventario')]),
-      ),
-      body:
-          _selectedIndex == 0
-              ? OfflineMapScreen()
-              : EdificacionForm(), // Reemplaza con tu otro widget
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
-          BottomNavigationBarItem(icon: Icon(Icons.widgets), label: 'Otro'),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        onTap: _onItemTapped,
-      ),
-    );
+  Future<void> _selectFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _map_path = result.files.single.path;
+        _map_file = File(_map_path!);
+      });
+      print('Ruta del archivo seleccionado: $_map_path');
+      print('Archivo seleccionado: $_map_file');
+      // Aquí puedes usar _map_path o _map_file para cargar el archivo.
+    } else {
+      // El usuario canceló la selección.
+      print('Selección de archivo cancelada.');
+    }
   }
 }

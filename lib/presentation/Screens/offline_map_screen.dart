@@ -5,18 +5,25 @@ import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
-import '../../utiles/copy_to_internal_disk.dart';
+import '../../utiles/file_management.dart';
+import 'Map layers/terrains_limits_layer.dart';
+import 'package:file_picker/file_picker.dart';
 
 class OfflineMapScreen extends StatefulWidget {
-  const OfflineMapScreen({super.key});
+  final String mbtilesFilePath;
+  const OfflineMapScreen({required this.mbtilesFilePath, super.key});
 
   @override
-  _OfflineMapScreenState createState() => _OfflineMapScreenState();
+  _OfflineMapScreenState createState() =>
+      _OfflineMapScreenState(mbtilesFilePath: mbtilesFilePath);
 }
 
 class _OfflineMapScreenState extends State<OfflineMapScreen> {
+  final String mbtilesFilePath;
   static late Future<MbTilesTileProvider> _tileProviderFuture;
   static bool _isTileProviderInitialized = false;
+
+  _OfflineMapScreenState({required this.mbtilesFilePath});
 
   @override
   void initState() {
@@ -31,7 +38,7 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
   Future<MbTilesTileProvider> _initializeTileProvider() async {
     // Obtener el directorio de documentos donde se encuentra el archivo .mbtiles
     Directory documentsDir = await getApplicationDocumentsDirectory();
-    String mbtilesFilePath = '${documentsDir.path}/habana.mbtiles';
+    // String mbtilesFilePath = '${documentsDir.path}/Map.mbtiles';
     // String mbtilesFilePath = '/data/user/0/com.example.flutter_application_1/files/habana.mbtiles';
 
     // Verificar si el archivo .mbtiles existe
@@ -60,10 +67,29 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
             children: [
               FlutterMap(
                 options: MapOptions(
-                  initialCenter: LatLng(23.14467, -82.35550),
+                  // initialCenter: LatLng(23.14467, -82.35550), // Habana
+                  initialCenter: LatLng(12.15116, -86.27337), // Managua
                   initialZoom: 11.0,
+                  onTap: (TapPosition details, LatLng point) {
+                    setState(() {
+                      print(
+                        'Coordenadas del clic: ${point.latitude}, ${point.longitude}',
+                      );
+                      // Aquí puedes realizar otras acciones con las coordenadas del clic
+                    });
+                  },
                 ),
-                children: [TileLayer(tileProvider: tileProvider)],
+                children: [
+                  TileLayer(tileProvider: tileProvider),
+                  DelimitationsLayer(
+                    geoJsonAssetPath: 'assets/delimitaciones/manzanas.geojson',
+                    borderColor: Colors.green,
+                  ),
+                  DelimitationsLayer(
+                    geoJsonAssetPath: 'assets/delimitaciones/predios.geojson',
+                    borderColor: Colors.red,
+                  ),
+                ],
               ),
               Positioned(
                 bottom: 16.0,
