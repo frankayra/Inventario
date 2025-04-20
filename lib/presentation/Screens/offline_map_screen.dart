@@ -37,7 +37,7 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
 
   Future<MbTilesTileProvider> _initializeTileProvider() async {
     // Obtener el directorio de documentos donde se encuentra el archivo .mbtiles
-    Directory documentsDir = await getApplicationDocumentsDirectory();
+    // Directory documentsDir = await getApplicationDocumentsDirectory();
     // String mbtilesFilePath = '${documentsDir.path}/Map.mbtiles';
     // String mbtilesFilePath = '/data/user/0/com.example.flutter_application_1/files/habana.mbtiles';
 
@@ -68,8 +68,17 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
               FlutterMap(
                 options: MapOptions(
                   // initialCenter: LatLng(23.14467, -82.35550), // Habana
-                  initialCenter: LatLng(12.15116, -86.27337), // Managua
+                  // initialCenter: LatLng(
+                  //   12.145643078921182,
+                  //   -86.26495747803298,
+                  // ), // Managua
+                  initialCenter: LatLng(
+                    43.66404747551534,
+                    -79.3884040582291,
+                  ), // Toronto
                   initialZoom: 11.0,
+                  maxZoom: 20.0,
+                  minZoom: 1.0,
                   onTap: (TapPosition details, LatLng point) {
                     setState(() {
                       print(

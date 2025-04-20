@@ -11,7 +11,7 @@ import 'presentation/Screens/form_screen.dart';
 import 'package:file_picker/file_picker.dart';
 
 class AppContext {
-  static const mapName = 'managua1.mbtiles';
+  static const mapName = 'nicaragua.mbtiles';
   static const assetsMapPath = 'assets/tiles/$mapName';
   static late String destinationPath;
   static Future<void> initializeVariables() async {
