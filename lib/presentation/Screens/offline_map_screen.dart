@@ -8,6 +8,10 @@ import 'dart:io';
 import '../../utiles/file_management.dart';
 import 'Map layers/terrains_limits_layer.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:vector_map_tiles_mbtiles/vector_map_tiles_mbtiles.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
+import 'package:mbtiles/mbtiles.dart';
+import 'package:vector_tile_renderer/vector_tile_renderer.dart' as vtr;
 
 class OfflineMapScreen extends StatefulWidget {
   final String mbtilesFilePath;
@@ -20,7 +24,9 @@ class OfflineMapScreen extends StatefulWidget {
 
 class _OfflineMapScreenState extends State<OfflineMapScreen> {
   final String mbtilesFilePath;
-  static late Future<MbTilesTileProvider> _tileProviderFuture;
+  // static late Future<MbTilesTileProvider> _tileProviderFuture;                     // Raster
+  static late Future<MbTilesVectorTileProvider> _tileProviderFuture; // Vector
+  static late MbTiles mbtiles; // Vector
   static bool _isTileProviderInitialized = false;
 
   _OfflineMapScreenState({required this.mbtilesFilePath});
@@ -35,26 +41,26 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
     _tileProviderFuture = _initializeTileProvider();
   }
 
-  Future<MbTilesTileProvider> _initializeTileProvider() async {
-    // Obtener el directorio de documentos donde se encuentra el archivo .mbtiles
-    // Directory documentsDir = await getApplicationDocumentsDirectory();
-    // String mbtilesFilePath = '${documentsDir.path}/Map.mbtiles';
-    // String mbtilesFilePath = '/data/user/0/com.example.flutter_application_1/files/habana.mbtiles';
-
-    // Verificar si el archivo .mbtiles existe
+  // Future<MbTilesTileProvider> _initializeTileProvider() async {                    // Raster
+  Future<MbTilesVectorTileProvider> _initializeTileProvider() async {
+    // Vector
     if (!File(mbtilesFilePath).existsSync()) {
       throw Exception(
         'El archivo mapa.mbtiles no se encontró en $mbtilesFilePath',
       );
     }
 
-    // Crear y devolver el proveedor de tiles MBTiles
-    return MbTilesTileProvider.fromPath(path: mbtilesFilePath);
+    // return MbTilesTileProvider.fromPath(path: mbtilesFilePath);                    // Raster
+
+    mbtiles = MbTiles(mbtilesPath: mbtilesFilePath, gzip: false); // Vector
+    return MbTilesVectorTileProvider(mbtiles: mbtiles); // Vector
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<MbTilesTileProvider>(
+    // return FutureBuilder<MbTilesTileProvider>(                                     // Raster
+    return FutureBuilder<MbTilesVectorTileProvider>(
+      // Vector
       future: _tileProviderFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -68,14 +74,14 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
               FlutterMap(
                 options: MapOptions(
                   // initialCenter: LatLng(23.14467, -82.35550), // Habana
-                  // initialCenter: LatLng(
-                  //   12.145643078921182,
-                  //   -86.26495747803298,
-                  // ), // Managua
                   initialCenter: LatLng(
-                    43.66404747551534,
-                    -79.3884040582291,
-                  ), // Toronto
+                    12.145643078921182,
+                    -86.26495747803298,
+                  ), // Managua
+                  // initialCenter: LatLng(
+                  //   43.66404747551534,
+                  //   -79.3884040582291,
+                  // ), // Toronto
                   initialZoom: 11.0,
                   maxZoom: 20.0,
                   minZoom: 1.0,
@@ -89,15 +95,24 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                   },
                 ),
                 children: [
-                  TileLayer(tileProvider: tileProvider),
-                  DelimitationsLayer(
-                    geoJsonAssetPath: 'assets/delimitaciones/manzanas.geojson',
-                    borderColor: Colors.green,
+                  VectorTileLayer(
+                    theme: _mapTheme(),
+                    tileProviders: TileProviders({
+                      'openmaptiles': tileProvider,
+                    }),
+                    // do not set maximumZoom here to the metadata.maxZoom
+                    // or tiles won't get over-zoomed.
+                    maximumZoom: 18,
                   ),
-                  DelimitationsLayer(
-                    geoJsonAssetPath: 'assets/delimitaciones/predios.geojson',
-                    borderColor: Colors.red,
-                  ),
+                  // TileLayer(tileProvider: tileProvider),
+                  // DelimitationsLayer(
+                  //   geoJsonAssetPath: 'assets/delimitaciones/manzanas.geojson',
+                  //   borderColor: Colors.green,
+                  // ),
+                  // DelimitationsLayer(
+                  //   geoJsonAssetPath: 'assets/delimitaciones/predios.geojson',
+                  //   borderColor: Colors.red,
+                  // ),
                 ],
               ),
               Positioned(
@@ -119,7 +134,12 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
 
   @override
   void dispose() {
-    _tileProviderFuture.then((tileProvider) => tileProvider.dispose());
+    // _tileProviderFuture.then((tileProvider) => tileProvider.dispose());            // Raster
     super.dispose();
   }
+}
+
+vtr.Theme _mapTheme() {
+  // Define tu estilo de mapa aquí (puedes cargarlo desde un archivo JSON)
+  return vtr.Theme(id: "my_theme", version: '1.0.0', layers: []);
 }
