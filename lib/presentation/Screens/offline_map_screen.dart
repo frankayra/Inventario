@@ -68,17 +68,26 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
               FlutterMap(
                 options: MapOptions(
                   // initialCenter: LatLng(23.14467, -82.35550), // Habana
-                  // initialCenter: LatLng(
-                  //   12.145643078921182,
-                  //   -86.26495747803298,
-                  // ), // Managua
                   initialCenter: LatLng(
-                    43.66404747551534,
-                    -79.3884040582291,
-                  ), // Toronto
+                    12.145643078921182,
+                    -86.26495747803298,
+                  ), // Managua
+                  // initialCenter: LatLng(
+                  //   -85.170815,
+                  //   12.864564999999999,
+                  // ), // Centro de Nicaragua
+
+                  // initialCenter: LatLng(
+                  //   43.66404747551534,
+                  //   -79.3884040582291,
+                  // ), // Toronto
+                  // initialCenter: LatLng(
+                  //   36.1555182044328,
+                  //   -115.13386501485957,
+                  // ), // California
                   initialZoom: 11.0,
-                  maxZoom: 20.0,
-                  minZoom: 1.0,
+                  maxZoom: 16.0,
+                  minZoom: 10.0,
                   onTap: (TapPosition details, LatLng point) {
                     setState(() {
                       print(
