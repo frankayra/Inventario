@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
+import 'package:inventario/presentation/Screens/mapa_debug.dart';
+import 'package:mbtiles/mbtiles.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
@@ -9,21 +11,21 @@ import '../../utiles/file_management.dart';
 import 'Map layers/terrains_limits_layer.dart';
 import 'package:file_picker/file_picker.dart';
 
-class OfflineMapScreen extends StatefulWidget {
+class OfflineMapWidget extends StatefulWidget {
   final String mbtilesFilePath;
-  const OfflineMapScreen({required this.mbtilesFilePath, super.key});
+  const OfflineMapWidget({required this.mbtilesFilePath, super.key});
 
   @override
-  _OfflineMapScreenState createState() =>
-      _OfflineMapScreenState(mbtilesFilePath: mbtilesFilePath);
+  _OfflineMapWidgetState createState() =>
+      _OfflineMapWidgetState(mbtilesFilePath: mbtilesFilePath);
 }
 
-class _OfflineMapScreenState extends State<OfflineMapScreen> {
+class _OfflineMapWidgetState extends State<OfflineMapWidget> {
   final String mbtilesFilePath;
   static late Future<MbTilesTileProvider> _tileProviderFuture;
   static bool _isTileProviderInitialized = false;
 
-  _OfflineMapScreenState({required this.mbtilesFilePath});
+  _OfflineMapWidgetState({required this.mbtilesFilePath});
 
   @override
   void initState() {
@@ -35,20 +37,27 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
     _tileProviderFuture = _initializeTileProvider();
   }
 
+  // Future<MbTiles> _getMbTiles() async {
+  //   if (!File(mbtilesFilePath).existsSync()) {
+  //     throw Exception(
+  //       'El archivo mapa.mbtiles no se encontró en $mbtilesFilePath',
+  //     );
+  //   }
+  //   return MbTiles(mbtilesPath: mbtilesFilePath);
+  // }
+
   Future<MbTilesTileProvider> _initializeTileProvider() async {
     // Obtener el directorio de documentos donde se encuentra el archivo .mbtiles
     // Directory documentsDir = await getApplicationDocumentsDirectory();
     // String mbtilesFilePath = '${documentsDir.path}/Map.mbtiles';
     // String mbtilesFilePath = '/data/user/0/com.example.flutter_application_1/files/habana.mbtiles';
 
-    // Verificar si el archivo .mbtiles existe
     if (!File(mbtilesFilePath).existsSync()) {
       throw Exception(
         'El archivo mapa.mbtiles no se encontró en $mbtilesFilePath',
       );
     }
 
-    // Crear y devolver el proveedor de tiles MBTiles
     return MbTilesTileProvider.fromPath(path: mbtilesFilePath);
   }
 
@@ -56,6 +65,8 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
   Widget build(BuildContext context) {
     return FutureBuilder<MbTilesTileProvider>(
       future: _tileProviderFuture,
+      // return FutureBuilder<MbTiles>(
+      //   future: _getMbTiles(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -63,15 +74,21 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
           final tileProvider = snapshot.data!;
+          // final _mbtiles = snapshot.data!;
+          // return getDebugMap(_mbtiles);
           return Stack(
             children: [
               FlutterMap(
                 options: MapOptions(
                   // initialCenter: LatLng(23.14467, -82.35550), // Habana
                   initialCenter: LatLng(
-                    12.145643078921182,
-                    -86.26495747803298,
-                  ), // Managua
+                    23.17053428523392,
+                    -82.27196563176855,
+                  ), // Alamar
+                  // initialCenter: LatLng(
+                  //   12.145643078921182,
+                  //   -86.26495747803298,
+                  // ), // Managua
                   // initialCenter: LatLng(
                   //   -85.170815,
                   //   12.864564999999999,
@@ -85,7 +102,7 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                   //   36.1555182044328,
                   //   -115.13386501485957,
                   // ), // California
-                  initialZoom: 11.0,
+                  initialZoom: 16.0,
                   maxZoom: 16.0,
                   minZoom: 10.0,
                   onTap: (TapPosition details, LatLng point) {
@@ -93,18 +110,20 @@ class _OfflineMapScreenState extends State<OfflineMapScreen> {
                       print(
                         'Coordenadas del clic: ${point.latitude}, ${point.longitude}',
                       );
-                      // Aquí puedes realizar otras acciones con las coordenadas del clic
+                      // Aquí se puede realizar otras acciones con las coordenadas del clic
                     });
                   },
                 ),
                 children: [
                   TileLayer(tileProvider: tileProvider),
                   DelimitationsLayer(
-                    geoJsonAssetPath: 'assets/delimitaciones/manzanas.geojson',
+                    geoJsonAssetPath:
+                        'assets/Delimitations/manzanas_habana.geojson',
                     borderColor: Colors.green,
                   ),
                   DelimitationsLayer(
-                    geoJsonAssetPath: 'assets/delimitaciones/predios.geojson',
+                    geoJsonAssetPath:
+                        'assets/Delimitations/predios_habana.geojson',
                     borderColor: Colors.red,
                   ),
                 ],

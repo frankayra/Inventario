@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:path_provider/path_provider.dart';
 // import 'package:geojson/geojson.dart';
 
 class DelimitationsLayer extends StatefulWidget {
@@ -34,7 +35,9 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
     try {
       final String data = await rootBundle.loadString(widget.geoJsonAssetPath);
       final geoJson = jsonDecode(data);
-
+      print(
+        "Se cargo satisfactoriamente el geojson desde la ruta ${widget.geoJsonAssetPath}",
+      );
       if (geoJson['type'] == 'FeatureCollection') {
         List<Polygon> polygons = [];
         List<Polyline> polylines = [];

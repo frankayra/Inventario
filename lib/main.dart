@@ -11,13 +11,13 @@ import 'presentation/Screens/form_screen.dart';
 import 'package:file_picker/file_picker.dart';
 
 class AppContext {
-  static const mapName = 'managua2.mbtiles';
+  static const mapName = 'habana.mbtiles';
   static const assetsMapPath = 'assets/tiles/$mapName';
-  static late String destinationPath;
+  static late String appDocumentsMapPath;
   static Future<void> initializeVariables() async {
     // Variables que se inicializan al inicio de la aplicacion
     // Se pueden usar en cualquier parte de la aplicacion
-    destinationPath =
+    appDocumentsMapPath =
         '${(await getApplicationDocumentsDirectory()).path}/$mapName';
   }
 }
@@ -26,15 +26,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppContext.initializeVariables();
 
-  await copyMbtilesToDocuments(AppContext.assetsMapPath, AppContext.mapName);
-
-  // Verificar si el mapa esta en el lugar correcto
-  if (!await File(AppContext.destinationPath).exists()) {
+  final mapNewPath = await copyFileToDocuments(
+    filePath: AppContext.assetsMapPath,
+    fileName: AppContext.mapName,
+    newSubPathList: ["Maps"],
+    fromAssets: true,
+  );
+  if (!File(mapNewPath).existsSync())
     throw Exception(
-      'El archivo mapa.mbtiles no se encontró en ${AppContext.destinationPath}',
+      "El archivo ${AppContext.mapName} no se encontró en la ruta $mapNewPath",
     );
-  }
-
+  AppContext.appDocumentsMapPath = mapNewPath;
   runApp(MyScafold());
 }
 
@@ -75,7 +77,9 @@ class _MyScafoldState extends State<MyScafold> {
         ),
         body:
             _selectedIndex == 0
-                ? OfflineMapScreen(mbtilesFilePath: AppContext.destinationPath)
+                ? OfflineMapWidget(
+                  mbtilesFilePath: AppContext.appDocumentsMapPath,
+                )
                 : EdificacionForm(), // Reemplaza con tu otro widget
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -98,7 +102,7 @@ class _MyScafoldState extends State<MyScafold> {
 
   Future<MbTilesTileProvider> _initializeTileProvider() async {
     final directory = await getApplicationDocumentsDirectory();
-    return MbTilesTileProvider.fromPath(path: AppContext.destinationPath);
+    return MbTilesTileProvider.fromPath(path: AppContext.appDocumentsMapPath);
   }
 
   void _onItemTapped(int index) {

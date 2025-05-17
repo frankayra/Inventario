@@ -4,21 +4,52 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 
-Future<String> copyMbtilesToDocuments(String path, String mapName) async {
-  final Directory documentsDir = await getApplicationDocumentsDirectory();
-  final String destinationPath = '${documentsDir.path}/$mapName';
+Future<String> copyFileToDocuments({
+  required String filePath,
+  required String? fileName,
+  List<String> newSubPathList = const [],
+  String newFileName = "",
+  bool fromAssets = false,
+  bool override = false,
+  bool userFilePick = false,
+  List<String> allowedExtensions = const [],
+  BuildContext? context,
+}) async {
+  String newSubPath = "${newSubPathList.join("/")}/";
+  Directory newDirectory = Directory(
+    "${(await getApplicationDocumentsDirectory()).path}/$newSubPath",
+  );
+  if (!await newDirectory.exists()) await newDirectory.create(recursive: true);
 
-  // Verificar si ya existe para evitar copiarlo de nuevo
-  if (await File(destinationPath).exists()) {
-    return destinationPath;
+  final String newFilePath =
+      "${newDirectory.path}${newFileName == "" ? fileName : newFileName}";
+  File newFile = File(newFilePath);
+  if (await newFile.exists() && !override) return newFilePath;
+
+  if (fromAssets) {
+    ByteData data = await rootBundle.load(filePath);
+    final bytes = data.buffer.asUint8List();
+    await newFile.writeAsBytes(bytes);
+  } else if (userFilePick) {
+    // Usar file_picker para seleccionar un archivo .mbtiles
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: allowedExtensions,
+    );
+
+    if (result != null) {
+      File selectedFile = File(result.files.single.path!);
+      await selectedFile.copy(newFilePath);
+    } else {
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se seleccionó ningún archivo')),
+        );
+      }
+    }
+  } else {
+    File(filePath).copy(newFilePath);
   }
 
-  // Leer el archivo desde los assets
-  final ByteData data = await rootBundle.load(path);
-  final List<int> bytes = data.buffer.asUint8List();
-
-  // Escribirlo en el almacenamiento interno
-  await File(destinationPath).writeAsBytes(bytes);
-
-  return destinationPath;
+  return newFilePath;
 }
