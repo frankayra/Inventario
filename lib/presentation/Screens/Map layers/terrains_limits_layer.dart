@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -7,13 +8,15 @@ import 'package:path_provider/path_provider.dart';
 // import 'package:geojson/geojson.dart';
 
 class DelimitationsLayer extends StatefulWidget {
-  final String geoJsonAssetPath;
+  final String geoJsonPath;
   final Color borderColor;
+  final bool loadFromAssets;
 
   const DelimitationsLayer({
     super.key,
-    required this.geoJsonAssetPath,
+    required this.geoJsonPath,
     required this.borderColor,
+    required this.loadFromAssets,
   });
 
   @override
@@ -33,10 +36,13 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
 
   Future<void> _loadGeoJsonData() async {
     try {
-      final String data = await rootBundle.loadString(widget.geoJsonAssetPath);
+      final String data =
+          widget.loadFromAssets
+              ? await rootBundle.loadString(widget.geoJsonPath)
+              : await File(widget.geoJsonPath).readAsString();
       final geoJson = jsonDecode(data);
       print(
-        "Se cargo satisfactoriamente el geojson desde la ruta ${widget.geoJsonAssetPath}",
+        "Se cargo satisfactoriamente el geojson desde la ruta ${widget.geoJsonPath}",
       );
       if (geoJson['type'] == 'FeatureCollection') {
         List<Polygon> polygons = [];

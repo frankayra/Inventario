@@ -11,9 +11,21 @@ import '../../utiles/file_management.dart';
 import 'Map layers/terrains_limits_layer.dart';
 import 'package:file_picker/file_picker.dart';
 
+const ALAMAR = LatLng(23.17053428523392, -82.27196563176855); // Alamar
+const HABANA = LatLng(23.14467, -82.35550); // Habana
+const MANAGUA = LatLng(12.145643078921182, -86.26495747803298); // Managua
+const NICARAGUA = LatLng(-85.170815, 12.864564999999999); // Centro de Nicaragua
+const TORONTO = LatLng(43.66404747551534, -79.3884040582291); // Toronto
+const CALIFORNIA = LatLng(36.1555182044328, -115.13386501485957); // California
+
 class OfflineMapWidget extends StatefulWidget {
   final String mbtilesFilePath;
-  const OfflineMapWidget({required this.mbtilesFilePath, super.key});
+  List<({String path, Color color})>? delimitationLayersDescriptions;
+  OfflineMapWidget({
+    required this.mbtilesFilePath,
+    List<({String path, Color color})>? this.delimitationLayersDescriptions,
+    super.key,
+  });
 
   @override
   _OfflineMapWidgetState createState() =>
@@ -80,28 +92,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
             children: [
               FlutterMap(
                 options: MapOptions(
-                  // initialCenter: LatLng(23.14467, -82.35550), // Habana
-                  initialCenter: LatLng(
-                    23.17053428523392,
-                    -82.27196563176855,
-                  ), // Alamar
-                  // initialCenter: LatLng(
-                  //   12.145643078921182,
-                  //   -86.26495747803298,
-                  // ), // Managua
-                  // initialCenter: LatLng(
-                  //   -85.170815,
-                  //   12.864564999999999,
-                  // ), // Centro de Nicaragua
-
-                  // initialCenter: LatLng(
-                  //   43.66404747551534,
-                  //   -79.3884040582291,
-                  // ), // Toronto
-                  // initialCenter: LatLng(
-                  //   36.1555182044328,
-                  //   -115.13386501485957,
-                  // ), // California
+                  initialCenter: ALAMAR,
                   initialZoom: 16.0,
                   maxZoom: 16.0,
                   minZoom: 10.0,
@@ -116,16 +107,17 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
                 ),
                 children: [
                   TileLayer(tileProvider: tileProvider),
-                  DelimitationsLayer(
-                    geoJsonAssetPath:
-                        'assets/Delimitations/manzanas_habana.geojson',
-                    borderColor: Colors.green,
-                  ),
-                  DelimitationsLayer(
-                    geoJsonAssetPath:
-                        'assets/Delimitations/predios_habana.geojson',
-                    borderColor: Colors.red,
-                  ),
+                  ...(widget.delimitationLayersDescriptions != null
+                      ? widget.delimitationLayersDescriptions!
+                          .map(
+                            (layerDescription) => DelimitationsLayer(
+                              geoJsonPath: layerDescription.path,
+                              borderColor: layerDescription.color,
+                              loadFromAssets: true,
+                            ),
+                          )
+                          .toList()
+                      : []),
                 ],
               ),
               Positioned(

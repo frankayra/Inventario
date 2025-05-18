@@ -79,6 +79,16 @@ class _MyScafoldState extends State<MyScafold> {
             _selectedIndex == 0
                 ? OfflineMapWidget(
                   mbtilesFilePath: AppContext.appDocumentsMapPath,
+                  delimitationLayersDescriptions: [
+                    (
+                      path: 'assets/Delimitations/manzanas_habana.geojson',
+                      color: Colors.red,
+                    ),
+                    (
+                      path: 'assets/Delimitations/predios_habana.geojson',
+                      color: Colors.green,
+                    ),
+                  ],
                 )
                 : EdificacionForm(), // Reemplaza con tu otro widget
         bottomNavigationBar: BottomNavigationBar(
