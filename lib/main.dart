@@ -8,11 +8,12 @@ import 'dart:io';
 import 'utiles/file_management.dart';
 import 'presentation/Screens/offline_map_screen.dart';
 import 'presentation/Screens/form_screen.dart';
+import 'presentation/Screens/form2_screen.dart';
 import 'package:file_picker/file_picker.dart';
 
 class AppContext {
-  static const mapName = 'habana.mbtiles';
-  static const assetsMapPath = 'assets/tiles/$mapName';
+  static late String mapName = "habana.mbtiles";
+  static late String assetsMapPath = "assets/tiles/$mapName";
   static late String appDocumentsMapPath;
   static Future<void> initializeVariables() async {
     // Variables que se inicializan al inicio de la aplicacion
@@ -20,6 +21,8 @@ class AppContext {
     appDocumentsMapPath =
         '${(await getApplicationDocumentsDirectory()).path}/$mapName';
   }
+
+  static Future<void> updateVariables() async {}
 }
 
 void main() async {
@@ -29,7 +32,7 @@ void main() async {
   final mapNewPath = await copyFileToDocuments(
     filePath: AppContext.assetsMapPath,
     fileName: AppContext.mapName,
-    newSubPathList: ["Maps"],
+    newSubPathList: ["Mapas"],
     fromAssets: true,
   );
   if (!File(mapNewPath).existsSync())
@@ -39,11 +42,6 @@ void main() async {
   AppContext.appDocumentsMapPath = mapNewPath;
   runApp(MyScafold());
 }
-
-//
-//
-//
-//
 
 class MyScafold extends StatefulWidget {
   const MyScafold({super.key});
@@ -67,7 +65,7 @@ class _MyScafoldState extends State<MyScafold> {
           title: Row(
             children: [
               Icon(Icons.home_filled),
-              Text(' Inventario'),
+              Text(' Inventario '),
               ElevatedButton(
                 onPressed: _selectFile,
                 child: Icon(Icons.file_open),
@@ -78,6 +76,9 @@ class _MyScafoldState extends State<MyScafold> {
         body:
             _selectedIndex == 0
                 ? OfflineMapWidget(
+                  /// ++++++++++++++++++++++++++++++++ ///
+                  /// +++++++++ MAP SETTINGS +++++++++ ///
+                  /// ++++++++++++++++++++++++++++++++ ///
                   mbtilesFilePath: AppContext.appDocumentsMapPath,
                   delimitationLayersDescriptions: [
                     (
@@ -89,12 +90,18 @@ class _MyScafoldState extends State<MyScafold> {
                       color: Colors.green,
                     ),
                   ],
+
+                  /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
                 )
-                : EdificacionForm(), // Reemplaza con tu otro widget
+                // : EdificacionForm(),
+                : FormularioInspeccion(),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
-            BottomNavigationBarItem(icon: Icon(Icons.widgets), label: 'Otro'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.widgets),
+              label: 'Registro',
+            ),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.blue,
@@ -110,16 +117,24 @@ class _MyScafoldState extends State<MyScafold> {
     _tileProviderFuture = _initializeTileProvider();
   }
 
-  Future<MbTilesTileProvider> _initializeTileProvider() async {
-    final directory = await getApplicationDocumentsDirectory();
-    return MbTilesTileProvider.fromPath(path: AppContext.appDocumentsMapPath);
-  }
+  Future<MbTilesTileProvider> _initializeTileProvider() async =>
+      MbTilesTileProvider.fromPath(path: AppContext.appDocumentsMapPath);
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
 
   Future<void> _selectFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
