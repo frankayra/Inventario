@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventario/presentation/Screens/form_screen.dart';
 
 class UsoDeSueloYPatentesForm extends StatefulWidget {
   const UsoDeSueloYPatentesForm({super.key});
@@ -12,7 +13,7 @@ class _UsoDeSueloYPatentesFormState extends State<UsoDeSueloYPatentesForm> {
   final List<Map<String, dynamic>> usosYSuelos = [];
 
   // +++++++++++++++++++++++++++++++ //
-  // +++++++++++ Widget ++++++++++++ //
+  // +++++++++ Constructor +++++++++ //
   // +++++++++++++++++++++++++++++++ //
   @override
   Widget build(BuildContext context) {
@@ -28,12 +29,12 @@ class _UsoDeSueloYPatentesFormState extends State<UsoDeSueloYPatentesForm> {
                   backgroundColor: Colors.green[100],
                   onDeleted: () => setState(() => usosYSuelos.removeAt(idx)),
                   deleteIcon: Icon(Icons.close),
-                  onPressed: () => _editarUsoYSuelo(idx),
+                  onPressed: () => _editarUsoSuelo(idx),
                 );
               }).toList(),
         ),
         ElevatedButton(
-          onPressed: _agregarUsoYSuelo,
+          onPressed: _agregarUsoSuelo,
           child: Text('Añadir instancia'),
         ),
       ],
@@ -43,13 +44,14 @@ class _UsoDeSueloYPatentesFormState extends State<UsoDeSueloYPatentesForm> {
   // ++++++++++++++++++++++++++++++++++ //
   // ++++++++ Metodos Utiles ++++++++++ //
   // ++++++++++++++++++++++++++++++++++ //
-  void _agregarUsoYSuelo() {
+  void _agregarUsoSuelo() {
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('Nueva instancia'),
-            content: Text('Formulario para nueva instancia'),
+            title: Text('Nuevo registro'),
+            // content: Text('Formulario para nueva instancia'),
+            content: EdificacionForm(),
             actions: [
               TextButton(
                 onPressed: () {
@@ -63,7 +65,7 @@ class _UsoDeSueloYPatentesFormState extends State<UsoDeSueloYPatentesForm> {
     );
   }
 
-  void _editarUsoYSuelo(int idx) {
+  void _editarUsoSuelo(int idx) {
     showDialog(
       context: context,
       builder:
@@ -79,4 +81,9 @@ class _UsoDeSueloYPatentesFormState extends State<UsoDeSueloYPatentesForm> {
           ),
     );
   }
+
+  // +++++++++++++++++++++++++++++++ //
+  // +++++++++++ Widget ++++++++++++ //
+  // +++++++++++++++++++++++++++++++ //
+  // Widget _mainForm()
 }

@@ -35,9 +35,38 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
 
     return Form(
       key: _formKey,
-      child: ListView.builder(
-        itemCount: secciones.length,
-        itemBuilder: (context, index) => secciones[index],
+      child: Column(
+        children: [
+          ListView.builder(
+            itemCount: secciones.length,
+            itemBuilder: (context, index) => secciones[index],
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  final edificacion = Edificacion(
+                    distrito: _distritoSeleccionado!,
+                    edificio: _edificio!,
+                    cantidadPisos: _cantidadPisos!,
+                    cantidadSotanos: _cantidadSotanos!,
+                    antejardin: _antejardin!,
+                    materialFachada: _materialFachada!,
+                    canoasBajantes: _canoasBajantes!,
+                    observacionesEdificaciones: _observacionesEdificaciones,
+                  );
+                  await insertEdificacion(edificacion);
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Datos guardados')));
+                }
+              },
+              child: Text('Guardar'),
+            ),
+          ),
+        ],
       ),
     );
   }
