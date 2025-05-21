@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-// ++++++++++++++++++ Metodos Genericos ++++++++++++++++ //
+// +++++++++++++++++ Interacción SQLite ++++++++++++++++ //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 Future<Database> openDB() async {
   final database = openDatabase(
@@ -75,7 +75,7 @@ CREATE TABLE propiedades(
         observacionesPatentes TEXT,
         imagenDocumentoLegal BLOB),
         PRIMARY KEY(id_predio, no_edificio, no_local),
-        FOREIGN KEY (id_predio, no_edificio) REFERENCES predios(id_predio, no_edificio);
+        FOREIGN KEY (id_predio, no_edificio) REFERENCES predios(id_predio, no_edificio));
           """);
     },
     version: 1,
@@ -107,14 +107,14 @@ abstract class InventarioDbTable {
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 class Predio extends InventarioDbTable {
   final int idPredio;
+
+  // +++++++++++++++++++++ Módulo Terreno ++++++++++++++++++++ //
   final Float nivelPredio1;
   final Float nivelPredio2;
   final Float nivelPredio3;
   final int acera;
   final Float anchoAcera;
   final String? observacionesTerreno;
-
-  // +++++++++++++++++++++ Módulo Terreno ++++++++++++++++++++ //
 
   Predio({
     required this.idPredio,
@@ -205,17 +205,19 @@ class Edificio extends InventarioDbTable {
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++++++     +++++++++++++++++++++++++++++++ //
-// +++++++++++++++++++++++++++++           ++++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++  Propiedad  +++++++++++++++++++++++++++ //
-// +++++++++++++++++++++++++++++           ++++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++++++     +++++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++     +++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++           ++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++  Propiedad  +++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++           ++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++     +++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 class Propiedad extends InventarioDbTable {
-  final int id_predio;
-  final int no_edificio;
-  final int no_local;
+  final int idPredio;
+  final int noEdificio;
+  final int noLocal;
+
+  // ++++++ Módulo Uso de suelo y Patentes comerciales ++++++ //
   final String nivelPiso;
   final String actividadPrimaria;
   final String? actividadComplementaria;
@@ -248,20 +250,83 @@ class Propiedad extends InventarioDbTable {
   final String? codigoCIUUActividadComplementaria;
   final String? observacionesPatentes;
   final int imagenDocumentoLegal;
-  Propiedad({this.id}) : super('propiedades');
+  Propiedad({
+    required this.idPredio,
+    required this.noEdificio,
+    required this.noLocal,
+    required this.nivelPiso,
+    required this.actividadPrimaria,
+    this.actividadComplementaria,
+    this.estadoNegocio,
+    this.nombreNegocio,
+    required this.cantidadParqueos,
+    this.documentoMostrado,
+    this.nombrePatentado,
+    this.numeroPatenteComercial,
+    this.cedulaPatentado,
+    this.nombreActividadPatente,
+    required this.tieneMasPatentes,
+    this.numeroPatente_2,
+    required this.tienePermisoSalud,
+    this.numeroPermisoSalud,
+    this.fechaVigenciaPermisoSalud,
+    this.codigoCIIUPermisoSalud,
+    required this.seTrataDeLocalMercado,
+    this.numeroLocalMercado,
+    required this.tienePatenteLicores,
+    this.numeroPatenteLicores,
+    this.areaActividad,
+    this.telefonoPatentado,
+    this.correoElectronico,
+    this.cantidadEmpleadosAntesCovid,
+    this.cantidadEmpleadosActual,
+    this.afectacionesCovidPersonalDesempennoEmpresa,
+    this.afectacionesCovidSobreVentas,
+    this.codigoCIUUActividadPrimaria,
+    this.codigoCIUUActividadComplementaria,
+    this.observacionesPatentes,
+    required this.imagenDocumentoLegal,
+  }) : super('propiedades');
 
   @override
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'distrito': distrito,
-      'edificio': edificio,
-      'cantidadPisos': cantidadPisos,
-      'cantidadSotanos': cantidadSotanos,
-      'antejardin': antejardin,
-      'materialFachada': materialFachada,
-      'canoasBajantes': canoasBajantes,
-      'observacionesEdificaciones': observacionesEdificaciones,
+      'id_predio': idPredio,
+      'no_edificio': noEdificio,
+      'no_local': noLocal,
+      'nivelPiso': nivelPiso,
+      'actividadPrimaria': actividadPrimaria,
+      'actividadComplementaria': actividadComplementaria,
+      'estadoNegocio': estadoNegocio,
+      'nombreNegocio': nombreNegocio,
+      'cantidadParqueos': cantidadParqueos,
+      'documentoMostrado': documentoMostrado,
+      'nombrePatentado': nombrePatentado,
+      'numeroPatenteComercial': numeroPatenteComercial,
+      'cedulaPatentado': cedulaPatentado,
+      'nombreActividadPatente': nombreActividadPatente,
+      'tieneMasPatentes': tieneMasPatentes,
+      'numeroPatente_2': numeroPatente_2,
+      'tienePermisoSalud': tienePermisoSalud,
+      'numeroPermisoSalud': numeroPermisoSalud,
+      'fechaVigenciaPermisoSalud': fechaVigenciaPermisoSalud,
+      'codigoCIIUPermisoSalud': codigoCIIUPermisoSalud,
+      'seTrataDeLocalMercado': seTrataDeLocalMercado,
+      'numeroLocalMercado': numeroLocalMercado,
+      'tienePatenteLicores': tienePatenteLicores,
+      'numeroPatenteLicores': numeroPatenteLicores,
+      'areaActividad': areaActividad,
+      'telefonoPatentado': telefonoPatentado,
+      'correoElectronico': correoElectronico,
+      'cantidadEmpleadosAntesCovid': cantidadEmpleadosAntesCovid,
+      'cantidadEmpleadosActual': cantidadEmpleadosActual,
+      'afectacionesCovidPersonalDesempennoEmpresa':
+          afectacionesCovidPersonalDesempennoEmpresa,
+      'afectacionesCovidSobreVentas': afectacionesCovidSobreVentas,
+      'codigoCIUUActividadPrimaria': codigoCIUUActividadPrimaria,
+      'codigoCIUUActividadComplementaria': codigoCIUUActividadComplementaria,
+      'observacionesPatentes': observacionesPatentes,
+      'imagenDocumentoLegal': imagenDocumentoLegal,
     };
   }
 }
