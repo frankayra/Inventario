@@ -1,4 +1,6 @@
 import 'dart:ffi';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -162,6 +164,7 @@ class Edificio extends InventarioDbTable {
 
   // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
   final int estadoInmueble;
+  final Uint8List imagenConstruccion;
   final String? observacionesConstruccion;
 
   // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
@@ -179,6 +182,7 @@ class Edificio extends InventarioDbTable {
     required this.canoasBajantes,
     this.observacionesEdificacion,
     required this.estadoInmueble,
+    required this.imagenConstruccion,
     this.observacionesConstruccion,
     required this.cantidadMedidores,
     this.observacionesMedidores,
@@ -197,6 +201,7 @@ class Edificio extends InventarioDbTable {
       'canoasBajantes': canoasBajantes,
       'observacionesEdificacion': observacionesEdificacion,
       'estadoInmueble': estadoInmueble,
+      'imagenConstruccion': imagenConstruccion,
       'observacionesConstruccion': observacionesConstruccion,
       'cantidadMedidores': cantidadMedidores,
       'observacionesMedidores': observacionesMedidores,
@@ -249,7 +254,7 @@ class Propiedad extends InventarioDbTable {
   final String? codigoCIUUActividadPrimaria;
   final String? codigoCIUUActividadComplementaria;
   final String? observacionesPatentes;
-  final int imagenDocumentoLegal;
+  final Uint8List imagenDocumentoLegal;
   Propiedad({
     required this.idPredio,
     required this.noEdificio,

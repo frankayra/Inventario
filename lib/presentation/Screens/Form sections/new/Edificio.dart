@@ -1,0 +1,299 @@
+import 'package:flutter/material.dart';
+import 'package:inventario/utiles/image_selection.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import '../../../../utiles/db_general_management.dart' as db;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
+class Edificio extends StatefulWidget {
+  const Edificio({super.key});
+
+  @override
+  State<Edificio> createState() => _EdificioState();
+}
+
+class _EdificioState extends State<Edificio> {
+  final _formKey = GlobalKey<FormState>();
+  final _dropdownOptions = {
+    "distrito": {
+      1: 'Carmen',
+      2: 'Merced',
+      3: 'Hospital',
+      4: 'Catedral',
+      5: 'Zapote',
+      6: 'San Francisco',
+      7: 'Uruca',
+      8: 'Mata Redonda',
+      9: 'Pavas',
+    },
+    "antejardin": {
+      0: 'No existe',
+      1: 'Si existe',
+      2: 'En construcción (Código 996)',
+      3: 'No aplica (Código 998)',
+    },
+    "material fachada": {
+      1: 'Bloques y Concreto',
+      2: 'Prefabricado',
+      3: 'Vidrio y Metal',
+      4: 'Ladrillo',
+      5: 'Madera',
+      6: 'Mixto',
+      998: 'No aplica (Código 998)',
+      999: 'No visible (Código 999)',
+    },
+    "canoas bajantes": {
+      0: 'No existe',
+      1: 'Cumple',
+      2: 'No cumple',
+      998: 'No aplica (Código 998)',
+    },
+    "estado inmueble": {
+      1: "Óptimo",
+      2: "Muy Bueno",
+      3: "Bueno",
+      4: "Intermedio",
+      5: "Regular",
+      6: "Deficiente",
+      7: "Malo",
+      8: "Muy Malo",
+      9: "Demolición",
+      998: "No Aplica (Código 998)",
+    },
+  };
+
+  // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
+  int? _distrito;
+  int? _edificio;
+  int? _cantidadPisos;
+  int? _cantidadSotanos;
+  int? _antejardin;
+  int? _materialFachada;
+  int? _canoasBajantes;
+  String? _observacionesEdificaciones;
+
+  // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
+  int? _estadoInmueble;
+  MyImagePicker _imagenConstruccion = MyImagePicker();
+  String? _observacionesConstruccion;
+
+  // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
+  int? _cantidadMedidores;
+  String? _observacionesMedidores;
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            TextFormField(
+              initialValue: 'Localización Automática',
+              decoration: InputDecoration(labelText: 'Localización'),
+              enabled: false,
+            ),
+            TextFormField(
+              // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+              // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+              // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+              // ++++++++++++++++++++++++    Edificación   ++++++++++++++++++++++++ //
+              // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+              // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+              // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Edificio'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa el número de edificio';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _edificio = number;
+                return null;
+              },
+            ),
+            DropdownButtonFormField(
+              value: _distrito,
+              items: _dropdownOptions["distrito"]!.entries
+                  .map((distrito) {
+                    return DropdownMenuItem(
+                      value: distrito.key,
+                      child: Text(distrito.value),
+                    );
+                  })
+                  .toList(growable: false),
+              onChanged: (value) {
+                setState(() {
+                  _distrito = value;
+                });
+              },
+              decoration: InputDecoration(labelText: 'Distrito'),
+              validator: (value) {
+                if (value == null) {
+                  return 'Por favor selecciona un distrito';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Cantidad pisos'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa la cantidad de pisos';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _cantidadPisos = number;
+                return null;
+              },
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Cantidad sótanos'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa la cantidad de sótanos';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _cantidadSotanos = number;
+                return null;
+              },
+            ),
+            DropdownButtonFormField(
+              value: _antejardin,
+              items:
+                  _dropdownOptions["antejardin"]!.entries.map((option) {
+                    return DropdownMenuItem(
+                      value: option.key,
+                      child: Text(option.value),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _antejardin = value;
+                });
+              },
+              decoration: InputDecoration(labelText: 'Antejardín'),
+              validator: (value) {
+                if (value == null) {
+                  return 'Por favor selecciona una opción';
+                }
+                return null;
+              },
+            ),
+            DropdownButtonFormField(
+              value: _materialFachada,
+              items:
+                  _dropdownOptions["material fachada"]!.entries.map((option) {
+                    return DropdownMenuItem(
+                      value: option.key,
+                      child: Text(option.value),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _materialFachada = value;
+                });
+              },
+              decoration: InputDecoration(labelText: 'Material fachada'),
+              validator: (value) {
+                if (value == null) {
+                  return 'Por favor selecciona una opción';
+                }
+                return null;
+              },
+            ),
+            DropdownButtonFormField(
+              value: _canoasBajantes,
+              items:
+                  _dropdownOptions["canoas bajantes"]!.entries.map((option) {
+                    return DropdownMenuItem(
+                      value: option.key,
+                      child: Text(option.value),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _canoasBajantes = value;
+                });
+              },
+              decoration: InputDecoration(labelText: 'Canoas bajantes'),
+              validator: (value) {
+                if (value == null) {
+                  return 'Por favor selecciona una opción';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Observaciones edificaciones',
+              ),
+              onChanged: (value) {
+                _observacionesEdificaciones = value;
+              },
+            ),
+            DropdownButtonFormField(
+              value: _estadoInmueble,
+              items:
+                  _dropdownOptions["estado inmueble"]!.entries.map((option) {
+                    return DropdownMenuItem(
+                      value: option.key,
+                      child: Text(option.value),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _estadoInmueble = value;
+                });
+              },
+              decoration: InputDecoration(labelText: 'Estado del inmueble'),
+              validator: (value) {
+                if (value == null) {
+                  return 'Por favor selecciona una opción';
+                }
+                return null;
+              },
+            ),
+            ,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    final edificacion = db.Edificio(
+                      distrito: _distrito!,
+                      noEdificio: _edificio!,
+                      cantidadPisos: _cantidadPisos!,
+                      cantidadSotanos: _cantidadSotanos!,
+                      antejardin: _antejardin!,
+                      materialFachada: _materialFachada!,
+                      canoasBajantes: _canoasBajantes!,
+                      observacionesEdificaciones: _observacionesEdificaciones,
+                    );
+                    await insertEdificacion(edificacion);
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Datos guardados')));
+                  }
+                },
+                child: Text('Guardar'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
