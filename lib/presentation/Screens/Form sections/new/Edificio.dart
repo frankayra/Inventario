@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:inventario/utiles/image_selection.dart';
+import 'package:inventario/presentation/Widgets/text.dart';
+import 'package:inventario/presentation/Widgets/image_selection.dart';
+import 'package:inventario/presentation/Widgets/selection.dart';
+import 'package:inventario/presentation/Widgets/numeric.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../../../../utiles/db_general_management.dart' as db;
+import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -95,14 +98,14 @@ class _EdificioState extends State<Edificio> {
               decoration: InputDecoration(labelText: 'Localización'),
               enabled: false,
             ),
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++    Edificación   ++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             TextFormField(
-              // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-              // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
-              // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
-              // ++++++++++++++++++++++++    Edificación   ++++++++++++++++++++++++ //
-              // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
-              // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
-              // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Edificio'),
               validator: (value) {
@@ -244,6 +247,14 @@ class _EdificioState extends State<Edificio> {
                 _observacionesEdificaciones = value;
               },
             ),
+
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++   Construcción   ++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             DropdownButtonFormField(
               value: _estadoInmueble,
               items:
@@ -266,7 +277,23 @@ class _EdificioState extends State<Edificio> {
                 return null;
               },
             ),
-            ,
+            _imagenConstruccion,
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Observaciones Construcción',
+              ),
+              onChanged: (value) {
+                _observacionesEdificaciones = value;
+              },
+            ),
+
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++     Medidores    ++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
