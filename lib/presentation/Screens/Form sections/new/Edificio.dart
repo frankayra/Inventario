@@ -10,7 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class Edificio extends StatefulWidget {
-  const Edificio({super.key});
+  final int idPredio;
+  const Edificio({super.key, required this.idPredio});
 
   @override
   State<Edificio> createState() => _EdificioState();
@@ -67,8 +68,8 @@ class _EdificioState extends State<Edificio> {
   };
 
   // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
-  int? _distrito;
   int? _edificio;
+  int? _distrito;
   int? _cantidadPisos;
   int? _cantidadSotanos;
   int? _antejardin;
@@ -94,7 +95,7 @@ class _EdificioState extends State<Edificio> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextFormField(
-              initialValue: 'Localización Automática',
+              initialValue: widget.idPredio.toString(),
               decoration: InputDecoration(labelText: 'Localización'),
               enabled: false,
             ),
@@ -321,6 +322,7 @@ class _EdificioState extends State<Edificio> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final edificacion = db.Edificio(
+                      idPredio: widget.idPredio,
                       noEdificio: _edificio!,
                       distrito: _distrito!,
                       cantidadPisos: _cantidadPisos!,
@@ -336,7 +338,7 @@ class _EdificioState extends State<Edificio> {
                       cantidadMedidores: _cantidadMedidores!,
                       observacionesMedidores: _observacionesMedidores,
                     );
-                    await insertEdificacion(edificacion);
+                    edificacion.insertInDB();
                     ScaffoldMessenger.of(
                       context,
                     ).showSnackBar(SnackBar(content: Text('Datos guardados')));

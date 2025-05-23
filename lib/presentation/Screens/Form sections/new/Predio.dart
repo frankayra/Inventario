@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../../../../utiles/db_general_management.dart';
+import 'package:inventario/utiles/db_general_management.dart';
 
 class Predio extends StatefulWidget {
   const Predio({super.key});

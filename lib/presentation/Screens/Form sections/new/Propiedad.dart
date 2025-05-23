@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../../../../utiles/db_general_management.dart';
+import 'package:inventario/utiles/db_general_management.dart';
 
 class Propiedad extends StatefulWidget {
   const Propiedad({super.key});
