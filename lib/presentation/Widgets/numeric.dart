@@ -15,7 +15,7 @@ class MyNumericInput extends StatefulWidget {
     required this.label,
     required this.noValidValidationMessage,
     this.extraValidationFunction,
-  }, [this.nullable]);
+  });
 
   @override
   State<MyNumericInput> createState() => _MyNumericInputState();
@@ -27,7 +27,7 @@ class _MyNumericInputState extends State<MyNumericInput> {
   Widget build(BuildContext context) {
     return TextFormField(
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(labelText: widget.labelText),
+      decoration: InputDecoration(labelText: widget.label),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return widget.noValidValidationMessage;

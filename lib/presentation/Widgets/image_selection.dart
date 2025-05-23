@@ -3,24 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 
-class MyImagePicker extends StatefulWidget {
-  @override
-  _MyImagePickerState createState() => _MyImagePickerState();
+class _ImageWrapper {
+  Uint8List bytes = Uint8List(0);
+  bool imageLoaded = false;
 }
 
-class _MyImagePickerState extends State<MyImagePicker> {
-  File? _image;
+class MyImagePicker extends StatefulWidget {
+  final _ImageWrapper _valueWrapper = _ImageWrapper();
+  Future<Uint8List> get getImageBytes async => _valueWrapper.bytes;
 
-  Future<Uint8List?> get getImageBytes async =>
-      _image != null ? await _image!.readAsBytes() : null;
+  @override
+  MyImagePickerState createState() => MyImagePickerState();
+}
+
+class MyImagePickerState extends State<MyImagePicker> {
+  File? _image;
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
 
     if (pickedFile != null) {
-      setState(() {
+      setState(() async {
         _image = File(pickedFile.path);
+        widget._valueWrapper.bytes = await _image!.readAsBytes();
+        widget._valueWrapper.imageLoaded = true;
       });
     }
   }

@@ -74,11 +74,11 @@ class _EdificioState extends State<Edificio> {
   int? _antejardin;
   int? _materialFachada;
   int? _canoasBajantes;
-  String? _observacionesEdificaciones;
+  String? _observacionesEdificacion;
 
   // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
   int? _estadoInmueble;
-  MyImagePicker _imagenConstruccion = MyImagePicker();
+  final MyImagePicker _imagenConstruccion = MyImagePicker();
   String? _observacionesConstruccion;
 
   // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
@@ -244,7 +244,7 @@ class _EdificioState extends State<Edificio> {
                 labelText: 'Observaciones edificaciones',
               ),
               onChanged: (value) {
-                _observacionesEdificaciones = value;
+                _observacionesEdificacion = value;
               },
             ),
 
@@ -283,7 +283,7 @@ class _EdificioState extends State<Edificio> {
                 labelText: 'Observaciones Construcción',
               ),
               onChanged: (value) {
-                _observacionesEdificaciones = value;
+                _observacionesConstruccion = value;
               },
             ),
 
@@ -294,20 +294,47 @@ class _EdificioState extends State<Edificio> {
             // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Cantidad Medidores'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa la cantidad de medidores';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _cantidadMedidores = number;
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Observaciones Medidores'),
+              onChanged: (value) {
+                _observacionesMedidores = value;
+              },
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final edificacion = db.Edificio(
-                      distrito: _distrito!,
                       noEdificio: _edificio!,
+                      distrito: _distrito!,
                       cantidadPisos: _cantidadPisos!,
                       cantidadSotanos: _cantidadSotanos!,
                       antejardin: _antejardin!,
                       materialFachada: _materialFachada!,
                       canoasBajantes: _canoasBajantes!,
-                      observacionesEdificaciones: _observacionesEdificaciones,
+                      observacionesEdificacion: _observacionesEdificacion,
+                      estadoInmueble: _estadoInmueble!,
+                      imagenConstruccion:
+                          await _imagenConstruccion.getImageBytes,
+                      observacionesConstruccion: _observacionesConstruccion,
+                      cantidadMedidores: _cantidadMedidores!,
+                      observacionesMedidores: _observacionesMedidores,
                     );
                     await insertEdificacion(edificacion);
                     ScaffoldMessenger.of(
