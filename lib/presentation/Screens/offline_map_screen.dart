@@ -20,10 +20,10 @@ const CALIFORNIA = LatLng(36.1555182044328, -115.13386501485957); // California
 
 class OfflineMapWidget extends StatefulWidget {
   final String mbtilesFilePath;
-  List<({String path, Color color})>? delimitationLayersDescriptions;
+  List<({String path, Color color})>? delimitationLayers;
   OfflineMapWidget({
     required this.mbtilesFilePath,
-    List<({String path, Color color})>? this.delimitationLayersDescriptions,
+    List<({String path, Color color})>? this.delimitationLayers,
     super.key,
   });
 
@@ -107,8 +107,8 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
                 ),
                 children: [
                   TileLayer(tileProvider: tileProvider),
-                  ...(widget.delimitationLayersDescriptions != null
-                      ? widget.delimitationLayersDescriptions!
+                  ...(widget.delimitationLayers != null
+                      ? widget.delimitationLayers!
                           .map(
                             (layerDescription) => DelimitationsLayer(
                               geoJsonPath: layerDescription.path,

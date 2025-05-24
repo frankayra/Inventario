@@ -68,6 +68,8 @@ class _EdificioState extends State<Edificio> {
   };
 
   // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
+
+  bool changePredio = false;
   int? _edificio;
   int? _distrito;
   int? _cantidadPisos;
@@ -79,7 +81,7 @@ class _EdificioState extends State<Edificio> {
 
   // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
   int? _estadoInmueble;
-  final MyImagePicker _imagenConstruccion = MyImagePicker();
+  final MyImagePickerInput _imagenConstruccion = MyImagePickerInput();
   String? _observacionesConstruccion;
 
   // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
@@ -94,10 +96,29 @@ class _EdificioState extends State<Edificio> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            TextFormField(
-              initialValue: widget.idPredio.toString(),
-              decoration: InputDecoration(labelText: 'Localización'),
-              enabled: false,
+            Row(
+              children: [
+                TextFormField(
+                  initialValue: widget.idPredio.toString(),
+                  decoration: InputDecoration(labelText: 'Localización'),
+                  enabled: changePredio,
+                ),
+                Column(
+                  children: [
+                    Checkbox(
+                      value: changePredio,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          changePredio = newValue!;
+                        });
+                      },
+                      activeColor: Colors.blue,
+                      checkColor: Colors.white,
+                    ),
+                    const Text('Cambiar'),
+                  ],
+                ),
+              ],
             ),
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
@@ -106,6 +127,7 @@ class _EdificioState extends State<Edificio> {
             // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // MyNumericInput(label: "Edificio", noValidValidationMessage: "Por favor ingresa el número de edificio"),
             TextFormField(
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Edificio'),

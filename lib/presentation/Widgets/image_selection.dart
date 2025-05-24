@@ -8,15 +8,15 @@ class _ImageWrapper {
   bool imageLoaded = false;
 }
 
-class MyImagePicker extends StatefulWidget {
+class MyImagePickerInput extends StatefulWidget {
   final _ImageWrapper _valueWrapper = _ImageWrapper();
   Future<Uint8List> get getImageBytes async => _valueWrapper.bytes;
 
   @override
-  MyImagePickerState createState() => MyImagePickerState();
+  MyImagePickerInputState createState() => MyImagePickerInputState();
 }
 
-class MyImagePickerState extends State<MyImagePicker> {
+class MyImagePickerInputState extends State<MyImagePickerInput> {
   File? _image;
 
   Future<void> _pickImage(ImageSource source) async {

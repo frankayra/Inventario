@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/construccion.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/edificacion.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/medidores_electricos.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/terreno.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/uso_de_suelo_y_patentes_comerciales.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/new/Predio.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/new/Edificio.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/new/Propiedad.dart';
 import 'package:inventario/utiles/db_management.dart';
 
-const EDIFICACION = 'Edificación';
-const TERRENO = 'Terreno';
-const MEDIDORES = 'Medidores Eléctricos';
-const CONSTRUCCION = 'Construcción';
-const USODESUELO = 'Uso de Suelo y Patentes Comerciales';
+const PREDIO = 'Predio';
+const EDIFICIOS = 'Edificios';
+const PROPIEDADES = 'Propiedades';
 
 class FormularioInspeccion extends StatefulWidget {
+  final int idPredio;
+  const FormularioInspeccion({required this.idPredio});
   @override
   _FormularioInspeccionState createState() => _FormularioInspeccionState();
 }
@@ -27,11 +25,9 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   @override
   Widget build(BuildContext context) {
     final secciones = [
-      _buildSection(EDIFICACION, EdificacionForm(), 0),
-      _buildSection(TERRENO, TerrenoForm(), 1),
-      _buildSection(USODESUELO, UsoDeSueloYPatentesForm(), 2),
-      _buildSection(MEDIDORES, MedidoresForm(), 3),
-      _buildSection(CONSTRUCCION, ConstruccionForm(), 4),
+      _buildSection(EDIFICIOS, Edificio(idPredio: widget.idPredio), 0),
+      // _buildSection(PREDIO, TerrenoForm(), 0),
+      // _buildSection(PROPIEDADES, UsoDeSueloYPatentesForm(), 2),
     ];
 
     return Form(
@@ -48,16 +44,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
             child: ElevatedButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  final edificacion = Edificacion(
-                    distrito: _distritoSeleccionado!,
-                    edificio: _edificio!,
-                    cantidadPisos: _cantidadPisos!,
-                    cantidadSotanos: _cantidadSotanos!,
-                    antejardin: _antejardin!,
-                    materialFachada: _materialFachada!,
-                    canoasBajantes: _canoasBajantes!,
-                    observacionesEdificaciones: _observacionesEdificaciones,
-                  );
+                  final edificacion = ;
                   await insertEdificacion(edificacion);
                   ScaffoldMessenger.of(
                     context,

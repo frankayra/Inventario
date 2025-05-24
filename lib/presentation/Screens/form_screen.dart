@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../../utiles/db_management.dart';
+import 'package:inventario/utiles/db_management.dart';
 
 class EdificacionForm extends StatefulWidget {
   const EdificacionForm({super.key});
