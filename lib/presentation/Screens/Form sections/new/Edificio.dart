@@ -98,10 +98,12 @@ class _EdificioState extends State<Edificio> {
           children: <Widget>[
             Row(
               children: [
-                TextFormField(
-                  initialValue: widget.idPredio.toString(),
-                  decoration: InputDecoration(labelText: 'Localización'),
-                  enabled: changePredio,
+                Expanded(
+                  child: TextFormField(
+                    initialValue: widget.idPredio.toString(),
+                    decoration: InputDecoration(labelText: 'Localización'),
+                    enabled: changePredio,
+                  ),
                 ),
                 Column(
                   children: [

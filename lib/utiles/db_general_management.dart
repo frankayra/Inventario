@@ -346,7 +346,7 @@ class Propiedad extends InventarioDbTable {
 // ++++++++++++++++++++++++++++++++     +++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
-Edificio getEdificio(int idPredio, int noEdificio){
+// Edificio getEdificio(int idPredio, int noEdificio){
   
-}
-List<Edificio> getAllEdificios()
+// }
+// List<Edificio> getAllEdificios()

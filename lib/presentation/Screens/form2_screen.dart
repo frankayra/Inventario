@@ -48,17 +48,17 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
             child: ElevatedButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  final edificacion = Edificacion(
-                    distrito: _distritoSeleccionado!,
-                    edificio: _edificio!,
-                    cantidadPisos: _cantidadPisos!,
-                    cantidadSotanos: _cantidadSotanos!,
-                    antejardin: _antejardin!,
-                    materialFachada: _materialFachada!,
-                    canoasBajantes: _canoasBajantes!,
-                    observacionesEdificaciones: _observacionesEdificaciones,
-                  );
-                  await insertEdificacion(edificacion);
+                  // final edificacion = Edificacion(
+                  //   distrito: _distritoSeleccionado!,
+                  //   edificio: _edificio!,
+                  //   cantidadPisos: _cantidadPisos!,
+                  //   cantidadSotanos: _cantidadSotanos!,
+                  //   antejardin: _antejardin!,
+                  //   materialFachada: _materialFachada!,
+                  //   canoasBajantes: _canoasBajantes!,
+                  //   observacionesEdificaciones: _observacionesEdificaciones,
+                  // );
+                  // await insertEdificacion(edificacion);
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text('Datos guardados')));

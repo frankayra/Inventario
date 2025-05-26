@@ -29,32 +29,18 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
       // _buildSection(PREDIO, TerrenoForm(), 0),
       // _buildSection(PROPIEDADES, UsoDeSueloYPatentesForm(), 2),
     ];
-
+    print("Se creo el array de secciones");
     return Form(
       key: _formKey,
-      child: Column(
+      child: ListView(
         children: [
-          ListView.builder(
-            itemCount: secciones.length,
-            itemBuilder: (context, index) => secciones[index],
-          ),
-
+          ...secciones,
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  final edificacion = ;
-                  await insertEdificacion(edificacion);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Datos guardados')));
-                }
-              },
-              child: Text('Guardar'),
-            ),
+            padding: EdgeInsets.all(16.0),
+            child: ElevatedButton(onPressed: () async {}, child: Text("Listo")),
           ),
         ],
+        //     ],
       ),
     );
   }
