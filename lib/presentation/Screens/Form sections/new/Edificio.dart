@@ -9,15 +9,15 @@ import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class Edificio extends StatefulWidget {
+class EdificioForm extends StatefulWidget {
   final int idPredio;
-  const Edificio({super.key, required this.idPredio});
+  const EdificioForm({super.key, required this.idPredio});
 
   @override
-  State<Edificio> createState() => _EdificioState();
+  State<EdificioForm> createState() => _EdificioState();
 }
 
-class _EdificioState extends State<Edificio> {
+class _EdificioState extends State<EdificioForm> {
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "distrito": {
@@ -103,6 +103,14 @@ class _EdificioState extends State<Edificio> {
                     initialValue: widget.idPredio.toString(),
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
+                    validator: (value) {
+                      final number = int.tryParse(value!);
+                      if (number == null ||
+                          number < 1000000000 ||
+                          number >= 10000000000) {
+                        return "Ingresa una Localización válida";
+                      }
+                    },
                   ),
                 ),
                 Column(

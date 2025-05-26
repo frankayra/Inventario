@@ -111,11 +111,11 @@ class Predio extends InventarioDbTable {
   final int idPredio;
 
   // +++++++++++++++++++++ Módulo Terreno ++++++++++++++++++++ //
-  final Float nivelPredio1;
-  final Float nivelPredio2;
-  final Float nivelPredio3;
+  final double nivelPredio1;
+  final double nivelPredio2;
+  final double nivelPredio3;
   final int acera;
-  final Float anchoAcera;
+  final double anchoAcera;
   final String? observacionesTerreno;
 
   Predio({
@@ -336,8 +336,6 @@ class Propiedad extends InventarioDbTable {
   }
 }
 
-
-
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++     +++++++++++++++++++++++++++++ //
 // +++++++++++++++++++++++++++++           ++++++++++++++++++++++++++ //
@@ -346,7 +344,9 @@ class Propiedad extends InventarioDbTable {
 // ++++++++++++++++++++++++++++++++     +++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
-// Edificio getEdificio(int idPredio, int noEdificio){
-  
-// }
-// List<Edificio> getAllEdificios()
+Future<Edificio> getEdificio (int idPredio, int noEdificio){
+  final db = openDB();
+  Edificio tupla = await db.query('edificios', where: 'id_predio = ? AND no_edificio = ?', whereArgs: [idPredio, ]);
+  if (transacciones.isNotEmpty) {
+}
+List<Edificio> getAllEdificios()
