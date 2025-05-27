@@ -3,22 +3,22 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
 
-class Predio extends StatefulWidget {
+class PredioForm extends StatefulWidget {
   final int? idPredio;
-  const Predio({super.key, this.idPredio});
+  const PredioForm({super.key, required this.idPredio});
 
   @override
-  State<Predio> createState() => _PredioState();
+  State<PredioForm> createState() => PredioFormState();
 }
 
 // TODO: Al presionar "Guardar", si se encuentra una tupla con el mismo ID, preguntar por confirmacion de cambio.
-class _PredioState extends State<Predio> {
+class PredioFormState extends State<PredioForm> {
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "acera": {0: 'No existe', 1: 'Bueno', 2: 'Regular', 3: 'Malo'},
   };
   bool changePredio = false;
-  int? _idPredio;
+  int? idPredio;
   double? _nivelPredio1;
   double? _nivelPredio2;
   double? _nivelPredio3;
@@ -27,7 +27,7 @@ class _PredioState extends State<Predio> {
   String? _observacionesTerreno;
   @override
   Widget build(BuildContext context) {
-    _idPredio = widget.idPredio;
+    idPredio = widget.idPredio;
     return Form(
       key: _formKey,
       child: Padding(
@@ -39,7 +39,7 @@ class _PredioState extends State<Predio> {
               children: [
                 Expanded(
                   child: TextFormField(
-                    initialValue: _idPredio.toString(),
+                    initialValue: idPredio.toString(),
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
                     validator: (value) {

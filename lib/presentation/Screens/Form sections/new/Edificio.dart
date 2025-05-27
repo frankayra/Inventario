@@ -14,10 +14,10 @@ class EdificioForm extends StatefulWidget {
   const EdificioForm({super.key, required this.idPredio});
 
   @override
-  State<EdificioForm> createState() => _EdificioState();
+  State<EdificioForm> createState() => EdificioFormState();
 }
 
-class _EdificioState extends State<EdificioForm> {
+class EdificioFormState extends State<EdificioForm> {
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "distrito": {
@@ -70,7 +70,7 @@ class _EdificioState extends State<EdificioForm> {
   // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
 
   bool changePredio = false;
-  int? _edificio;
+  int? noEdificio;
   int? _distrito;
   int? _cantidadPisos;
   int? _cantidadSotanos;
@@ -149,7 +149,7 @@ class _EdificioState extends State<EdificioForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _edificio = number;
+                noEdificio = number;
                 return null;
               },
             ),
@@ -355,7 +355,7 @@ class _EdificioState extends State<EdificioForm> {
                   if (_formKey.currentState!.validate()) {
                     final edificacion = db.Edificio(
                       idPredio: widget.idPredio,
-                      noEdificio: _edificio!,
+                      noEdificio: noEdificio!,
                       distrito: _distrito!,
                       cantidadPisos: _cantidadPisos!,
                       cantidadSotanos: _cantidadSotanos!,

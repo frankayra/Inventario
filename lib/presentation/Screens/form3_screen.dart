@@ -25,8 +25,8 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   @override
   Widget build(BuildContext context) {
     final secciones = [
-      _buildSection(EDIFICIOS, EdificioForm(idPredio: widget.idPredio), 0),
-      // _buildSection(PREDIO, TerrenoForm(), 0),
+      _buildSection(PREDIO, PredioForm(idPredio: widget.idPredio), 0),
+      _buildSection(EDIFICIOS, EdificioForm(idPredio: widget.idPredio), 1),
       // _buildSection(PROPIEDADES, UsoDeSueloYPatentesForm(), 2),
     ];
     return Form(
