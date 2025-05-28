@@ -110,3 +110,25 @@
 # Mejoras posibles
 Validación de Registros,
 Sugerencia en el sub-campo "Observaciones" de las variables: Por ejemplo en la variable "Edificación" podría aparecer por defecto (Placeholder)"Predio encajonado".
+
+
+## Detalles interfaz grafica
+- Al cambiar el numero de predio, debera reaccionar el formulario completo y cambiar en consecuencia.
+  - En caso de que esté a medias, alguno de los 3, propiedad, Edificio, o el propio Predio, se debera preguntar si guardar los cambios actuales o no.
+- al seleccionar una entidad(opcion de edicion) ya sea de edificio o de propiedad, el resto del formulario cambiara en consecuencia
+  - Para el caso de edicion de una Propiedad, se muestran los datos de dicha tupla y se muestra un mensaje de guardado en caso de que no se hayan guardado los datos
+  - Para el caso de un edificio, en caso de que se este rellenando un edificio o una propiedad, se mostrara un mensaje de guardado, en caso de que ambos formularios esten guardados, se agregara un nuevo edificio sin mas. Ambos casos terminaran cambiando la lista de las propiedades ya que se cambia de edificio.
+- tendran un icono de `agregar` a la izquierda de las entidades que sea para crear una nueva instancia de formulario
+- en caso de que se tenga rellenado algun campo, o sea, que el formulario este a medio rellenar, y se presione el boton de `agregar`, saldra una ventana emergente preguntando si quieren salvar los cambios
+- En caso de que se hayan salvado los cambios, no se preguntara nada
+  - En caso de que este vacio el formulario, tambien se aplica para el mismo caso
+- Hay que tener en cuenta el caso de que se esta rellenando una nueva propiedad y se agrega un edificio, con la propiedad a medias, o se cambia el numero del predio con un edificio a medias, o una combinacion de ambas
+- Al hacer click sobre el boton de `agregar` y no se haya rellenado nada, o sea que el formulario este vacio, no se hara nada. Esto se cumple tanto para Propiedad como para Edificio
+
+
+
+
+### IMPORTANTE!!!
+EN CASO DE QUE SE TENGA UN MENSAJE DE GUARDADO AL MODIFICAR ALGUN FORMULARIO CON DATOS AUN NO SALVADOS, Y SE INTENTE VALIDAR EL FORMULARIO Y NO SE PUEDA, NO SE SALVAN LOS CAMBIOS HASTA QUE ESTO OCURRA.
+
+En caso de editar el numero del edificio en el formulario de edificio o editar el numero de local en el formulario de Propiedad, debemos modificar tambien no solo la tupla que corresponde al nuevo identificador en la base de datos, sino tambien el diccionario almacenado como variable global del Formulario correspondiente.

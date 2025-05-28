@@ -1,0 +1,35 @@
+import 'dart:typed_data';
+
+class ImageWrapper {
+  Uint8List bytes = Uint8List(0);
+  bool imageLoaded = false;
+}
+
+class FormGlobalStatusWrapper {
+  final Map<String, dynamic> variables = {
+    "idPredio": null,
+    "noEdificio": null,
+    "noLocal": null,
+  };
+  Map<String, List<void Function(dynamic)>>
+  _variablesOnChangedSuscribedFunctions = {};
+  FormGlobalStatusWrapper() {
+    for (var variable in variables.keys) {
+      _variablesOnChangedSuscribedFunctions[variable] = [];
+    }
+  }
+  operator [](String key) => variables[key];
+  operator []=(String key, dynamic value) {
+    variables[key] = value;
+    for (var onChagedFunction in _variablesOnChangedSuscribedFunctions[key]!) {
+      onChagedFunction(value);
+    }
+  }
+
+  void suscribeToVariableChangeEvent({
+    required String variable,
+    required void Function(dynamic) onChanged,
+  }) {
+    _variablesOnChangedSuscribedFunctions[variable]!.add(onChanged);
+  }
+}

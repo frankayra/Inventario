@@ -401,7 +401,7 @@ class Propiedad extends InventarioDbTable {
   final String? numeroPermisoSalud;
   final int? fechaVigenciaPermisoSalud;
   final String? codigoCIIUPermisoSalud;
-  final int seTrataDeLocalMercado;
+  final bool seTrataDeLocalMercado;
   final int? numeroLocalMercado;
   final bool tienePatenteLicores;
   final int? numeroPatenteLicores;

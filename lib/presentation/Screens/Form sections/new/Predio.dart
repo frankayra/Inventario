@@ -5,7 +5,7 @@ import 'package:inventario/utiles/db_general_management.dart' as db;
 
 class PredioForm extends StatefulWidget {
   final int? idPredio;
-  const PredioForm({super.key, required this.idPredio});
+  const PredioForm({super.key, this.idPredio});
 
   @override
   State<PredioForm> createState() => PredioFormState();
@@ -39,7 +39,7 @@ class PredioFormState extends State<PredioForm> {
               children: [
                 Expanded(
                   child: TextFormField(
-                    initialValue: idPredio.toString(),
+                    initialValue: idPredio != null ? idPredio.toString() : "",
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
                     validator: (value) {

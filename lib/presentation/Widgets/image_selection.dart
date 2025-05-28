@@ -2,14 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
-
-class _ImageWrapper {
-  Uint8List bytes = Uint8List(0);
-  bool imageLoaded = false;
-}
+import 'package:inventario/utiles/wrappers.dart';
 
 class MyImagePickerInput extends StatefulWidget {
-  final _ImageWrapper _valueWrapper = _ImageWrapper();
+  final ImageWrapper _valueWrapper = ImageWrapper();
   Future<Uint8List> get getImageBytes async => _valueWrapper.bytes;
 
   @override

@@ -6,12 +6,14 @@ import 'package:inventario/presentation/Widgets/numeric.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
+import 'package:inventario/utiles/wrappers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class EdificioForm extends StatefulWidget {
-  final int idPredio;
-  const EdificioForm({super.key, required this.idPredio});
+  final FormGlobalStatusWrapper formGlobalStatus;
+
+  const EdificioForm({super.key, required this.formGlobalStatus});
 
   @override
   State<EdificioForm> createState() => EdificioFormState();
@@ -100,7 +102,9 @@ class EdificioFormState extends State<EdificioForm> {
               children: [
                 Expanded(
                   child: TextFormField(
-                    initialValue: widget.idPredio.toString(),
+                    initialValue:
+                        widget.formGlobalStatus.variables["idPredio"]
+                            .toString(),
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
                     validator: (value) {
@@ -354,7 +358,7 @@ class EdificioFormState extends State<EdificioForm> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final edificacion = db.Edificio(
-                      idPredio: widget.idPredio,
+                      idPredio: widget.formGlobalStatus.variables["idPredio"],
                       noEdificio: noEdificio!,
                       distrito: _distrito!,
                       cantidadPisos: _cantidadPisos!,
