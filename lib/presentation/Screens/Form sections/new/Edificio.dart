@@ -4,7 +4,6 @@ import 'package:inventario/presentation/Widgets/image_selection.dart';
 import 'package:inventario/presentation/Widgets/selection.dart';
 import 'package:inventario/presentation/Widgets/numeric.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:inventario/utiles/wrappers.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,6 +19,7 @@ class EdificioForm extends StatefulWidget {
 }
 
 class EdificioFormState extends State<EdificioForm> {
+  List<db.Edificio> edificiosDelPredio = [];
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "distrito": {
@@ -68,6 +68,19 @@ class EdificioFormState extends State<EdificioForm> {
       998: "No Aplica (Código 998)",
     },
   };
+  @override
+  void initState() {
+    super.initState();
+    if (widget.formGlobalStatus["idPredio"] != null) {
+      db.getAllEdificios(idPredio: widget.formGlobalStatus["idPredio"]).then((
+        List<db.Edificio> edificios,
+      ) {
+        setState(() {
+          edificiosDelPredio = edificios;
+        });
+      });
+    }
+  }
 
   // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
 
@@ -84,7 +97,9 @@ class EdificioFormState extends State<EdificioForm> {
 
   // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
   int? _estadoInmueble;
-  final MyImagePickerInput _imagenConstruccion = MyImagePickerInput();
+  final MyImagePickerInput _imagenConstruccion = MyImagePickerInput(
+    imageLabel: "Imagen de construcción",
+  );
   String? _observacionesConstruccion;
 
   // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
@@ -99,6 +114,27 @@ class EdificioFormState extends State<EdificioForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Wrap(
+              spacing: 8,
+              children: [
+                ElevatedButton(
+                  onPressed: _agregarEdificio,
+                  child: Icon(Icons.add_circle_outlined),
+                ),
+
+                ...(edificiosDelPredio.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  return InputChip(
+                    label: Text('Ed. ${entry.value.noEdificio + 1}'),
+                    backgroundColor: Colors.green[100],
+                    onDeleted:
+                        () => setState(() => edificiosDelPredio.removeAt(idx)),
+                    deleteIcon: Icon(Icons.close),
+                    onPressed: () => _editarEdificio(idx),
+                  );
+                }).toList()),
+              ],
+            ),
             Row(
               children: [
                 Expanded(
@@ -131,7 +167,7 @@ class EdificioFormState extends State<EdificioForm> {
                       activeColor: Colors.blue,
                       checkColor: Colors.white,
                     ),
-                    const Text('Cambiar'),
+                    const Icon(Icons.edit, color: Colors.blue),
                   ],
                 ),
               ],
@@ -388,6 +424,73 @@ class EdificioFormState extends State<EdificioForm> {
           ],
         ),
       ),
+    );
+  }
+
+  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++   Utiles   ++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  void _agregarEdificio() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Nuevo registro'),
+            content: Text('Formulario para nueva instancia'),
+            // content: _PropiedadAux(),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  setState(
+                    () async => edificiosDelPredio.add(
+                      db.Edificio(
+                        // Claves
+                        idPredio: widget.formGlobalStatus["idPredio"],
+                        noEdificio: widget.formGlobalStatus["noEdificio"],
+                        // noEdificio: noEdificio!,
+                        distrito: _distrito!,
+                        cantidadPisos: _cantidadPisos!,
+                        cantidadSotanos: _cantidadSotanos!,
+                        antejardin: _antejardin!,
+                        materialFachada: _materialFachada!,
+                        canoasBajantes: _canoasBajantes!,
+                        observacionesEdificacion: _observacionesEdificacion,
+                        estadoInmueble: _estadoInmueble!,
+                        imagenConstruccion:
+                            await _imagenConstruccion.getImageBytes,
+                        observacionesConstruccion: _observacionesConstruccion,
+                        cantidadMedidores: _cantidadMedidores!,
+                        observacionesMedidores: _observacionesMedidores,
+                      ),
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
+                child: Text('Guardar'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _editarEdificio(int idx) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Editar instancia ${idx + 1}'),
+            content: Text('Formulario de edición'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cerrar'),
+              ),
+            ],
+          ),
     );
   }
 }

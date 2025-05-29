@@ -111,10 +111,14 @@ class PropiedadFormState extends State<PropiedadForm> {
   int? _cantidadEmpleadosActual;
   String? _afectacionesCovidPersonalDesempennoEmpresa;
   String? _afectacionesCovidSobreVentas;
+  List<int> _afectacionesCovidPersonalDesempennoEmpresaList = [];
+  List<int> _afectacionesCovidSobreVentasList = [];
   String? _codigoCIUUActividadPrimaria;
   String? _codigoCIUUActividadComplementaria;
   String? _observacionesPatentes;
-  final MyImagePickerInput _imagenDocumentoLegal = MyImagePickerInput();
+  final MyImagePickerInput _imagenDocumentoLegal = MyImagePickerInput(
+    imageLabel: "Imagen de documento legal",
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +127,7 @@ class PropiedadFormState extends State<PropiedadForm> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Wrap(
               spacing: 8,
@@ -316,114 +321,331 @@ class PropiedadFormState extends State<PropiedadForm> {
                 _nombreActividadPatente = value;
               },
             ),
-            Row(
-              children: [
-                Wrap(
-                  children: [
-                    Checkbox(
-                      value: _tieneMasPatentes,
-                      onChanged: (bool? newValue) {
+            SizedBox(height: 20),
+            CheckboxListTile(
+              value: _tieneMasPatentes,
+              title: Text("Tiene autorizadas más patentes"),
+              onChanged: (bool? selected) {
+                setState(() {
+                  _tieneMasPatentes = selected!;
+                });
+              },
+              activeColor: Colors.blue,
+              checkColor: Colors.white,
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+            ),
+            TextFormField(
+              enabled: _tieneMasPatentes,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Número de patente 2'),
+              validator: (value) {
+                if (_tieneMasPatentes && (value == null || value.isEmpty)) {
+                  return 'Por favor ingresa el número de patente comercial 2';
+                }
+                final number = int.tryParse(value!);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _numeroPatente_2 = number;
+                return null;
+              },
+            ),
+            SizedBox(height: 20),
+            CheckboxListTile(
+              value: _tienePermisoSalud,
+              title: Text("Tiene permiso de salud"),
+              onChanged: (bool? selected) {
+                setState(() {
+                  _tienePermisoSalud = selected!;
+                });
+              },
+              activeColor: Colors.blue,
+              checkColor: Colors.white,
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+            ),
+            TextFormField(
+              enabled: _tienePermisoSalud,
+              decoration: InputDecoration(
+                labelText: 'Número de permiso de salud',
+              ),
+              onChanged: (value) {
+                _nombrePatentado = value;
+              },
+              validator: (value) {
+                if (_tienePermisoSalud && (value == null || value.isEmpty)) {
+                  return 'Por favor ingresa el número de permiso de salud';
+                }
+                return null;
+              },
+            ),
+            DateInput(
+              startDate: DateTime(2000, 1, 1),
+              lastDate: DateTime(2100),
+              labelText: 'Fecha de vigencia del permiso de salud',
+              onChanged: (value) {
+                _fechaVigenciaPermisoSalud = int.parse(
+                  "${value.year}${value.month.toString().padLeft(2, '0')}${value.day.toString().padLeft(2, '0')}",
+                );
+              },
+              // enabled: _tienePermisoSalud,
+            ),
+            TextFormField(
+              enabled: _tienePermisoSalud,
+              decoration: InputDecoration(
+                labelText: 'Código CIIU del permiso de salud',
+              ),
+              onChanged: (value) {
+                _codigoCIIUPermisoSalud = value;
+              },
+              validator: (value) {
+                if (_tienePermisoSalud && (value == null || value.isEmpty)) {
+                  return 'Por favor ingresa el código CIIU del permiso de salud';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 20),
+            CheckboxListTile(
+              value: _seTrataDeLocalMercado,
+              title: Text("Se trata de un local de mercado"),
+              onChanged: (bool? selected) {
+                setState(() {
+                  _seTrataDeLocalMercado = selected!;
+                });
+              },
+              activeColor: Colors.blue,
+              checkColor: Colors.white,
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+            ),
+            TextFormField(
+              enabled: _seTrataDeLocalMercado,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Número de local mercado'),
+              validator: (value) {
+                if (_seTrataDeLocalMercado &&
+                    (value == null || value.isEmpty)) {
+                  return 'Por favor ingresa el número de local mercado';
+                }
+                final number = int.tryParse(value!);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _numeroLocalMercado = number;
+                return null;
+              },
+            ),
+            SizedBox(height: 20),
+            CheckboxListTile(
+              value: _tienePatenteLicores,
+              title: Text("Tiene patente de licores"),
+              onChanged: (bool? selected) {
+                setState(() {
+                  _tienePatenteLicores = selected!;
+                });
+              },
+              activeColor: Colors.blue,
+              checkColor: Colors.white,
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+            ),
+            TextFormField(
+              enabled: _tienePatenteLicores,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Número de patente licores',
+              ),
+              validator: (value) {
+                if (_tienePatenteLicores && (value == null || value.isEmpty)) {
+                  return 'Por favor ingresa el número de patente licores';
+                }
+                final number = int.tryParse(value!);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _numeroPatenteLicores = number;
+                return null;
+              },
+            ),
+            DropdownButtonFormField(
+              value: _areaActividad,
+              items: _dropdownOptions["areaActividad"]!.entries
+                  .map((area) {
+                    return DropdownMenuItem(
+                      value: area.key,
+                      child: Text(area.value),
+                    );
+                  })
+                  .toList(growable: false),
+              onChanged: (value) {
+                setState(() {
+                  _areaActividad = value;
+                });
+              },
+              decoration: InputDecoration(labelText: 'Área de actividad'),
+              validator: (value) {
+                if (value == null) {
+                  return 'Por favor selecciona un área de actividad';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Teléfono patentado'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa el teléfono del patentado';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _telefonoPatentado = number;
+                return null;
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Correo electrónico'),
+              onChanged: (value) {
+                _correoElectronico = value;
+              },
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Cantidad de empleados antes del COVID-19',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa la cantidad de empleados antes del COVID-19';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _cantidadEmpleadosAntesCovid = number;
+                return null;
+              },
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Cantidad de empleados actual',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa la cantidad de empleados actual';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                _cantidadEmpleadosActual = number;
+                return null;
+              },
+            ),
+            SizedBox(height: 30),
+            Text(
+              'Afectaciones por COVID personal y desempeño de la empresa:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            ListView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              children:
+                  _dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]!
+                      .entries
+                      .map((e) {
+                        return CheckboxListTile(
+                          value: _afectacionesCovidPersonalDesempennoEmpresaList
+                              .contains(e.key),
+                          title: Text(e.value),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          dense: true,
+                          onChanged: (bool? selected) {
+                            if (selected == true) {
+                              _afectacionesCovidPersonalDesempennoEmpresaList
+                                  .add(e.key);
+                            } else {
+                              _afectacionesCovidPersonalDesempennoEmpresaList
+                                  .remove(e.key);
+                            }
+                            setState(() {
+                              _afectacionesCovidPersonalDesempennoEmpresa =
+                                  _afectacionesCovidPersonalDesempennoEmpresaList
+                                      .map((key) {
+                                        return _dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]![key]!;
+                                      })
+                                      .join(', ');
+                            });
+                          },
+                        );
+                      })
+                      .toList(),
+            ),
+
+            SizedBox(height: 30),
+            Text(
+              'Afectaciones por COVID sobre las ventas:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            ListView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              children:
+                  _dropdownOptions["afectacionesCovidSobreVentas"]!.entries.map((
+                    e,
+                  ) {
+                    return CheckboxListTile(
+                      value: _afectacionesCovidSobreVentasList.contains(e.key),
+                      title: Text(e.value),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      dense: true,
+                      onChanged: (bool? selected) {
+                        if (selected == true) {
+                          _afectacionesCovidSobreVentasList.add(e.key);
+                        } else {
+                          _afectacionesCovidSobreVentasList.remove(e.key);
+                        }
                         setState(() {
-                          _tieneMasPatentes = newValue!;
+                          _afectacionesCovidSobreVentas =
+                              _afectacionesCovidSobreVentasList
+                                  .map((key) {
+                                    return _dropdownOptions["afectacionesCovidSobreVentas"]![key]!;
+                                  })
+                                  .join(', ');
                         });
                       },
-                      activeColor: Colors.blue,
-                      checkColor: Colors.white,
-                    ),
-                    const Text('Tiene autorizadas más patentes'),
-                  ],
-                ),
-                Expanded(
-                  child: TextFormField(
-                    enabled: _tieneMasPatentes,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Número de patente 2',
-                    ),
-                    validator: (value) {
-                      if (_tieneMasPatentes &&
-                          (value == null || value.isEmpty)) {
-                        return 'Por favor ingresa el número de patente comercial 2';
-                      }
-                      final number = int.tryParse(value!);
-                      if (number == null) {
-                        return 'Por favor ingresa un número válido';
-                      }
-                      _numeroPatente_2 = number;
-                      return null;
-                    },
-                  ),
-                ),
-              ],
+                    );
+                  }).toList(),
             ),
-            Row(
-              children: [
-                Wrap(
-                  children: [
-                    Checkbox(
-                      value: _tienePermisoSalud,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          _tienePermisoSalud = newValue!;
-                        });
-                      },
-                      activeColor: Colors.blue,
-                      checkColor: Colors.white,
-                    ),
-                    const Text('Tiene Permiso de salud'),
-                  ],
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        enabled: _tienePermisoSalud,
-                        decoration: InputDecoration(
-                          labelText: 'Número de permiso de salud',
-                        ),
-                        onChanged: (value) {
-                          _nombrePatentado = value;
-                        },
-                        validator: (value) {
-                          if (_tienePermisoSalud &&
-                              (value == null || value.isEmpty)) {
-                            return 'Por favor ingresa el número de permiso de salud';
-                          }
-                          return null;
-                        },
-                      ),
-                      DateInput(
-                        startDate: DateTime(2000, 1, 1),
-                        lastDate: DateTime(2100),
-                        labelText: 'Fecha de vigencia del permiso de salud',
-                        onChanged: (value) {
-                          _fechaVigenciaPermisoSalud = int.parse(
-                            "${value.year}${value.month.toString().padLeft(2, '0')}${value.day.toString().padLeft(2, '0')}",
-                          );
-                        },
-                        // enabled: _tienePermisoSalud,
-                      ),
-                      TextFormField(
-                        enabled: _tienePermisoSalud,
-                        decoration: InputDecoration(
-                          labelText: 'Código CIIU del permiso de salud',
-                        ),
-                        onChanged: (value) {
-                          _codigoCIIUPermisoSalud = value;
-                        },
-                        validator: (value) {
-                          if (_tienePermisoSalud &&
-                              (value == null || value.isEmpty)) {
-                            return 'Por favor ingresa el código CIIU del permiso de salud';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Código CIIU actividad primaria',
+              ),
+              onChanged: (value) {
+                _codigoCIUUActividadPrimaria = value;
+              },
             ),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Código CIIU actividad complementaria',
+              ),
+              onChanged: (value) {
+                _codigoCIUUActividadComplementaria = value;
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Observaciones patentes'),
+              onChanged: (value) {
+                _observacionesPatentes = value;
+              },
+            ),
+            SizedBox(height: 20),
+            _imagenDocumentoLegal,
           ],
         ),
       ),

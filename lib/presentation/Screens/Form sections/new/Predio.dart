@@ -42,6 +42,7 @@ class PredioFormState extends State<PredioForm> {
                     initialValue: idPredio != null ? idPredio.toString() : "",
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
+                    onChanged: (value) {},
                     validator: (value) {
                       final number = int.tryParse(value!);
                       if (number == null ||
@@ -64,7 +65,7 @@ class PredioFormState extends State<PredioForm> {
                       activeColor: Colors.blue,
                       checkColor: Colors.white,
                     ),
-                    const Text('Cambiar'),
+                    const Icon(Icons.edit, color: Colors.blue),
                   ],
                 ),
               ],

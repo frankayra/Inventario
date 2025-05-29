@@ -7,7 +7,8 @@ import 'package:inventario/utiles/wrappers.dart';
 class MyImagePickerInput extends StatefulWidget {
   final ImageWrapper _valueWrapper = ImageWrapper();
   Future<Uint8List> get getImageBytes async => _valueWrapper.bytes;
-
+  final String? imageLabel;
+  MyImagePickerInput({super.key, this.imageLabel});
   @override
   MyImagePickerInputState createState() => MyImagePickerInputState();
 }
@@ -70,7 +71,7 @@ class MyImagePickerInputState extends State<MyImagePickerInput> {
           ElevatedButton.icon(
             onPressed: _showOptions,
             icon: Icon(Icons.image),
-            label: Text('Seleccionar imagen'),
+            label: Text(widget.imageLabel ?? 'Seleccionar imagen'),
           ),
         ],
       ),
