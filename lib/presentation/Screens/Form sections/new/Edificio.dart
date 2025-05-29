@@ -72,6 +72,7 @@ class EdificioFormState extends State<EdificioForm> {
   // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
 
   bool changePredio = false;
+  int? idPredio;
   int? noEdificio;
   int? _distrito;
   int? _cantidadPisos;
@@ -112,6 +113,7 @@ class EdificioFormState extends State<EdificioForm> {
                       if (number == null ||
                           number < 1000000000 ||
                           number >= 10000000000) {
+                        idPredio = number;
                         return "Ingresa una Localización válida";
                       }
                     },

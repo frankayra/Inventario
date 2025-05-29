@@ -52,12 +52,12 @@
       - Al marcar la casilla del sub-campo "Se trata de un local de un mercado" se podrá disponible el sub-campo "Número de local(mercado)"
       - Al marcar la casilla del sub-campo "Tiene patente de licores" se podrá disponible el sub-campo "Número de patente de licores"
       - El sub-campo "Área de la actividad" es un campo de selección SIMPLE que dará a escoger entre las siguientes opciones:
-        1. Menos de 50m^2
-        2. 51 a 100m^2
-        3. 100 a 200m^2
-        4. 200 a 400m^2
-        5. 400 a 1000m^2
-        6. Más de 1000m^2
+        1. Menos de 50m²
+        2. 51 a 100m²
+        3. 100 a 200m²
+        4. 200 a 400m²
+        5. 400 a 1000m²
+        6. Más de 1000m²
         7. 998. No aplica
         8. 999. No visible
       - El sub-campo "Afectaciones por COVID personal y desempeño de la empresa", es un campo de selección MÚLTIPLE, que dará a escoger de la lista siguiente:
@@ -132,3 +132,15 @@ Sugerencia en el sub-campo "Observaciones" de las variables: Por ejemplo en la v
 EN CASO DE QUE SE TENGA UN MENSAJE DE GUARDADO AL MODIFICAR ALGUN FORMULARIO CON DATOS AUN NO SALVADOS, Y SE INTENTE VALIDAR EL FORMULARIO Y NO SE PUEDA, NO SE SALVAN LOS CAMBIOS HASTA QUE ESTO OCURRA.
 
 En caso de editar el numero del edificio en el formulario de edificio o editar el numero de local en el formulario de Propiedad, debemos modificar tambien no solo la tupla que corresponde al nuevo identificador en la base de datos, sino tambien el diccionario almacenado como variable global del Formulario correspondiente.
+
+Cuando se quita el checkmark de "Localizacion" en el formulario de Edificio, o "Numero de Edificio" en el formulario de Propiedad nos tenemos que secciorar de cambiar la info en la tabla. En el caso de un Propiedad cambiada de edificio, no hay problema, solo se cambia el id y ya, pero para el caso de cambiar un edificio de Localizacion, tendremos que cambiar todas las propiedades de localizacion. Aqui hay que tener en cuenta que puede que haya un edificio en la nueva localizacion con el mismo numero, por ende hace falta chequear esto y enviar un mensaje de advertencia. Importante cambiar informacion en base de datos, pero tambien en el diccionario local de AMBAS tablas.
+
+
+
+
+- Al no ejecutarse la validacion de los campos de formulario que estan inhabilitados, esto podemos aprovecharlo para cambiar en los metodos de validacion de los campos como "Localizacion" en predio, en edificio y en propiedad, o "noEdificio" en edificio y en propiedad, o "noLocal" en Propiedad
+
+
+
+### No tan importante
+- Al validar el formulario, no se ejecutan los metodos de validacion de los campos que no estan `enabled`, por lo tanto, por ejemplo, en el caso de la "Localizacion", que en varios formularios esta desabilitada pero no porque no se debe validar, sino porque es inusual cambiarla, y para evitar confusiones se inhabilita, se debria validar manualmente

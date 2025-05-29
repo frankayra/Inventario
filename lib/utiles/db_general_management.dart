@@ -13,20 +13,19 @@ import 'package:sqflite/sqflite.dart';
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 Future<Database> openDB() async {
-  return openDatabase(
-    join(await getDatabasesPath(), 'inventario.db'),
-    onCreate: (db, version) {
-      return db.execute("""
-CREATE TABLE predios(
+  final pathToDB = join(await getDatabasesPath(), 'inventario.db');
+  await deleteDatabase(pathToDB);
+  final scripts = [
+    """CREATE TABLE predios(
         id_predio INTEGER PRIMARY KEY, 
-        nivelPredio_1 FLOAT NOT NULL,
-        nivelPredio_2 FLOAT NOT NULL,
-        nivelPredio_3 FLOAT NOT NULL,
+        nivelPredio1 FLOAT NOT NULL,
+        nivelPredio2 FLOAT NOT NULL,
+        nivelPredio3 FLOAT NOT NULL,
         acera INTEGER NOT NULL,
         anchoAcera FLOAT NOT NULL,
-        observacionesTerreno TEXT);
+        observacionesTerreno TEXT);""",
 
-CREATE TABLE edificios(
+    """CREATE TABLE edificios(
         id_predio INTEGER, 
         no_edificio INTEGER, 
         distrito INTEGER NOT NULL, 
@@ -37,14 +36,15 @@ CREATE TABLE edificios(
         canoasBajantes INTEGER NOT NULL, 
         observacionesEdificacion TEXT, 
         estadoInmueble INTEGER NOT NULL, 
+        imagenConstruccion BLOB NOT NULL,
         observacionesConstruccion TEXT, 
         cantidadMedidores INTEGER NOT NULL, 
         observacionesMedidores TEXT, 
         PRIMARY KEY (id_predio, no_edificio), 
         FOREIGN KEY (id_predio) REFERENCES predios(id_predio) 
-          ON DELETE CASCADE);
-          
-CREATE TABLE propiedades(
+          ON DELETE CASCADE);""",
+
+    """CREATE TABLE propiedades(
         id_predio INTEGER,
         no_edificio INTEGER,
         no_local INTEGER,
@@ -79,10 +79,17 @@ CREATE TABLE propiedades(
         codigoCIUUActividadPrimaria TEXT,
         codigoCIUUActividadComplementaria TEXT,
         observacionesPatentes TEXT,
-        imagenDocumentoLegal BLOB),
+        imagenDocumentoLegal BLOB,
         PRIMARY KEY(id_predio, no_edificio, no_local),
-        FOREIGN KEY (id_predio, no_edificio) REFERENCES predios(id_predio, no_edificio));
-          """);
+        FOREIGN KEY (id_predio, no_edificio) REFERENCES predios(id_predio, no_edificio));""",
+  ];
+
+  return openDatabase(
+    pathToDB,
+    onCreate: (db, version) async {
+      for (var script in scripts) {
+        await db.execute(script);
+      }
     },
     version: 1,
   );
@@ -387,7 +394,7 @@ class Propiedad extends InventarioDbTable {
   final String nivelPiso;
   final String actividadPrimaria;
   final String? actividadComplementaria;
-  final String? estadoNegocio;
+  final int? estadoNegocio;
   final String? nombreNegocio;
   final int cantidadParqueos;
   final int? documentoMostrado;

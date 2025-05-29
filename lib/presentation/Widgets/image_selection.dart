@@ -20,10 +20,14 @@ class MyImagePickerInputState extends State<MyImagePickerInput> {
     final pickedFile = await picker.pickImage(source: source);
 
     if (pickedFile != null) {
-      setState(() async {
+      setState(() {
         _image = File(pickedFile.path);
-        widget._valueWrapper.bytes = await _image!.readAsBytes();
-        widget._valueWrapper.imageLoaded = true;
+        _image!.readAsBytes().then(
+          (bytes) => {
+            widget._valueWrapper.bytes = bytes,
+            widget._valueWrapper.imageLoaded = true,
+          },
+        );
       });
     }
   }
