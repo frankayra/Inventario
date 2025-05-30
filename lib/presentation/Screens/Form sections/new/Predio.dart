@@ -55,6 +55,10 @@ class PredioFormState extends State<PredioForm> {
                 ),
                 Column(
                   children: [
+                    Icon(
+                      Icons.edit,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                     Checkbox(
                       value: changePredio,
                       onChanged: (bool? newValue) {
@@ -62,10 +66,9 @@ class PredioFormState extends State<PredioForm> {
                           changePredio = newValue!;
                         });
                       },
-                      activeColor: Colors.blue,
-                      checkColor: Colors.white,
+                      // activeColor: Colors.blue,
+                      // checkColor: Colors.white,
                     ),
-                    const Icon(Icons.edit, color: Colors.blue),
                   ],
                 ),
               ],

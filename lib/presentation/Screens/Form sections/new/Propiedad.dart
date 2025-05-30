@@ -173,6 +173,10 @@ class PropiedadFormState extends State<PropiedadForm> {
                 ),
                 Column(
                   children: [
+                    Icon(
+                      Icons.edit,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                     Checkbox(
                       value: changeEdificio,
                       onChanged: (bool? newValue) {
@@ -180,10 +184,9 @@ class PropiedadFormState extends State<PropiedadForm> {
                           changeEdificio = newValue!;
                         });
                       },
-                      activeColor: Colors.blue,
-                      checkColor: Colors.white,
+                      // activeColor: Colors.blue,
+                      // checkColor: Colors.white,
                     ),
-                    const Text('Cambiar'),
                   ],
                 ),
               ],

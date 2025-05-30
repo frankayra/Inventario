@@ -135,12 +135,16 @@ En caso de editar el numero del edificio en el formulario de edificio o editar e
 
 Cuando se quita el checkmark de "Localizacion" en el formulario de Edificio, o "Numero de Edificio" en el formulario de Propiedad nos tenemos que secciorar de cambiar la info en la tabla. En el caso de un Propiedad cambiada de edificio, no hay problema, solo se cambia el id y ya, pero para el caso de cambiar un edificio de Localizacion, tendremos que cambiar todas las propiedades de localizacion. Aqui hay que tener en cuenta que puede que haya un edificio en la nueva localizacion con el mismo numero, por ende hace falta chequear esto y enviar un mensaje de advertencia. Importante cambiar informacion en base de datos, pero tambien en el diccionario local de AMBAS tablas.
 
+Cuando se estan rellenando los formularios, y se cambia de pestaña, a ver el mapa, se debe tener en cuenta si se guardaron los cambios.
+
 
 
 
 - Al no ejecutarse la validacion de los campos de formulario que estan inhabilitados, esto podemos aprovecharlo para cambiar en los metodos de validacion de los campos como "Localizacion" en predio, en edificio y en propiedad, o "noEdificio" en edificio y en propiedad, o "noLocal" en Propiedad
+- Controlar que al activar el boton de editar la localizacion, editarla y desactivar la opcion nuevamente, se acceda al valor correcto al validar el formulario y enviarlo.
 
 
 
 ### No tan importante
 - Al validar el formulario, no se ejecutan los metodos de validacion de los campos que no estan `enabled`, por lo tanto, por ejemplo, en el caso de la "Localizacion", que en varios formularios esta desabilitada pero no porque no se debe validar, sino porque es inusual cambiarla, y para evitar confusiones se inhabilita, se debria validar manualmente
+- 
