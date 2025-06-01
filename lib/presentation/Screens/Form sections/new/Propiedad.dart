@@ -152,45 +152,46 @@ class PropiedadFormState extends State<PropiedadForm> {
                 }).toList()),
               ],
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue:
-                        widget.formGlobalStatus.variables["idPredio"]
-                            .toString(),
-                    decoration: InputDecoration(labelText: 'Localización'),
-                    enabled: changeEdificio,
-                    validator: (value) {
-                      final number = int.tryParse(value!);
-                      if (number == null ||
-                          number < 1000000000 ||
-                          number >= 10000000000) {
-                        return "Ingresa una Localización válida";
-                      }
-                    },
-                  ),
-                ),
-                Column(
-                  children: [
-                    Icon(
-                      Icons.edit,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                    Checkbox(
-                      value: changeEdificio,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          changeEdificio = newValue!;
-                        });
-                      },
-                      // activeColor: Colors.blue,
-                      // checkColor: Colors.white,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            SizedBox(height: 40),
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: TextFormField(
+            //         initialValue:
+            //             widget.formGlobalStatus.variables["idPredio"]
+            //                 .toString(),
+            //         decoration: InputDecoration(labelText: 'Localización'),
+            //         enabled: changeEdificio,
+            //         validator: (value) {
+            //           final number = int.tryParse(value!);
+            //           if (number == null ||
+            //               number < 1000000000 ||
+            //               number >= 10000000000) {
+            //             return "Ingresa una Localización válida";
+            //           }
+            //         },
+            //       ),
+            //     ),
+            //     Column(
+            //       children: [
+            //         Icon(
+            //           Icons.edit,
+            //           color: Theme.of(context).colorScheme.secondary,
+            //         ),
+            //         Checkbox(
+            //           value: changeEdificio,
+            //           onChanged: (bool? newValue) {
+            //             setState(() {
+            //               changeEdificio = newValue!;
+            //             });
+            //           },
+            //           // activeColor: Colors.blue,
+            //           // checkColor: Colors.white,
+            //         ),
+            //       ],
+            //     ),
+            //   ],
+            // ),
             TextFormField(
               decoration: InputDecoration(labelText: 'Nivel piso'),
               onChanged: (value) {

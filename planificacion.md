@@ -147,4 +147,55 @@ Cuando se estan rellenando los formularios, y se cambia de pestaña, a ver el ma
 
 ### No tan importante
 - Al validar el formulario, no se ejecutan los metodos de validacion de los campos que no estan `enabled`, por lo tanto, por ejemplo, en el caso de la "Localizacion", que en varios formularios esta desabilitada pero no porque no se debe validar, sino porque es inusual cambiarla, y para evitar confusiones se inhabilita, se debria validar manualmente
-- 
+
+
+
+
+
+
+
+
+## Problemas que tengo
+- El tema es que necesito saber si manejar los cambios de los formularios al hacer operaciones como: cambiar el numero de predio, agregar nuevo edificio
+
+- Incertidumbre entre si al cambiar el numero de predio en el formulario Predio hacer cambios al formulario completo 
+
+- Al permitir cambiar las propiedades de edificio o de predio y edificio y a los edificios cambiar de predio, surgiran cosas a manejar como:
+  - Al cambiar una propiedad de predio: Existe el numero de edificio en ese nuevo predio? Existira una propiedad con el mismo numero de local en ese nuevo edificio de ese nuevo predio?
+  - Al cambiar un edificio de predio: Cambiar tambien de predio TODAS las propiedades de ese edificio, en la BD. Existira un edificio con este numero de edificio en el nuevo predio? 
+  - Al cambiar el numero de predio en el formulario Predio: Estamos cambiando la informacion del predio actual, o estamos cambiando el formulario actual a mostrar? Si estamos cambiando la informacion del predio actual, hay que cambiar TODOS los edificios y TODAS las propiedades de todos los edificios hacia el nuevo predio. Cuando vas a cambiar toda esa info hacia el nuevo predio, que pasa con los edificios con la misma numeracion? 
+
+### Algunas respuestas a estos problemas
+- Cuando se cambie el numero de predio en el formulario Predio, o sea, la Localizacion: Esto significara que se quiere cambiar de predio a mostrar, ya que no tiene sentido que cambies la informacion del predio actual, porque surgen problemas como por ejemplo: Si el predio con la numeracion sugerida, tenia informacion rellenada, que debriamos hacer en este caso, sobrescribir la informacion? O por ejemplo si ese predio tenia un edificio "0", lo cual significa por convenio que ese predio no tiene edificios, y de repente el predio que le estamos cambiando la numeracion, tiene edificios, y por ende, el predio que no tenia edificios tiene edificios con numero pero tambien edificio numero "0".
+- No se podra cambiar una propiedad de edificio ya que esto en la vida real no tiene mucho sentido, mucho menos, cambiarla de predio. Estas cosas en la practica no se hacen muy seguido ya que es poco posible equivocarse al poner una propiedad en un edificio diferente. Para no perder informacion como la foto, se deberan tomar medidas como tirar la foto con la camara y luego de tener la imagen en la galeria, cargarla desde ahi, en vez de tirar la foto al momento de cargar la foto.
+- Si se pueden cambiar los edificios de predio ya que esto si tiene sentido en la vida real, por ejemplo en el caso de que un edificio se cambie en la distribucion hacia un diferente predio. Al hacer esto, se enviara el edificio con el numero original, y si ya existe un edificio con este numero en el nuevo predio, se le asignara un nuevo numero que no exista en ese predio. Sin embargo, esto quedara para el final.
+
+
+## Workflow del formulario
+- Mandar mensaje de confirmacion de guardado en las siguientes situaciones:
+  - Cuando se cambia el numero de localizacion en el formulario Predio y no se han guardado cosas del formulario Predio, Edificio o Propiedad.
+  - Cuando se agrega un edificio y no se han guardado los cambios del formulario Edificio o propiedad.
+  - Cuando se agrega una propiedad y no se han guardado los cambios del formulario Propiedad
+  - Cuando se cambia de pestaña y no se han guardado cambios de cualquiera de los formularios.
+- Al darle guardar a una propiedad, se mantendra la informacion en el formulario rellenada
+- Al agregar una nueva propiedad al edificio, se invoca una nueva instancia del formulario Propiedad, por ende se borra el formulario entero, aqui tenemos que saber si esta guardado
+- Los subformularios Predio, Edificio y Propiedad, seran independientemente validos para descartar en los casos siguientes:
+  - Ya se guardo,
+  - No se han rellenado, o sea, estan vacios, o
+  - Se autorizo descartarlo por el usuario.
+- El formulario sera valido para descartar si los tres subformularios son validos para descartar
+
+### Por ende, lista de tareas a llevar a cabo en orden
+- [ ] Revisar que funcionen correctamente las operaciones en la base de datos al:
+  - 1. [ ] Guardar las tuplas tanto de Predio, como de Edificio, como de Propiedad
+  - 2. [ ] Recuperar las tuplas tanto de Edificios asociados a un Predio como de Propiedades asociadas a un Edificio.
+  - 3. [ ] Sobrescribir la informacion de una Propiedad o de un Edificio al introducir en el formulario la misma llave primaria de una tupla que ya existia en la BD.
+- [ ] Cuando se cambie el numero de Localizacion en el subformulario Predio, aparezcan nuevas instancias de Edificio y Propiedad sin guardar.
+- [ ] Al presionar en la interfaz de la lista de edificios en uno de ellos para editarlo, aparezca la informacion de este rellenada en el formulario.
+- [ ] Lo mismo anterior pero con Propiedad.
+- [ ] Cambiar para que la lista de edificios y propiedades en la interfaz visual, se extraiga en lugar de desde una lista alojada en una variable global directamente desde la BD.
+- [ ] Al presionar en la interfaz de la lista de edificios en la cruz de uno de ellos para eliminarlo, se elimine tanto de la BD como de la lista
+
+
+
+- [ ] Agregar una funcionalidad de exportar la base de datos hacia un directorio local.

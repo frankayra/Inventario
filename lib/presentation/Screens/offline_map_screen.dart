@@ -94,7 +94,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
                 options: MapOptions(
                   initialCenter: ALAMAR,
                   initialZoom: 16.0,
-                  maxZoom: 16.0,
+                  maxZoom: 18.0,
                   minZoom: 10.0,
                   onTap: (TapPosition details, LatLng point) {
                     setState(() {

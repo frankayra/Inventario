@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
+import 'package:inventario/utiles/wrappers.dart';
 
 class PredioForm extends StatefulWidget {
-  final int? idPredio;
-  const PredioForm({super.key, this.idPredio});
+  final FormGlobalStatusWrapper formGlobalStatus;
+  const PredioForm({super.key, required this.formGlobalStatus});
 
   @override
   State<PredioForm> createState() => PredioFormState();
@@ -27,7 +28,7 @@ class PredioFormState extends State<PredioForm> {
   String? _observacionesTerreno;
   @override
   Widget build(BuildContext context) {
-    idPredio = widget.idPredio;
+    idPredio = widget.formGlobalStatus["idPredio"];
     return Form(
       key: _formKey,
       child: Padding(
@@ -42,7 +43,14 @@ class PredioFormState extends State<PredioForm> {
                     initialValue: idPredio != null ? idPredio.toString() : "",
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
-                    onChanged: (value) {},
+                    onChanged: (value) {
+                      final number = int.tryParse(value!);
+                      if (number == null ||
+                          number >= 1000000000 ||
+                          number < 10000000000) {
+                        widget.formGlobalStatus["idPredio"] = number;
+                      }
+                    },
                     validator: (value) {
                       final number = int.tryParse(value!);
                       if (number == null ||
@@ -168,7 +176,7 @@ class PredioFormState extends State<PredioForm> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final predio = db.Predio(
-                      idPredio: widget.idPredio!,
+                      idPredio: widget.formGlobalStatus["idPredio"]!,
                       nivelPredio1: _nivelPredio1!,
                       nivelPredio2: _nivelPredio2!,
                       nivelPredio3: _nivelPredio3!,
@@ -176,7 +184,7 @@ class PredioFormState extends State<PredioForm> {
                       anchoAcera: _anchoAcera!,
                       observacionesTerreno: _observacionesTerreno,
                     );
-                    predio.insertInDB();
+                    await predio.insertInDB();
                     ScaffoldMessenger.of(
                       context,
                     ).showSnackBar(SnackBar(content: Text('Datos guardados')));

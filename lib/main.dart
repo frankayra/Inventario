@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,6 +12,8 @@ import 'presentation/Screens/offline_map_screen.dart';
 // import 'presentation/Screens/form2_screen.dart';
 import 'presentation/Screens/form3_screen.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:inventario/utiles/db_general_management.dart' as db;
+import 'package:inventario/utiles/db_debug.dart';
 
 class AppContext {
   static late String mapName = "habana.mbtiles";
@@ -28,6 +31,40 @@ class AppContext {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  var predio = db.Predio(
+    idPredio: 1000000000,
+    nivelPredio1: 1,
+    nivelPredio2: 1,
+    nivelPredio3: 1,
+    acera: 1,
+    anchoAcera: 1,
+  );
+  var edificio = db.Edificio(
+    idPredio: 1000000000,
+    noEdificio: 1,
+    distrito: 1,
+    cantidadPisos: 1,
+    cantidadSotanos: 1,
+    antejardin: 1,
+    materialFachada: 1,
+    canoasBajantes: 1,
+    estadoInmueble: 1,
+    imagenConstruccion: Uint8List(8),
+    cantidadMedidores: 1,
+    observacionesConstruccion: "bla bla bla",
+    observacionesEdificacion: "bla bla",
+    observacionesMedidores: "bla bla bla bla",
+  );
+  predio.insertInDB();
+  edificio.insertInDB();
+  List<db.Predio>? predios;
+  List<db.Edificio>? edificios;
+  db.getAllPredios().then((_predios) => predios = _predios);
+  db
+      .getAllEdificios(idPredio: 1000000000)
+      .then((_edificios) => edificios = _edificios);
+  print(predios!.join(", "));
+  print(edificios!.join(", "));
   await AppContext.initializeVariables();
 
   final mapNewPath = await copyFileToDocuments(
@@ -41,7 +78,13 @@ void main() async {
       "El archivo ${AppContext.mapName} no se encontró en la ruta $mapNewPath",
     );
   AppContext.appDocumentsMapPath = mapNewPath;
-  runApp(MyScafold());
+  runApp(
+    MaterialApp(
+      title: 'Inventario',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MyScafold(),
+    ),
+  );
 }
 
 class MyScafold extends StatefulWidget {
@@ -58,56 +101,57 @@ class _MyScafoldState extends State<MyScafold> {
   File? _map_file;
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Inventario',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Row(
-            children: [
-              Icon(Icons.home_filled),
-              Text(' Inventario '),
-              ElevatedButton(
-                onPressed: _selectFile,
-                child: Icon(Icons.file_open),
-              ),
-            ],
-          ),
-        ),
-        body:
-            _selectedIndex == 0
-                ? OfflineMapWidget(
-                  /// ++++++++++++++++++++++++++++++++ ///
-                  /// +++++++++ MAP SETTINGS +++++++++ ///
-                  /// ++++++++++++++++++++++++++++++++ ///
-                  mbtilesFilePath: AppContext.appDocumentsMapPath,
-                  delimitationLayers: [
-                    (
-                      path: 'assets/Delimitations/manzanas_habana.geojson',
-                      color: Colors.red,
-                    ),
-                    (
-                      path: 'assets/Delimitations/predios_habana.geojson',
-                      color: Colors.green,
-                    ),
-                  ],
-
-                  /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
-                )
-                // : EdificacionForm(),
-                : FormularioInspeccion(idPredio: 1),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.widgets),
-              label: 'Registro',
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Wrap(children: [Icon(Icons.home_filled), Text(' Inventario ')]),
           ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blue,
-          onTap: _onItemTapped,
         ),
+        actions: [
+          ElevatedButton(onPressed: _selectFile, child: Icon(Icons.file_open)),
+          IconButton(
+            icon: Icon(Icons.info),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => DBDebugDialog(),
+              );
+            },
+          ),
+        ],
+      ),
+      body:
+          _selectedIndex == 0
+              ? OfflineMapWidget(
+                /// ++++++++++++++++++++++++++++++++ ///
+                /// +++++++++ MAP SETTINGS +++++++++ ///
+                /// ++++++++++++++++++++++++++++++++ ///
+                mbtilesFilePath: AppContext.appDocumentsMapPath,
+                delimitationLayers: [
+                  (
+                    path: 'assets/Delimitations/manzanas_habana.geojson',
+                    color: Colors.red,
+                  ),
+                  (
+                    path: 'assets/Delimitations/predios_habana.geojson',
+                    color: Colors.green,
+                  ),
+                ],
+
+                /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
+              )
+              // : EdificacionForm(),
+              : FormularioInspeccion(idPredio: 1),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
+          BottomNavigationBarItem(icon: Icon(Icons.widgets), label: 'Registro'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
       ),
     );
   }

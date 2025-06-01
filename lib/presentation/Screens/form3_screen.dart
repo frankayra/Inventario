@@ -29,7 +29,11 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   Widget build(BuildContext context) {
     formGlobalStatusWrapper['idPredio'] = widget.idPredio;
     final secciones = [
-      _buildSection(PREDIO, PredioForm(idPredio: widget.idPredio), 0),
+      _buildSection(
+        PREDIO,
+        PredioForm(formGlobalStatus: formGlobalStatusWrapper),
+        0,
+      ),
       _buildSection(
         EDIFICIOS,
         EdificioForm(formGlobalStatus: formGlobalStatusWrapper),

@@ -112,6 +112,22 @@ Future<Predio?> getPredio({required int idPredio}) async {
   return null;
 }
 
+Future<List<Predio>> getAllPredios() async {
+  final db = await openDB();
+  List<Map<String, dynamic>> rawTuples = await db.query(
+    'predios',
+    orderBy: 'id_predio',
+  );
+  if (rawTuples.isNotEmpty) {
+    final predios = <Predio>[];
+    for (var rawTuple in rawTuples) {
+      predios.add(Predio.fromRawTuple(rawTuple));
+    }
+    return predios;
+  }
+  return [];
+}
+
 Future<Edificio?> getEdificio({
   required int idPredio,
   required int noEdificio,
