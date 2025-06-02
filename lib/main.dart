@@ -31,6 +31,10 @@ class AppContext {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/ DEBUG \/\/\/\/\/\/\/\/\/\/\/\/\/\/\\
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
   var predio = db.Predio(
     idPredio: 1000000000,
     nivelPredio1: 1,
@@ -55,17 +59,19 @@ void main() async {
     observacionesEdificacion: "bla bla",
     observacionesMedidores: "bla bla bla bla",
   );
-  predio.insertInDB();
-  edificio.insertInDB();
+  await predio.insertInDB();
+  await edificio.insertInDB();
   List<db.Predio>? predios;
   List<db.Edificio>? edificios;
-  db.getAllPredios().then((_predios) => predios = _predios);
-  db
-      .getAllEdificios(idPredio: 1000000000)
-      .then((_edificios) => edificios = _edificios);
-  print(predios!.join(", "));
-  print(edificios!.join(", "));
+  predios = await db.getAllPredios();
+  edificios = await db.getAllEdificios(idPredio: predio.idPredio);
   await AppContext.initializeVariables();
+  print("Predios: ${predios}");
+  print("Edificios: ${edificios}");
+
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
 
   final mapNewPath = await copyFileToDocuments(
     filePath: AppContext.assetsMapPath,
@@ -199,4 +205,11 @@ class _MyScafoldState extends State<MyScafold> {
   }
 }
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++   Callbacks   ++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 void mapPointTapCallbackFunction(LatLng point) {}

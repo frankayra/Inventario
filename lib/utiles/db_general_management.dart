@@ -5,16 +5,16 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++++++    +++++++++++++++++++++++++++++ //
-// +++++++++++++++++++++++++++++          ++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++   SQLite   +++++++++++++++++++++++++ //
-// +++++++++++++++++++++++++++++          ++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++++++    +++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++    ++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++          +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++   SQLite   ++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++          +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++    ++++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
 Future<Database> openDB() async {
   final pathToDB = join(await getDatabasesPath(), 'inventario.db');
-  await deleteDatabase(pathToDB);
+  // await deleteDatabase(pathToDB);
   final scripts = [
     """CREATE TABLE predios(
         id_predio INTEGER PRIMARY KEY, 
@@ -84,7 +84,7 @@ Future<Database> openDB() async {
         FOREIGN KEY (id_predio, no_edificio) REFERENCES predios(id_predio, no_edificio));""",
   ];
 
-  return openDatabase(
+  return await openDatabase(
     pathToDB,
     onCreate: (db, version) async {
       for (var script in scripts) {

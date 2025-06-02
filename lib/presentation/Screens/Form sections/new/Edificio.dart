@@ -135,6 +135,7 @@ class EdificioFormState extends State<EdificioForm> {
                 }).toList()),
               ],
             ),
+            SizedBox(height: 40),
             Row(
               children: [
                 Expanded(

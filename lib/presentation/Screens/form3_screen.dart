@@ -20,6 +20,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   final _formKey = GlobalKey<FormState>();
 
   bool mostrarCampoExtra = false;
+  List<Widget> secciones = [];
   List<bool> seccionesExpandibles = List.filled(5, false);
   int? expandedSectionIndex;
   final formGlobalStatusWrapper =
@@ -28,7 +29,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   @override
   Widget build(BuildContext context) {
     formGlobalStatusWrapper['idPredio'] = widget.idPredio;
-    final secciones = [
+    secciones = [
       _buildSection(
         PREDIO,
         PredioForm(formGlobalStatus: formGlobalStatusWrapper),
@@ -85,5 +86,77 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
         ],
       ),
     );
+  }
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++   Callbacks   ++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+
+  void idPredioChanged(int idPredio) {
+    setState(() {
+      formGlobalStatusWrapper["idPredio"] = idPredio;
+      formGlobalStatusWrapper["noEdificio"] = null;
+      formGlobalStatusWrapper["noLocal"] = null;
+      secciones.removeAt(2);
+      secciones.removeAt(1);
+      secciones.removeAt(0);
+      secciones.addAll([
+        _buildSection(
+          PREDIO,
+          PredioForm(formGlobalStatus: formGlobalStatusWrapper),
+          0,
+        ),
+        _buildSection(
+          EDIFICIOS,
+          EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
+          1,
+        ),
+        _buildSection(
+          PROPIEDADES,
+          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+          2,
+        ),
+      ]);
+    });
+  }
+
+  void noEdificioChanged(int idPredio, int noEdificio) {
+    setState(() {
+      formGlobalStatusWrapper["idPredio"] = idPredio;
+      formGlobalStatusWrapper["noEdificio"] = noEdificio;
+      secciones.removeAt(2);
+      secciones.removeAt(1);
+      secciones.addAll([
+        _buildSection(
+          EDIFICIOS,
+          EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
+          1,
+        ),
+        _buildSection(
+          PROPIEDADES,
+          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+          2,
+        ),
+      ]);
+    });
+  }
+
+  void noLocalChanged(int idPredio, int noEdificio, int noLocal) {
+    setState(() {
+      formGlobalStatusWrapper["idPredio"] = idPredio;
+      formGlobalStatusWrapper["noEdificio"] = noEdificio;
+      formGlobalStatusWrapper["noLocal"] = noLocal;
+      secciones.removeAt(2);
+      secciones.addAll([
+        _buildSection(
+          PROPIEDADES,
+          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+          2,
+        ),
+      ]);
+    });
   }
 }
