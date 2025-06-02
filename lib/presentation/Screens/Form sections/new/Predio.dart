@@ -5,7 +5,7 @@ import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:inventario/utiles/wrappers.dart';
 
 class PredioForm extends StatefulWidget {
-  final FormGlobalStatusWrapper formGlobalStatus;
+  final FormGlobalStatusWrapper<int> formGlobalStatus;
   const PredioForm({super.key, required this.formGlobalStatus});
 
   @override
@@ -45,9 +45,8 @@ class PredioFormState extends State<PredioForm> {
                     enabled: changePredio,
                     onChanged: (value) {
                       final number = int.tryParse(value!);
-                      if (number == null ||
-                          number >= 1000000000 ||
-                          number < 10000000000) {
+                      if (number != null &&
+                          (number >= 1000000000 || number < 10000000000)) {
                         widget.formGlobalStatus["idPredio"] = number;
                       }
                     },

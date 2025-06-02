@@ -5,21 +5,21 @@ class ImageWrapper {
   bool imageLoaded = false;
 }
 
-class FormGlobalStatusWrapper {
-  final Map<String, dynamic> variables = {
+class FormGlobalStatusWrapper<T> {
+  final Map<String, T?> variables = {
     "idPredio": null,
     "noEdificio": null,
     "noLocal": null,
   };
-  Map<String, List<void Function(dynamic)>>
-  _variablesOnChangedSuscribedFunctions = {};
+  Map<String, List<void Function(T?)>> _variablesOnChangedSuscribedFunctions =
+      {};
   FormGlobalStatusWrapper() {
     for (var variable in variables.keys) {
       _variablesOnChangedSuscribedFunctions[variable] = [];
     }
   }
   operator [](String key) => variables[key];
-  operator []=(String key, dynamic value) {
+  operator []=(String key, T? value) {
     variables[key] = value;
     for (var onChagedFunction in _variablesOnChangedSuscribedFunctions[key]!) {
       onChagedFunction(value);
@@ -28,7 +28,7 @@ class FormGlobalStatusWrapper {
 
   void suscribeToVariableChangeEvent({
     required String variable,
-    required void Function(dynamic) onChanged,
+    required void Function(T?) onChanged,
   }) {
     _variablesOnChangedSuscribedFunctions[variable]!.add(onChanged);
   }

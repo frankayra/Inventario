@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Widgets/text.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
@@ -10,7 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class EdificioForm extends StatefulWidget {
-  final FormGlobalStatusWrapper formGlobalStatus;
+  final FormGlobalStatusWrapper<int> formGlobalStatus;
 
   const EdificioForm({super.key, required this.formGlobalStatus});
 
@@ -399,8 +401,69 @@ class EdificioFormState extends State<EdificioForm> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    bool? saveDecision;
+                    bool overriting = false;
+                    bool differentPredio =
+                        idPredio != widget.formGlobalStatus["idPredio"];
+
+                    final edificio = await db.getEdificio(
+                      idPredio: widget.formGlobalStatus["idPredio"],
+                      noEdificio: noEdificio!,
+                    );
+                    if (edificio != null) {
+                      overriting = true;
+                      saveDecision = await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder:
+                            (dialogContext) => AlertDialog(
+                              content: Text(
+                                "Ya existe un Edificio en este predio que tiene esta numeración. Desea sobrescribir la información existente?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop(false);
+                                  },
+                                  child: Text('Cancelar'),
+                                ),
+                                TextButton(
+                                  onPressed:
+                                      () =>
+                                          Navigator.of(dialogContext).pop(true),
+                                  child: Text('Aceptar'),
+                                ),
+                              ],
+                            ),
+                      );
+                    }
+                    if (saveDecision == null) {
+                      if (overriting) return;
+                    } else {
+                      if (!saveDecision) {
+                        return;
+                      } else {
+                        if (differentPredio) {
+                          // Si se cambio el numero de predio significa que
+                          //  se quiere cambiar el edificio de Predio. Por ende
+                          //  no solo hay que actualizar los datos del edificio,
+                          //  sino tambien de todas sus propiedades
+                          final propiedadesDelEdificio = await db
+                              .getAllPropiedades(
+                                idPredio: widget.formGlobalStatus["idPredio"],
+                                noEdificio: noEdificio!,
+                              );
+                          for (var p in propiedadesDelEdificio){
+                            p.
+                          }
+                        }
+                        edificio!.
+                        edificio!.updateInDB();
+                      }
+                    }
+
                     final edificacion = db.Edificio(
-                      idPredio: widget.formGlobalStatus.variables["idPredio"],
+                      idPredio: widget.formGlobalStatus["idPredio"],
                       noEdificio: noEdificio!,
                       distrito: _distrito!,
                       cantidadPisos: _cantidadPisos!,
@@ -416,10 +479,16 @@ class EdificioFormState extends State<EdificioForm> {
                       cantidadMedidores: _cantidadMedidores!,
                       observacionesMedidores: _observacionesMedidores,
                     );
-                    edificacion.insertInDB();
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Datos guardados')));
+                    try {
+                      await edificacion.insertInDB();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('❌ Error al guardar los datos')),
+                      );
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('✅ Datos guardados')),
+                    );
                   }
                 },
                 child: Text('Guardar'),

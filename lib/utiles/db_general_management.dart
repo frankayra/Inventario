@@ -202,8 +202,13 @@ Future<List<Propiedad>> getAllPropiedades({
 
 abstract class InventarioDbTable {
   final String tableName;
+  final String primaryKeysWhere;
+  List<int> get primaryKeysWhereArgs;
   Map<String, dynamic> toMap();
-  const InventarioDbTable(this.tableName);
+  const InventarioDbTable({
+    required this.tableName,
+    required this.primaryKeysWhere,
+  });
 
   Future<void> insertInDB() async {
     final db = await openDB();
@@ -214,14 +219,29 @@ abstract class InventarioDbTable {
     );
   }
 
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++ UPDATE ++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   Future<void> updateInDB({String? where, List<int>? whereArgs}) async {
     final db = await openDB();
-    await db.update(tableName, toMap(), where: where, whereArgs: whereArgs);
+    await db.update(
+      tableName,
+      toMap(),
+      where: where ?? primaryKeysWhere,
+      whereArgs: where == null ? primaryKeysWhereArgs : whereArgs,
+    );
   }
 
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++ DELETE ++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   Future<void> deleteInDB({String? where, List<int>? whereArgs}) async {
     final db = await openDB();
-    await db.delete(tableName, where: where, whereArgs: whereArgs);
+    await db.delete(
+      tableName,
+      where: where ?? primaryKeysWhere,
+      whereArgs: where == null ? primaryKeysWhereArgs : whereArgs,
+    );
   }
 }
 
@@ -251,7 +271,7 @@ class Predio extends InventarioDbTable {
     required this.acera,
     required this.anchoAcera,
     this.observacionesTerreno,
-  }) : super('predios');
+  }) : super(tableName: 'predios', primaryKeysWhere: "id_predio = ?");
   Predio.fromRawTuple(Map<String, dynamic> rawTuple)
     : this(
         idPredio: rawTuple["id_predio"],
@@ -277,20 +297,7 @@ class Predio extends InventarioDbTable {
   }
 
   @override
-  Future<void> updateInDB({String? where, List<int>? whereArgs}) async {
-    super.updateInDB(
-      where: where ?? "id_predio = ?",
-      whereArgs: where == null ? [idPredio] : (whereArgs ?? []),
-    );
-  }
-
-  @override
-  Future<void> deleteInDB({String? where, List<int>? whereArgs}) async {
-    super.deleteInDB(
-      where: where ?? "id_predio = ?",
-      whereArgs: where == null ? [idPredio] : (whereArgs ?? []),
-    );
-  }
+  List<int> get primaryKeysWhereArgs => [idPredio];
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
@@ -337,7 +344,10 @@ class Edificio extends InventarioDbTable {
     this.observacionesConstruccion,
     required this.cantidadMedidores,
     this.observacionesMedidores,
-  }) : super('edificios');
+  }) : super(
+         tableName: 'edificios',
+         primaryKeysWhere: "id_predio = ? AND no_edificio = ?",
+       );
   Edificio.fromRawTuple(Map<String, dynamic> rawTuple)
     : this(
         idPredio: rawTuple["id_predio"],
@@ -377,20 +387,7 @@ class Edificio extends InventarioDbTable {
   }
 
   @override
-  Future<void> updateInDB({String? where, List<int>? whereArgs}) async {
-    super.updateInDB(
-      where: where ?? "id_predio = ? AND no_edificio = ?",
-      whereArgs: where == null ? [idPredio, noEdificio] : (whereArgs ?? []),
-    );
-  }
-
-  @override
-  Future<void> deleteInDB({String? where, List<int>? whereArgs}) async {
-    super.deleteInDB(
-      where: where ?? "id_predio = ? AND no_edificio = ?",
-      whereArgs: where == null ? [idPredio, noEdificio] : (whereArgs ?? []),
-    );
-  }
+  List<int> get primaryKeysWhereArgs => [idPredio, noEdificio];
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
@@ -475,7 +472,10 @@ class Propiedad extends InventarioDbTable {
     this.codigoCIUUActividadComplementaria,
     this.observacionesPatentes,
     required this.imagenDocumentoLegal,
-  }) : super('propiedades');
+  }) : super(
+         tableName: 'propiedades',
+         primaryKeysWhere: "id_predio = ? AND no_edificio = ? AND no_local = ?",
+       );
 
   Propiedad.fromRawTuple(Map<String, dynamic> rawTuple)
     : this(
@@ -560,20 +560,5 @@ class Propiedad extends InventarioDbTable {
   }
 
   @override
-  Future<void> updateInDB({String? where, List<int>? whereArgs}) async {
-    super.updateInDB(
-      where: where ?? "id_predio = ? AND no_edificio = ? AND no_local = ?",
-      whereArgs:
-          where == null ? [idPredio, noEdificio, noLocal] : (whereArgs ?? []),
-    );
-  }
-
-  @override
-  Future<void> deleteInDB({String? where, List<int>? whereArgs}) async {
-    super.deleteInDB(
-      where: where ?? "id_predio = ? AND no_edificio = ? AND no_local = ?",
-      whereArgs:
-          where == null ? [idPredio, noEdificio, noLocal] : (whereArgs ?? []),
-    );
-  }
+  List<int> get primaryKeysWhereArgs => [idPredio, noEdificio, noLocal];
 }

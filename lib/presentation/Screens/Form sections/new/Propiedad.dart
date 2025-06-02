@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 // TODO: Como sera que se agregan nuevas instancias y se cambian los valores automaticamente.
 
 class PropiedadForm extends StatefulWidget {
-  final FormGlobalStatusWrapper formGlobalStatus;
+  final FormGlobalStatusWrapper<int> formGlobalStatus;
   const PropiedadForm({super.key, required this.formGlobalStatus});
 
   @override
