@@ -25,7 +25,7 @@ class PropiedadFormState extends State<PropiedadForm> {
       2: 'Cierre temporal',
       3: 'Desocupado con Rótulo SE ALQUILA',
       4: 'Cierre total',
-      5: 'Ha modificado la actividad autorizada(EXPRESS u otra actividad)',
+      5: 'Ha modificado la actividad \n      autorizada(EXPRESS u otra actividad)',
     },
     "documentoMostrado": {
       1: 'Certificado Patente',
@@ -670,7 +670,7 @@ class PropiedadFormState extends State<PropiedadForm> {
           (context) => AlertDialog(
             title: Text('Nuevo registro'),
             // content: Text('Formulario para nueva instancia'),
-            content: _PropiedadAux(),
+            content: Container(),
             actions: [
               TextButton(
                 onPressed: () async {
@@ -747,18 +747,5 @@ class PropiedadFormState extends State<PropiedadForm> {
             ],
           ),
     );
-  }
-}
-
-class _PropiedadAux extends StatefulWidget {
-  const _PropiedadAux({super.key});
-  @override
-  State<_PropiedadAux> createState() => _PropiedadAuxState();
-}
-
-class _PropiedadAuxState extends State<_PropiedadAux> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }

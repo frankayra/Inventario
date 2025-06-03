@@ -42,6 +42,7 @@ Future<Database> openDB() async {
         observacionesMedidores TEXT, 
         PRIMARY KEY (id_predio, no_edificio), 
         FOREIGN KEY (id_predio) REFERENCES predios(id_predio) 
+          ON UPDATE CASCADE
           ON DELETE CASCADE);""",
 
     """CREATE TABLE propiedades(
@@ -81,7 +82,9 @@ Future<Database> openDB() async {
         observacionesPatentes TEXT,
         imagenDocumentoLegal BLOB,
         PRIMARY KEY(id_predio, no_edificio, no_local),
-        FOREIGN KEY (id_predio, no_edificio) REFERENCES predios(id_predio, no_edificio));""",
+        FOREIGN KEY (id_predio, no_edificio) REFERENCES edificios(id_predio, no_edificio) 
+          ON UPDATE CASCADE 
+          ON DELETE CASCADE);""",
   ];
 
   return await openDatabase(

@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/new/Predio.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/new/Edificio.dart';
@@ -49,6 +47,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   @override
   Widget build(BuildContext context) {
     formGlobalStatusWrapper['idPredio'] = widget.idPredio;
+    // formGlobalStatusWrapper.listeningToChangeEvents = true;
     secciones = [
       _buildSection(
         PREDIO,

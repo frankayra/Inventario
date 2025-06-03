@@ -6,6 +6,7 @@ class ImageWrapper {
 }
 
 class FormGlobalStatusWrapper<T> {
+  bool listeningToChangeEvents = false;
   final Map<String, T?> variables = {
     "idPredio": null,
     "noEdificio": null,
@@ -21,6 +22,7 @@ class FormGlobalStatusWrapper<T> {
   operator [](String key) => variables[key];
   operator []=(String key, T? value) {
     variables[key] = value;
+    if (!listeningToChangeEvents) return;
     for (var onChagedFunction in _variablesOnChangedSuscribedFunctions[key]!) {
       onChagedFunction(value);
     }
