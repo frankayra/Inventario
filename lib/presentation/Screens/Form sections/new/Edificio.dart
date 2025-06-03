@@ -24,6 +24,7 @@ class EdificioForm extends StatefulWidget {
 
 class EdificioFormState extends State<EdificioForm> {
   List<db.Edificio> edificiosDelPredio = [];
+  bool editingState = false;
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "distrito": {
@@ -84,11 +85,6 @@ class EdificioFormState extends State<EdificioForm> {
       ) {
         setState(() {
           edificiosDelPredio = edificios;
-          print("Llegue aqui");
-          for (var e in edificios) {
-            print("Edificio: ${e.noEdificio}");
-          }
-          print("Llegue aca");
         });
       });
     }
@@ -98,6 +94,7 @@ class EdificioFormState extends State<EdificioForm> {
   // TODO: Rellenar los campos de edificio si es que me mandaron un edificio.
   // TODO: Al guardar un formulario, resetearlo hacia abajo por ende vaciar los campos
   // TODO: Ver razon por la que cuando se rellena uno o varios campos de un subformulario, luego se despliega otro y se vuelve a desplegar el primero, no tiene nada rellenado.
+  // TODO: ver el tema de los edificios que se transfieren a predios inexistentes en la base de datos.
   // DONE: Analizar el caso en que se este editando el noEdificio de un edificio que ya existia.
   // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
 
@@ -132,6 +129,7 @@ class EdificioFormState extends State<EdificioForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Wrap(
+              key: ValueKey(edificiosDelPredio),
               spacing: 8,
               children: [
                 ElevatedButton(
@@ -140,10 +138,16 @@ class EdificioFormState extends State<EdificioForm> {
                 ),
 
                 ...(edificiosDelPredio.asMap().entries.map((entry) {
+                  var chipBackgroundColor = Colors.grey[100];
+                  if (widget.formGlobalStatus["noEdificio"] != null &&
+                      widget.formGlobalStatus["noEdificio"] ==
+                          entry.value.noEdificio) {
+                    chipBackgroundColor = Colors.green[100];
+                  }
                   final idx = entry.key;
                   return InputChip(
-                    label: Text('Ed. ${entry.value.noEdificio + 1}'),
-                    backgroundColor: Colors.green[100],
+                    label: Text('Ed. ${entry.value.noEdificio}'),
+                    backgroundColor: chipBackgroundColor,
                     onDeleted:
                         () => setState(() => edificiosDelPredio.removeAt(idx)),
                     deleteIcon: Icon(Icons.close),
@@ -526,7 +530,19 @@ class EdificioFormState extends State<EdificioForm> {
                         SnackBar(content: Text('❌ Error al guardar los datos')),
                       );
                     }
-                    widget.formGlobalStatus["noEdificio"] = null;
+
+                    if (casoEncontrado != 5) {
+                      widget.formGlobalStatus["noEdificio"] = null;
+                    }
+                    db
+                        .getAllEdificios(
+                          idPredio: widget.formGlobalStatus["idPredio"],
+                        )
+                        .then((List<db.Edificio> edificios) {
+                          setState(() {
+                            edificiosDelPredio = edificios;
+                          });
+                        });
                   }
                 },
                 child: Text('Guardar'),

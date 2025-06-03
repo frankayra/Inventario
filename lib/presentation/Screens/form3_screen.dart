@@ -18,11 +18,11 @@ class FormularioInspeccion extends StatefulWidget {
 class _FormularioInspeccionState extends State<FormularioInspeccion> {
   final _formKey = GlobalKey<FormState>();
 
-  bool mostrarCampoExtra = false;
+  bool changePredio = false;
   List<Widget> secciones = [];
   List<bool> seccionesExpandibles = List.filled(5, false);
   int? expandedSectionIndex;
-  bool statebuilt = false;
+  // bool statebuilt = false;
   final formGlobalStatusWrapper =
       FormGlobalStatusWrapper<
         int
@@ -48,29 +48,105 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
 
   @override
   Widget build(BuildContext context) {
-    if (!statebuilt) {
-      secciones = [
-        _buildSection(
-          PREDIO,
-          PredioForm(formGlobalStatus: formGlobalStatusWrapper),
-          0,
+    secciones = [
+      _buildSection(
+        PREDIO,
+        PredioForm(
+          key: ValueKey(
+            'predio-${formGlobalStatusWrapper.variables["idPredio"]}',
+          ),
+          formGlobalStatus: formGlobalStatusWrapper,
         ),
+        0,
+      ),
+      if (formGlobalStatusWrapper['idPredio'] != null)
         _buildSection(
           EDIFICIOS,
-          EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
+          EdificioForm(
+            key: ValueKey(
+              'edificio-${formGlobalStatusWrapper.variables["idPredio"]}',
+            ),
+            formGlobalStatus: formGlobalStatusWrapper,
+          ),
           1,
         ),
+      if (formGlobalStatusWrapper['noEdificio'] != null)
         _buildSection(
           PROPIEDADES,
-          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+          PropiedadForm(
+            key: ValueKey(
+              'propiedad-${formGlobalStatusWrapper.variables["noEdificio"]}',
+            ),
+            formGlobalStatus: formGlobalStatusWrapper,
+          ),
           2,
         ),
-      ];
-    }
+    ];
+    int idPredio = formGlobalStatusWrapper["idPredio"];
     return Form(
       key: _formKey,
       child: ListView(
         children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).scaffoldBackgroundColor,
+                  const Color.fromARGB(255, 228, 228, 228),
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    initialValue: idPredio != null ? idPredio.toString() : "",
+                    decoration: InputDecoration(labelText: 'Localización'),
+                    enabled: changePredio,
+                    onChanged: (value) {
+                      final number = int.tryParse(value);
+                      if (number != null &&
+                          number >= 1000000000 &&
+                          number < 10000000000) {
+                        setState(() {
+                          formGlobalStatusWrapper["idPredio"] = number;
+                        });
+                      }
+                    },
+                    validator: (value) {
+                      final number = int.tryParse(value!);
+                      if (number == null ||
+                          number < 1000000000 ||
+                          number >= 10000000000) {
+                        return "Ingresa una Localización válida";
+                      }
+                    },
+                  ),
+                ),
+                Column(
+                  children: [
+                    Icon(
+                      Icons.edit,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    Checkbox(
+                      value: changePredio,
+                      onChanged: (bool? newValue) {
+                        setState(() {
+                          changePredio = newValue!;
+                        });
+                      },
+                      // activeColor: Colors.blue,
+                      // checkColor: Colors.white,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           ...secciones,
           Padding(
             padding: EdgeInsets.all(16.0),
@@ -118,12 +194,12 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   void idPredioChanged(int? idPredio) {
     setState(() {
+      if (secciones.length >= 3) secciones.removeAt(2);
+      if (secciones.length >= 2) secciones.removeAt(1);
+      if (secciones.length >= 1) secciones.removeAt(0);
       formGlobalStatusWrapper.variables["idPredio"] = idPredio;
       formGlobalStatusWrapper.variables["noEdificio"] = null;
       formGlobalStatusWrapper.variables["noLocal"] = null;
-      secciones.removeAt(2);
-      secciones.removeAt(1);
-      secciones.removeAt(0);
       secciones.addAll([
         _buildSection(
           PREDIO,
@@ -146,10 +222,10 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
 
   void noEdificioChanged(int? noEdificio) {
     setState(() {
+      if (secciones.length >= 3) secciones.removeAt(2);
+      if (secciones.length >= 2) secciones.removeAt(1);
       formGlobalStatusWrapper.variables["noEdificio"] = noEdificio;
       formGlobalStatusWrapper.variables["noLocal"] = null;
-      secciones.removeAt(2);
-      secciones.removeAt(1);
       secciones.addAll([
         _buildSection(
           EDIFICIOS,
@@ -167,8 +243,8 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
 
   void noLocalChanged(int? noLocal) {
     setState(() {
+      if (secciones.length >= 3) secciones.removeAt(2);
       formGlobalStatusWrapper.variables["noLocal"] = noLocal;
-      secciones.removeAt(2);
       secciones.addAll([
         _buildSection(
           PROPIEDADES,

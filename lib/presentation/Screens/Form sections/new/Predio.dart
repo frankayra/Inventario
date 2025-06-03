@@ -36,51 +36,6 @@ class PredioFormState extends State<PredioForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: idPredio != null ? idPredio.toString() : "",
-                    decoration: InputDecoration(labelText: 'Localización'),
-                    enabled: changePredio,
-                    onChanged: (value) {
-                      final number = int.tryParse(value);
-                      if (number != null &&
-                          number >= 1000000000 &&
-                          number < 10000000000) {
-                        widget.formGlobalStatus["idPredio"] = number;
-                      }
-                    },
-                    validator: (value) {
-                      final number = int.tryParse(value!);
-                      if (number == null ||
-                          number < 1000000000 ||
-                          number >= 10000000000) {
-                        return "Ingresa una Localización válida";
-                      }
-                    },
-                  ),
-                ),
-                Column(
-                  children: [
-                    Icon(
-                      Icons.edit,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                    Checkbox(
-                      value: changePredio,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          changePredio = newValue!;
-                        });
-                      },
-                      // activeColor: Colors.blue,
-                      // checkColor: Colors.white,
-                    ),
-                  ],
-                ),
-              ],
-            ),
             TextFormField(
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Nivel predio 1'),
