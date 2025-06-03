@@ -22,6 +22,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   List<Widget> secciones = [];
   List<bool> seccionesExpandibles = List.filled(5, false);
   int? expandedSectionIndex;
+  bool statebuilt = false;
   final formGlobalStatusWrapper =
       FormGlobalStatusWrapper<
         int
@@ -30,6 +31,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   @override
   void initState() {
     super.initState();
+    formGlobalStatusWrapper.variables['idPredio'] = widget.idPredio;
     formGlobalStatusWrapper.suscribeToVariableChangeEvent(
       variable: "idPredio",
       onChanged: idPredioChanged,
@@ -46,25 +48,25 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
 
   @override
   Widget build(BuildContext context) {
-    formGlobalStatusWrapper['idPredio'] = widget.idPredio;
-    // formGlobalStatusWrapper.listeningToChangeEvents = true;
-    secciones = [
-      _buildSection(
-        PREDIO,
-        PredioForm(formGlobalStatus: formGlobalStatusWrapper),
-        0,
-      ),
-      _buildSection(
-        EDIFICIOS,
-        EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
-        1,
-      ),
-      _buildSection(
-        PROPIEDADES,
-        PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
-        2,
-      ),
-    ];
+    if (!statebuilt) {
+      secciones = [
+        _buildSection(
+          PREDIO,
+          PredioForm(formGlobalStatus: formGlobalStatusWrapper),
+          0,
+        ),
+        _buildSection(
+          EDIFICIOS,
+          EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
+          1,
+        ),
+        _buildSection(
+          PROPIEDADES,
+          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+          2,
+        ),
+      ];
+    }
     return Form(
       key: _formKey,
       child: ListView(
@@ -116,9 +118,9 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   void idPredioChanged(int? idPredio) {
     setState(() {
-      formGlobalStatusWrapper["idPredio"] = idPredio;
-      formGlobalStatusWrapper["noEdificio"] = null;
-      formGlobalStatusWrapper["noLocal"] = null;
+      formGlobalStatusWrapper.variables["idPredio"] = idPredio;
+      formGlobalStatusWrapper.variables["noEdificio"] = null;
+      formGlobalStatusWrapper.variables["noLocal"] = null;
       secciones.removeAt(2);
       secciones.removeAt(1);
       secciones.removeAt(0);
@@ -144,8 +146,8 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
 
   void noEdificioChanged(int? noEdificio) {
     setState(() {
-      formGlobalStatusWrapper["noEdificio"] = noEdificio;
-      formGlobalStatusWrapper["noLocal"] = null;
+      formGlobalStatusWrapper.variables["noEdificio"] = noEdificio;
+      formGlobalStatusWrapper.variables["noLocal"] = null;
       secciones.removeAt(2);
       secciones.removeAt(1);
       secciones.addAll([
@@ -165,7 +167,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
 
   void noLocalChanged(int? noLocal) {
     setState(() {
-      formGlobalStatusWrapper["noLocal"] = noLocal;
+      formGlobalStatusWrapper.variables["noLocal"] = noLocal;
       secciones.removeAt(2);
       secciones.addAll([
         _buildSection(

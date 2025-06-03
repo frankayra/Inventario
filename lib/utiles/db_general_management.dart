@@ -89,6 +89,10 @@ Future<Database> openDB() async {
 
   return await openDatabase(
     pathToDB,
+    onConfigure: (db) async {
+      // 🔥 ¡IMPORTANTE!
+      await db.execute('PRAGMA foreign_keys = ON');
+    },
     onCreate: (db, version) async {
       for (var script in scripts) {
         await db.execute(script);
@@ -172,7 +176,7 @@ Future<Propiedad?> getPropiedad({
 }) async {
   final db = await openDB();
   List<Map<String, dynamic>> rawTuples = await db.query(
-    'propiedad',
+    'propiedades',
     where: 'id_predio = ? AND no_edificio = ? AND no_local = ?',
     whereArgs: [idPredio, noEdificio, noLocal],
   );
@@ -496,15 +500,17 @@ class Propiedad extends InventarioDbTable {
         numeroPatenteComercial: rawTuple["numeroPatenteComercial"],
         cedulaPatentado: rawTuple["cedulaPatentado"],
         nombreActividadPatente: rawTuple["nombreActividadPatente"],
-        tieneMasPatentes: rawTuple["tieneMasPatentes"],
+        tieneMasPatentes: rawTuple["tieneMasPatentes"] == 1 ? true : false,
         numeroPatente_2: rawTuple["numeroPatente_2"],
-        tienePermisoSalud: rawTuple["tienePermisoSalud"],
+        tienePermisoSalud: rawTuple["tienePermisoSalud"] == 1 ? true : false,
         numeroPermisoSalud: rawTuple["numeroPermisoSalud"],
         fechaVigenciaPermisoSalud: rawTuple["fechaVigenciaPermisoSalud"],
         codigoCIIUPermisoSalud: rawTuple["codigoCIIUPermisoSalud"],
-        seTrataDeLocalMercado: rawTuple["seTrataDeLocalMercado"],
+        seTrataDeLocalMercado:
+            rawTuple["seTrataDeLocalMercado"] == 1 ? true : false,
         numeroLocalMercado: rawTuple["numeroLocalMercado"],
-        tienePatenteLicores: rawTuple["tienePatenteLicores"],
+        tienePatenteLicores:
+            rawTuple["tienePatenteLicores"] == 1 ? true : false,
         numeroPatenteLicores: rawTuple["numeroPatenteLicores"],
         areaActividad: rawTuple["areaActividad"],
         telefonoPatentado: rawTuple["telefonoPatentado"],
@@ -537,15 +543,15 @@ class Propiedad extends InventarioDbTable {
       'numeroPatenteComercial': numeroPatenteComercial,
       'cedulaPatentado': cedulaPatentado,
       'nombreActividadPatente': nombreActividadPatente,
-      'tieneMasPatentes': tieneMasPatentes,
+      'tieneMasPatentes': tieneMasPatentes ? 1 : 0,
       'numeroPatente_2': numeroPatente_2,
-      'tienePermisoSalud': tienePermisoSalud,
+      'tienePermisoSalud': tienePermisoSalud ? 1 : 0,
       'numeroPermisoSalud': numeroPermisoSalud,
       'fechaVigenciaPermisoSalud': fechaVigenciaPermisoSalud,
       'codigoCIIUPermisoSalud': codigoCIIUPermisoSalud,
-      'seTrataDeLocalMercado': seTrataDeLocalMercado,
+      'seTrataDeLocalMercado': seTrataDeLocalMercado ? 1 : 0,
       'numeroLocalMercado': numeroLocalMercado,
-      'tienePatenteLicores': tienePatenteLicores,
+      'tienePatenteLicores': tienePatenteLicores ? 1 : 0,
       'numeroPatenteLicores': numeroPatenteLicores,
       'areaActividad': areaActividad,
       'telefonoPatentado': telefonoPatentado,

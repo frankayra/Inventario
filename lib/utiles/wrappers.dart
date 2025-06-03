@@ -6,7 +6,7 @@ class ImageWrapper {
 }
 
 class FormGlobalStatusWrapper<T> {
-  bool listeningToChangeEvents = false;
+  bool listeningToChangeEvents = true;
   final Map<String, T?> variables = {
     "idPredio": null,
     "noEdificio": null,
@@ -24,6 +24,11 @@ class FormGlobalStatusWrapper<T> {
     variables[key] = value;
     if (!listeningToChangeEvents) return;
     for (var onChagedFunction in _variablesOnChangedSuscribedFunctions[key]!) {
+      print("""
+        /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+        /\/\/\/\/\/\/\/\/\/\/\/\   ejecutando $onChagedFunction
+        /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+""");
       onChagedFunction(value);
     }
   }

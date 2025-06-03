@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Widgets/text.dart';
@@ -74,12 +75,20 @@ class EdificioFormState extends State<EdificioForm> {
   @override
   void initState() {
     super.initState();
+    setState(() {
+      idPredio = widget.formGlobalStatus["idPredio"];
+    });
     if (widget.formGlobalStatus["idPredio"] != null) {
       db.getAllEdificios(idPredio: widget.formGlobalStatus["idPredio"]).then((
         List<db.Edificio> edificios,
       ) {
         setState(() {
           edificiosDelPredio = edificios;
+          print("Llegue aqui");
+          for (var e in edificios) {
+            print("Edificio: ${e.noEdificio}");
+          }
+          print("Llegue aca");
         });
       });
     }
@@ -149,8 +158,7 @@ class EdificioFormState extends State<EdificioForm> {
                 Expanded(
                   child: TextFormField(
                     initialValue:
-                        widget.formGlobalStatus.variables["idPredio"]
-                            .toString(),
+                        widget.formGlobalStatus["idPredio"].toString(),
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
                     validator: (value) {
@@ -418,52 +426,39 @@ class EdificioFormState extends State<EdificioForm> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    bool? saveDecision;
-                    bool overriting = false;
-                    bool differentPredio =
-                        idPredio != widget.formGlobalStatus["idPredio"];
-                    bool differentNoEdificio =
-                        noEdificio != widget.formGlobalStatus["noEdificio"];
-
-                    final edificio = await db.getEdificio(
+                    db.Edificio? edificioEnElNuevoLugar = await db.getEdificio(
                       idPredio: idPredio!,
                       noEdificio: noEdificio!,
                     );
 
-                    if (edificio != null) {
-                      overriting = true;
-                      saveDecision = await showAcceptDismissAlertDialog(
-                        context,
-                        message:
-                            "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
-                      );
-                    }
-                    if (saveDecision == null) {
-                      if (overriting) {
-                        // ---- Caso 1: saveDecision es null porque se entro en el AlertDialog y se cerro por clickear fuera del area del mismo.
-                        return;
+                    ///\  /\  /\  /\  /\  /\  /\  /\  /\
+                    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
+                    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
+                    bool nuevoIngreso =
+                        widget.formGlobalStatus['noEdificio'] == null;
+                    bool edicion = !nuevoIngreso;
+                    bool nadieEnElNuevoLugar = edificioEnElNuevoLugar == null;
+                    bool alguienEnElNuevoLugar = !nadieEnElNuevoLugar;
+                    bool mismoLugarDeDestino =
+                        widget.formGlobalStatus["idPredio"] == idPredio &&
+                        widget.formGlobalStatus["noEdificio"] == noEdificio;
+                    int casoEncontrado = -1;
+
+                    if (nuevoIngreso) {
+                      if (nadieEnElNuevoLugar) {
+                        casoEncontrado = 1;
+                      } else if (alguienEnElNuevoLugar) {
+                        casoEncontrado = 2;
                       }
-                      // ---- Caso 2: saveDecision es null porque asi se asigno en un principio y nunca se entro al if que comprueba si hay sobrescritura.
-                    } else {
-                      if (!saveDecision) {
-                        // ---- Caso 3: saveDecision es false porque se rechazo sobrescribir los datos del edificio ya existente. Esto se aplica tanto para edificios del mismo predio como para el caso que se quiere sobrescribir uno de un predio diferente
-                        return;
-                      } else {
-                        // ---- Caso 4: saveDecesion es true y por tanto se deberia comprobar si estamos editando informacion de la misma tupla(mismas llaves) o si cambia de llaves y hay que actualizar la tupla
-                        if (differentPredio || differentNoEdificio) {
-                          // ---- Caso 4.1: Se esta aobrescribiendo un edificio diferente. Aqui siempre tendremos que override es true ya que saveDecision es != null
-                          edificio!.deleteInDB();
-                        } else {
-                          // ---- Caso 4.2: Se esta editando el propio edificio. overriding es true
-                        }
+                    } else if (edicion) {
+                      if (mismoLugarDeDestino) {
+                        casoEncontrado = 5;
+                      } else if (nadieEnElNuevoLugar) {
+                        casoEncontrado = 3;
+                      } else if (alguienEnElNuevoLugar) {
+                        casoEncontrado = 4;
                       }
                     }
-                    // Casos que pasan hacia aqui: Caso 2, Caso 4.1, Caso 4.2. Esto significa que aqui obtenemos los casos:
-                    // 1. Hay que insertar sin mas porque no existia la tupla aun en la BD.
-                    // 2. Ya se elimino la tupla que estaba ahi y se puede insertar, pero deberia actualizar los datos de la tupla anterior para que se transfieran las propiedades junto al edificio
-                    // 3. Hay que modificar la tupla actual
-                    //     3.1. sus propiedades
-                    //     3.2. sus propiedades y llaves primarias
 
                     final newEdificio = db.Edificio(
                       idPredio: idPredio!,
@@ -483,30 +478,54 @@ class EdificioFormState extends State<EdificioForm> {
                       observacionesMedidores: _observacionesMedidores,
                     );
                     try {
-                      if (overriting) {
-                        // Caso 2 y 3
-                        print("Caso 2 o 3");
-                        await newEdificio.updateInDB(
-                          where: "id_predio = ? AND no_edificio = ?",
-                          whereArgs: [
-                            widget.formGlobalStatus["idPredio"],
-                            widget.formGlobalStatus["noEdificio"],
-                          ],
-                        );
-                      } else {
-                        // Caso 1
-                        print("Caso 1");
-                        await newEdificio.insertInDB();
+                      switch (casoEncontrado) {
+                        case 1:
+                          await newEdificio.insertInDB();
+                        case 2:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
+                          await edificioEnElNuevoLugar!.deleteInDB();
+                          await newEdificio.insertInDB();
+                        case 3:
+                          newEdificio.updateInDB(
+                            where: "id_predio = ? and no_edificio = ?",
+                            whereArgs: [
+                              widget.formGlobalStatus["idPredio"],
+                              widget.formGlobalStatus["noEdificio"],
+                            ],
+                          );
+                        case 4:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
+                          await edificioEnElNuevoLugar!.deleteInDB();
+                          newEdificio.updateInDB(
+                            where: "id_predio = ? and no_edificio = ?",
+                            whereArgs: [
+                              widget.formGlobalStatus["idPredio"],
+                              widget.formGlobalStatus["noEdificio"],
+                            ],
+                          );
+                        case 5:
+                          newEdificio.updateInDB();
+                          break;
+                        default:
                       }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('✅ Datos guardados')),
+                      );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('❌ Error al guardar los datos')),
                       );
-                      return;
                     }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('✅ Datos guardados')),
-                    );
                     widget.formGlobalStatus["noEdificio"] = null;
                   }
                 },

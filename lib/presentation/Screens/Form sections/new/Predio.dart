@@ -44,9 +44,10 @@ class PredioFormState extends State<PredioForm> {
                     decoration: InputDecoration(labelText: 'Localización'),
                     enabled: changePredio,
                     onChanged: (value) {
-                      final number = int.tryParse(value!);
+                      final number = int.tryParse(value);
                       if (number != null &&
-                          (number >= 1000000000 || number < 10000000000)) {
+                          number >= 1000000000 &&
+                          number < 10000000000) {
                         widget.formGlobalStatus["idPredio"] = number;
                       }
                     },
