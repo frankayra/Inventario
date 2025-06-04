@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Widgets/date_selection.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:inventario/utiles/db_general_management.dart';
+import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:inventario/utiles/wrappers.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
+import 'package:inventario/presentation/Widgets/dialogs.dart';
 import 'package:image_picker/image_picker.dart';
 
 // TODO: Como sera que se agregan nuevas instancias y se cambian los valores automaticamente.
@@ -17,7 +18,7 @@ class PropiedadForm extends StatefulWidget {
 }
 
 class PropiedadFormState extends State<PropiedadForm> {
-  List<Propiedad> propiedadesDelEdificio = [];
+  List<db.Propiedad> propiedadesDelEdificio = [];
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "estadoNegocio": {
@@ -68,20 +69,25 @@ class PropiedadFormState extends State<PropiedadForm> {
     super.initState();
     if (widget.formGlobalStatus["idPredio"] != null &&
         widget.formGlobalStatus["noEdificio"] != null) {
-      getAllPropiedades(
-        idPredio: widget.formGlobalStatus["idPredio"],
-        noEdificio: widget.formGlobalStatus["noEdificio"],
-      ).then((List<Propiedad> propiedades) {
-        setState(() {
-          propiedadesDelEdificio = propiedades;
-        });
-      });
+      idPredio = widget.formGlobalStatus["idPredio"];
+      noEdificio = widget.formGlobalStatus["noEdificio"];
+      db
+          .getAllPropiedades(
+            idPredio: widget.formGlobalStatus["idPredio"],
+            noEdificio: widget.formGlobalStatus["noEdificio"],
+          )
+          .then((List<db.Propiedad> propiedades) {
+            setState(() {
+              propiedadesDelEdificio = propiedades;
+            });
+          });
     }
   }
 
   // ++++++ Módulo Uso de suelo y Patentes Comerciales ++++++ //
-
   bool changeEdificio = false;
+  int? idPredio;
+  int? noEdificio;
   int? noLocal;
   String? _nivelPiso;
   String? _actividadPrimaria;
@@ -138,10 +144,17 @@ class PropiedadFormState extends State<PropiedadForm> {
                 ),
 
                 ...(propiedadesDelEdificio.asMap().entries.map((entry) {
+                  var chipBackgroundColor = Colors.grey[100];
+                  if (widget.formGlobalStatus["noEdificio"] != null &&
+                      widget.formGlobalStatus["noLocal"] != null &&
+                      widget.formGlobalStatus["noLocal"] ==
+                          entry.value.noLocal) {
+                    chipBackgroundColor = Colors.green[100];
+                  }
                   final idx = entry.key;
                   return InputChip(
-                    label: Text('Local ${entry.value.noLocal + 1}'),
-                    backgroundColor: Colors.green[100],
+                    label: Text('P. ${entry.value.noLocal}'),
+                    backgroundColor: chipBackgroundColor,
                     onDeleted:
                         () => setState(
                           () => propiedadesDelEdificio.removeAt(idx),
@@ -153,22 +166,23 @@ class PropiedadFormState extends State<PropiedadForm> {
               ],
             ),
             SizedBox(height: 40),
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++   Cambio de Edificio a la propiedad   ++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             // Row(
             //   children: [
             //     Expanded(
             //       child: TextFormField(
             //         initialValue:
-            //             widget.formGlobalStatus.variables["idPredio"]
-            //                 .toString(),
-            //         decoration: InputDecoration(labelText: 'Localización'),
+            //             widget.formGlobalStatus["noEdificio"].toString(),
+            //         decoration: InputDecoration(labelText: 'noEdificio'),
             //         enabled: changeEdificio,
             //         validator: (value) {
             //           final number = int.tryParse(value!);
-            //           if (number == null ||
-            //               number < 1000000000 ||
-            //               number >= 10000000000) {
-            //             return "Ingresa una Localización válida";
+            //           if (number == null) {
+            //             return "Ingresa una numero de edificio válido";
             //           }
+            //           noEdificio = number;
             //         },
             //       ),
             //     ),
@@ -185,8 +199,6 @@ class PropiedadFormState extends State<PropiedadForm> {
             //               changeEdificio = newValue!;
             //             });
             //           },
-            //           // activeColor: Colors.blue,
-            //           // checkColor: Colors.white,
             //         ),
             //       ],
             //     ),
@@ -344,14 +356,16 @@ class PropiedadFormState extends State<PropiedadForm> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Número de patente 2'),
               validator: (value) {
-                if (_tieneMasPatentes && (value == null || value.isEmpty)) {
-                  return 'Por favor ingresa el número de patente comercial 2';
+                if (_tieneMasPatentes) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingresa el número de patente comercial 2';
+                  }
+                  final number = int.tryParse(value!);
+                  if (number == null) {
+                    return 'Por favor ingresa un número válido';
+                  }
+                  _numeroPatente_2 = number;
                 }
-                final number = int.tryParse(value!);
-                if (number == null) {
-                  return 'Por favor ingresa un número válido';
-                }
-                _numeroPatente_2 = number;
                 return null;
               },
             ),
@@ -650,6 +664,167 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             SizedBox(height: 20),
             _imagenDocumentoLegal,
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++               +++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++                 ++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++    Validacion   ++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++    Formulario   ++++++++++++++++++++++++++ //
+            // ++++++++++++++++++++++++                 ++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++               +++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    db.Propiedad? propiedadEnElNuevoLugar = await db
+                        .getPropiedad(
+                          idPredio: widget.formGlobalStatus["idPredio"]!,
+                          noEdificio: noEdificio!,
+                          noLocal: noLocal!,
+                        );
+
+                    ///\  /\  /\  /\  /\  /\  /\  /\  /\
+                    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
+                    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
+                    bool nuevoIngreso =
+                        widget.formGlobalStatus['noLocal'] == null;
+                    bool edicion = !nuevoIngreso;
+                    bool nadieEnElNuevoLugar = propiedadEnElNuevoLugar == null;
+                    bool alguienEnElNuevoLugar = !nadieEnElNuevoLugar;
+                    bool mismoLugarDeDestino =
+                        widget.formGlobalStatus["idPredio"] == noEdificio &&
+                        widget.formGlobalStatus["noEdificio"] == noEdificio &&
+                        widget.formGlobalStatus["noLocal"] == noLocal;
+                    int casoEncontrado = -1;
+
+                    if (nuevoIngreso) {
+                      if (nadieEnElNuevoLugar) {
+                        casoEncontrado = 1;
+                      } else if (alguienEnElNuevoLugar) {
+                        casoEncontrado = 2;
+                      }
+                    } else if (edicion) {
+                      if (mismoLugarDeDestino) {
+                        casoEncontrado = 5;
+                      } else if (nadieEnElNuevoLugar) {
+                        casoEncontrado = 3;
+                      } else if (alguienEnElNuevoLugar) {
+                        casoEncontrado = 4;
+                      }
+                    }
+
+                    final newPropiedad = db.Propiedad(
+                      idPredio: idPredio!,
+                      noEdificio: noEdificio!,
+                      noLocal: noLocal!,
+                      nivelPiso: _nivelPiso!,
+                      actividadPrimaria: _actividadPrimaria!,
+                      actividadComplementaria: _actividadComplementaria,
+                      estadoNegocio: _estadoNegocio,
+                      nombreNegocio: _nombreNegocio,
+                      cantidadParqueos: _cantidadParqueos!,
+                      documentoMostrado: _documentoMostrado,
+                      nombrePatentado: _nombrePatentado,
+                      numeroPatenteComercial: _numeroPatenteComercial,
+                      cedulaPatentado: _cedulaPatentado,
+                      nombreActividadPatente: _nombreActividadPatente,
+                      tieneMasPatentes: _tieneMasPatentes,
+                      numeroPatente_2: _numeroPatente_2,
+                      tienePermisoSalud: _tienePermisoSalud,
+                      numeroPermisoSalud: _numeroPermisoSalud,
+                      fechaVigenciaPermisoSalud: _fechaVigenciaPermisoSalud,
+                      codigoCIIUPermisoSalud: _codigoCIIUPermisoSalud,
+                      seTrataDeLocalMercado: _seTrataDeLocalMercado,
+                      numeroLocalMercado: _numeroLocalMercado,
+                      tienePatenteLicores: _tienePatenteLicores,
+                      numeroPatenteLicores: _numeroPatenteLicores,
+                      areaActividad: _areaActividad,
+                      telefonoPatentado: _telefonoPatentado,
+                      correoElectronico: _correoElectronico,
+                      cantidadEmpleadosAntesCovid: _cantidadEmpleadosAntesCovid,
+                      cantidadEmpleadosActual: _cantidadEmpleadosActual,
+                      afectacionesCovidPersonalDesempennoEmpresa:
+                          _afectacionesCovidPersonalDesempennoEmpresa,
+                      afectacionesCovidSobreVentas:
+                          _afectacionesCovidSobreVentas,
+                      codigoCIUUActividadPrimaria: _codigoCIUUActividadPrimaria,
+                      codigoCIUUActividadComplementaria:
+                          _codigoCIUUActividadComplementaria,
+                      observacionesPatentes: _observacionesPatentes,
+                      imagenDocumentoLegal:
+                          await _imagenDocumentoLegal.getImageBytes,
+                    );
+                    try {
+                      switch (casoEncontrado) {
+                        case 1:
+                          await newPropiedad.insertInDB();
+                        case 2:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
+                          await propiedadEnElNuevoLugar!.deleteInDB();
+                          await newPropiedad.insertInDB();
+                        case 3:
+                          newPropiedad.updateInDB(
+                            where: "id_predio = ? and no_edificio = ?",
+                            whereArgs: [
+                              widget.formGlobalStatus["idPredio"],
+                              widget.formGlobalStatus["noEdificio"],
+                            ],
+                          );
+                        case 4:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
+                          await propiedadEnElNuevoLugar!.deleteInDB();
+                          newPropiedad.updateInDB(
+                            where: "id_predio = ? and no_edificio = ?",
+                            whereArgs: [
+                              widget.formGlobalStatus["idPredio"],
+                              widget.formGlobalStatus["noEdificio"],
+                            ],
+                          );
+                        case 5:
+                          newPropiedad.updateInDB();
+                          break;
+                        default:
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('✅ Datos guardados')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('❌ Error al guardar los datos')),
+                      );
+                    }
+
+                    if (casoEncontrado != 5) {
+                      widget.formGlobalStatus["noLocal"] = null;
+                    }
+                    db
+                        .getAllPropiedades(
+                          idPredio: widget.formGlobalStatus["idPredio"],
+                          noEdificio: widget.formGlobalStatus["noEdificio"],
+                        )
+                        .then((List<db.Propiedad> propiedades) {
+                          setState(() {
+                            propiedadesDelEdificio = propiedades;
+                          });
+                        });
+                  }
+                },
+                child: Text('Guardar'),
+              ),
+            ),
           ],
         ),
       ),
@@ -663,89 +838,9 @@ class PropiedadFormState extends State<PropiedadForm> {
   // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
   // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  void _agregarPropiedad() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Nuevo registro'),
-            // content: Text('Formulario para nueva instancia'),
-            content: Container(),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  setState(
-                    () async => propiedadesDelEdificio.add(
-                      Propiedad(
-                        // Claves
-                        idPredio: widget.formGlobalStatus["idPredio"],
-                        noEdificio: widget.formGlobalStatus["noEdificio"],
-                        noLocal: noLocal!,
-                        // Atributos
-                        nivelPiso: _nivelPiso!,
-                        actividadPrimaria: _actividadPrimaria!,
-                        actividadComplementaria: _actividadComplementaria,
-                        estadoNegocio: _estadoNegocio,
-                        nombreNegocio: _nombreNegocio,
-                        cantidadParqueos: _cantidadParqueos!,
-                        documentoMostrado: _documentoMostrado,
-                        nombrePatentado: _nombrePatentado,
-                        numeroPatenteComercial: _numeroPatenteComercial,
-                        cedulaPatentado: _cedulaPatentado,
-                        nombreActividadPatente: _nombreActividadPatente,
-                        numeroPatente_2: _numeroPatente_2,
-                        numeroPermisoSalud: _numeroPermisoSalud,
-                        fechaVigenciaPermisoSalud: _fechaVigenciaPermisoSalud,
-                        codigoCIIUPermisoSalud: _codigoCIIUPermisoSalud,
-                        numeroLocalMercado: _numeroLocalMercado,
-                        numeroPatenteLicores: _numeroPatenteLicores,
-                        areaActividad: _areaActividad,
-                        telefonoPatentado: _telefonoPatentado,
-                        correoElectronico: _correoElectronico,
-                        cantidadEmpleadosAntesCovid:
-                            _cantidadEmpleadosAntesCovid,
-                        cantidadEmpleadosActual: _cantidadEmpleadosActual,
-                        afectacionesCovidPersonalDesempennoEmpresa:
-                            _afectacionesCovidPersonalDesempennoEmpresa,
-                        afectacionesCovidSobreVentas:
-                            _afectacionesCovidSobreVentas,
-                        codigoCIUUActividadPrimaria:
-                            _codigoCIUUActividadPrimaria,
-                        codigoCIUUActividadComplementaria:
-                            _codigoCIUUActividadComplementaria,
-                        observacionesPatentes: _observacionesPatentes,
-                        tieneMasPatentes: _tieneMasPatentes,
-                        tienePermisoSalud: _tienePermisoSalud,
-                        seTrataDeLocalMercado: _seTrataDeLocalMercado,
-                        tienePatenteLicores: _tienePatenteLicores,
-                        imagenDocumentoLegal:
-                            await _imagenDocumentoLegal.getImageBytes,
-                      ),
-                    ),
-                  );
-                  Navigator.pop(context);
-                },
-                child: Text('Guardar'),
-              ),
-            ],
-          ),
-    );
-  }
+  void _agregarPropiedad() {}
 
   void _editarPropiedad(int idx) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Editar instancia ${idx + 1}'),
-            content: Text('Formulario de edición'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cerrar'),
-              ),
-            ],
-          ),
-    );
+    widget.formGlobalStatus["noLocal"] = propiedadesDelEdificio[idx].noLocal;
   }
 }

@@ -76,10 +76,8 @@ class EdificioFormState extends State<EdificioForm> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      idPredio = widget.formGlobalStatus["idPredio"];
-    });
     if (widget.formGlobalStatus["idPredio"] != null) {
+      idPredio = widget.formGlobalStatus["idPredio"];
       db.getAllEdificios(idPredio: widget.formGlobalStatus["idPredio"]).then((
         List<db.Edificio> edificios,
       ) {
@@ -96,8 +94,8 @@ class EdificioFormState extends State<EdificioForm> {
   // TODO: Ver razon por la que cuando se rellena uno o varios campos de un subformulario, luego se despliega otro y se vuelve a desplegar el primero, no tiene nada rellenado.
   // TODO: ver el tema de los edificios que se transfieren a predios inexistentes en la base de datos.
   // DONE: Analizar el caso en que se este editando el noEdificio de un edificio que ya existia.
-  // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
 
+  // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
   bool changePredio = false;
   int? idPredio;
   int? noEdificio;
@@ -605,19 +603,6 @@ class EdificioFormState extends State<EdificioForm> {
   }
 
   void _editarEdificio(int idx) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Editar instancia ${idx + 1}'),
-            content: Text('Formulario de edición'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cerrar'),
-              ),
-            ],
-          ),
-    );
+    widget.formGlobalStatus["noEdificio"] = edificiosDelPredio[idx].noEdificio;
   }
 }

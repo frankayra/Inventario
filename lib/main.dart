@@ -138,11 +138,11 @@ class _MyScafoldState extends State<MyScafold> {
                 delimitationLayers: [
                   (
                     path: 'assets/Delimitations/manzanas_habana.geojson',
-                    color: Colors.red,
+                    color: Colors.green,
                   ),
                   (
                     path: 'assets/Delimitations/predios_habana.geojson',
-                    color: Colors.green,
+                    color: Colors.red,
                   ),
                 ],
 
