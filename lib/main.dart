@@ -35,68 +35,68 @@ void main() async {
   //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
   //\/\/\/\/\/\/\/\/\/\/\/\/\/\/ DEBUG \/\/\/\/\/\/\/\/\/\/\/\/\/\/\\
   //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-  var predio = db.Predio(
-    idPredio: 1000000000,
-    nivelPredio1: 1,
-    nivelPredio2: 1,
-    nivelPredio3: 1,
-    acera: 1,
-    anchoAcera: 1,
-  );
-  var edificio = db.Edificio(
-    idPredio: 1000000000,
-    noEdificio: 1,
-    distrito: 1,
-    cantidadPisos: 1,
-    cantidadSotanos: 1,
-    antejardin: 1,
-    materialFachada: 1,
-    canoasBajantes: 1,
-    estadoInmueble: 1,
-    imagenConstruccion: Uint8List(8),
-    cantidadMedidores: 1,
-    observacionesConstruccion: "bla bla bla",
-    observacionesEdificacion: "bla bla",
-    observacionesMedidores: "bla bla bla bla",
-  );
-  final propiedad1 = db.Propiedad(
-    idPredio: 1000000000,
-    noEdificio: 1,
-    noLocal: 1,
-    nivelPiso: 'Planta Baja',
-    actividadPrimaria: 'Comercio',
-    cantidadParqueos: 2,
-    tieneMasPatentes: false,
-    tienePermisoSalud: true,
-    seTrataDeLocalMercado: false,
-    tienePatenteLicores: false,
-    imagenDocumentoLegal: Uint8List(0),
-    nombreNegocio: 'Mi Tienda',
-  );
-  var propiedad2 = db.Propiedad.fromRawTuple(propiedad1.toMap());
-  propiedad2.noLocal = 2;
-  var propiedad3 = db.Propiedad.fromRawTuple(propiedad1.toMap());
-  propiedad3.noLocal = 3;
-  var propiedad4 = db.Propiedad.fromRawTuple(propiedad1.toMap());
-  propiedad4.noLocal = 4;
-  await predio.insertInDB();
-  await edificio.insertInDB();
-  await propiedad1.insertInDB();
-  await propiedad2.insertInDB();
-  await propiedad3.insertInDB();
-  await propiedad4.insertInDB();
-  List<db.Predio>? predios;
-  List<db.Edificio>? edificios;
-  predios = await db.getAllPredios();
-  edificios = await db.getAllEdificios(idPredio: predio.idPredio);
+  // var predio = db.Predio(
+  //   idPredio: 1000000000,
+  //   nivelPredio1: 1,
+  //   nivelPredio2: 1,
+  //   nivelPredio3: 1,
+  //   acera: 1,
+  //   anchoAcera: 1,
+  // );
+  // var edificio = db.Edificio(
+  //   idPredio: 1000000000,
+  //   noEdificio: 1,
+  //   distrito: 1,
+  //   cantidadPisos: 1,
+  //   cantidadSotanos: 1,
+  //   antejardin: 1,
+  //   materialFachada: 1,
+  //   canoasBajantes: 1,
+  //   estadoInmueble: 1,
+  //   imagenConstruccion: Uint8List(8),
+  //   cantidadMedidores: 1,
+  //   observacionesConstruccion: "bla bla bla",
+  //   observacionesEdificacion: "bla bla",
+  //   observacionesMedidores: "bla bla bla bla",
+  // );
+  // final propiedad1 = db.Propiedad(
+  //   idPredio: 1000000000,
+  //   noEdificio: 1,
+  //   noLocal: 1,
+  //   nivelPiso: 'Planta Baja',
+  //   actividadPrimaria: 'Comercio',
+  //   cantidadParqueos: 2,
+  //   tieneMasPatentes: false,
+  //   tienePermisoSalud: true,
+  //   seTrataDeLocalMercado: false,
+  //   tienePatenteLicores: false,
+  //   imagenDocumentoLegal: Uint8List(0),
+  //   nombreNegocio: 'Mi Tienda',
+  // );
+  // var propiedad2 = db.Propiedad.fromRawTuple(propiedad1.toMap());
+  // propiedad2.noLocal = 2;
+  // var propiedad3 = db.Propiedad.fromRawTuple(propiedad1.toMap());
+  // propiedad3.noLocal = 3;
+  // var propiedad4 = db.Propiedad.fromRawTuple(propiedad1.toMap());
+  // propiedad4.noLocal = 4;
+  // await predio.insertInDB();
+  // await edificio.insertInDB();
+  // await propiedad1.insertInDB();
+  // await propiedad2.insertInDB();
+  // await propiedad3.insertInDB();
+  // await propiedad4.insertInDB();
+  // List<db.Predio>? predios;
+  // List<db.Edificio>? edificios;
+  // predios = await db.getAllPredios();
+  // edificios = await db.getAllEdificios(idPredio: predio.idPredio);
+  // print("Predios: ${predios}");
+  // print("Edificios: ${edificios}");
+
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+
   await AppContext.initializeVariables();
-  print("Predios: ${predios}");
-  print("Edificios: ${edificios}");
-
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-
   final mapNewPath = await copyFileToDocuments(
     filePath: AppContext.assetsMapPath,
     fileName: AppContext.mapName,
