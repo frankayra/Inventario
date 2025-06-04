@@ -59,8 +59,32 @@ void main() async {
     observacionesEdificacion: "bla bla",
     observacionesMedidores: "bla bla bla bla",
   );
+  final propiedad1 = db.Propiedad(
+    idPredio: 1000000000,
+    noEdificio: 1,
+    noLocal: 1,
+    nivelPiso: 'Planta Baja',
+    actividadPrimaria: 'Comercio',
+    cantidadParqueos: 2,
+    tieneMasPatentes: false,
+    tienePermisoSalud: true,
+    seTrataDeLocalMercado: false,
+    tienePatenteLicores: false,
+    imagenDocumentoLegal: Uint8List(0),
+    nombreNegocio: 'Mi Tienda',
+  );
+  var propiedad2 = db.Propiedad.fromRawTuple(propiedad1.toMap());
+  propiedad2.noLocal = 2;
+  var propiedad3 = db.Propiedad.fromRawTuple(propiedad1.toMap());
+  propiedad3.noLocal = 3;
+  var propiedad4 = db.Propiedad.fromRawTuple(propiedad1.toMap());
+  propiedad4.noLocal = 4;
   await predio.insertInDB();
   await edificio.insertInDB();
+  await propiedad1.insertInDB();
+  await propiedad2.insertInDB();
+  await propiedad3.insertInDB();
+  await propiedad4.insertInDB();
   List<db.Predio>? predios;
   List<db.Edificio>? edificios;
   predios = await db.getAllPredios();
@@ -149,7 +173,7 @@ class _MyScafoldState extends State<MyScafold> {
                 /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
               )
               // : EdificacionForm(),
-              : FormularioInspeccion(idPredio: 1),
+              : FormularioInspeccion(idPredio: 1000000000),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),

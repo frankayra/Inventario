@@ -8,6 +8,9 @@ import 'package:inventario/presentation/Widgets/dialogs.dart';
 import 'package:image_picker/image_picker.dart';
 
 // TODO: Como sera que se agregan nuevas instancias y se cambian los valores automaticamente.
+// TODO: arreglar los validadores de los campos opcionales que se activan con los campos check.
+// TODO: Arreglar el widget de fecha.
+// TODO: Verificar la correcta funcion al presionar en una propiedad.
 
 class PropiedadForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;
@@ -80,6 +83,70 @@ class PropiedadFormState extends State<PropiedadForm> {
             setState(() {
               propiedadesDelEdificio = propiedades;
             });
+            if (widget.formGlobalStatus["noLocal"] != null) {
+              db
+                  .getPropiedad(
+                    idPredio: idPredio!,
+                    noEdificio: noEdificio!,
+                    noLocal: widget.formGlobalStatus["noLocal"]!,
+                  )
+                  .then((currentPropiedad) {
+                    if (currentPropiedad != null) {
+                      setState(() {
+                        noLocal = widget.formGlobalStatus["noLocal"];
+                        _nivelPiso = currentPropiedad.nivelPiso;
+                        _actividadPrimaria = currentPropiedad.actividadPrimaria;
+                        _actividadComplementaria =
+                            currentPropiedad.actividadComplementaria;
+                        _estadoNegocio = currentPropiedad.estadoNegocio;
+                        _nombreNegocio = currentPropiedad.nombreNegocio;
+                        _cantidadParqueos = currentPropiedad.cantidadParqueos;
+                        _documentoMostrado = currentPropiedad.documentoMostrado;
+                        _nombrePatentado = currentPropiedad.nombrePatentado;
+                        _numeroPatenteComercial =
+                            currentPropiedad.numeroPatenteComercial;
+                        _cedulaPatentado = currentPropiedad.cedulaPatentado;
+                        _nombreActividadPatente =
+                            currentPropiedad.nombreActividadPatente;
+                        _tieneMasPatentes = currentPropiedad.tieneMasPatentes;
+                        _numeroPatente_2 = currentPropiedad.numeroPatente_2;
+                        _tienePermisoSalud = currentPropiedad.tienePermisoSalud;
+                        _numeroPermisoSalud =
+                            currentPropiedad.numeroPermisoSalud;
+                        _fechaVigenciaPermisoSalud =
+                            currentPropiedad.fechaVigenciaPermisoSalud;
+                        _codigoCIIUPermisoSalud =
+                            currentPropiedad.codigoCIIUPermisoSalud;
+                        _seTrataDeLocalMercado =
+                            currentPropiedad.seTrataDeLocalMercado;
+                        _numeroLocalMercado =
+                            currentPropiedad.numeroLocalMercado;
+                        _tienePatenteLicores =
+                            currentPropiedad.tienePatenteLicores;
+                        _numeroPatenteLicores =
+                            currentPropiedad.numeroPatenteLicores;
+                        _areaActividad = currentPropiedad!.areaActividad;
+                        _telefonoPatentado = currentPropiedad.telefonoPatentado;
+                        _correoElectronico = currentPropiedad.correoElectronico;
+                        _cantidadEmpleadosAntesCovid =
+                            currentPropiedad.cantidadEmpleadosAntesCovid;
+                        _cantidadEmpleadosActual =
+                            currentPropiedad.cantidadEmpleadosActual;
+                        _afectacionesCovidPersonalDesempennoEmpresa =
+                            currentPropiedad
+                                .afectacionesCovidPersonalDesempennoEmpresa;
+                        _afectacionesCovidSobreVentas =
+                            currentPropiedad.afectacionesCovidSobreVentas;
+                        _codigoCIUUActividadPrimaria =
+                            currentPropiedad.codigoCIUUActividadPrimaria;
+                        _codigoCIUUActividadComplementaria =
+                            currentPropiedad.codigoCIUUActividadComplementaria;
+                        _observacionesPatentes =
+                            currentPropiedad.observacionesPatentes;
+                      });
+                    }
+                  });
+            }
           });
     }
   }
@@ -166,6 +233,7 @@ class PropiedadFormState extends State<PropiedadForm> {
               ],
             ),
             SizedBox(height: 40),
+
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++   Cambio de Edificio a la propiedad   ++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
@@ -204,6 +272,22 @@ class PropiedadFormState extends State<PropiedadForm> {
             //     ),
             //   ],
             // ),
+            TextFormField(
+              initialValue: noLocal != null ? noLocal.toString() : "",
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Numero Local'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingresa el número de local';
+                }
+                final number = int.tryParse(value);
+                if (number == null) {
+                  return 'Por favor ingresa un número válido';
+                }
+                noLocal = number;
+                return null;
+              },
+            ),
             TextFormField(
               decoration: InputDecoration(labelText: 'Nivel piso'),
               onChanged: (value) {
@@ -838,7 +922,9 @@ class PropiedadFormState extends State<PropiedadForm> {
   // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
   // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  void _agregarPropiedad() {}
+  void _agregarPropiedad() {
+    widget.formGlobalStatus["noLocal"] = null;
+  }
 
   void _editarPropiedad(int idx) {
     widget.formGlobalStatus["noLocal"] = propiedadesDelEdificio[idx].noLocal;

@@ -84,6 +84,34 @@ class EdificioFormState extends State<EdificioForm> {
         setState(() {
           edificiosDelPredio = edificios;
         });
+        if (widget.formGlobalStatus["noEdificio"] != null) {
+          db
+              .getEdificio(
+                idPredio: idPredio!,
+                noEdificio: widget.formGlobalStatus["noEdificio"]!,
+              )
+              .then((currentEdificio) {
+                if (currentEdificio != null) {
+                  setState(() {
+                    noEdificio = widget.formGlobalStatus["noEdificio"];
+                    _distrito = currentEdificio.distrito;
+                    _cantidadPisos = currentEdificio.cantidadPisos;
+                    _cantidadSotanos = currentEdificio.cantidadSotanos;
+                    _antejardin = currentEdificio.antejardin;
+                    _materialFachada = currentEdificio.materialFachada;
+                    _canoasBajantes = currentEdificio.canoasBajantes;
+                    _observacionesEdificacion =
+                        currentEdificio.observacionesEdificacion;
+                    _estadoInmueble = currentEdificio.estadoInmueble;
+                    _observacionesConstruccion =
+                        currentEdificio.observacionesConstruccion;
+                    _cantidadMedidores = currentEdificio.cantidadMedidores;
+                    _observacionesMedidores =
+                        currentEdificio.observacionesMedidores;
+                  });
+                }
+              });
+        }
       });
     }
   }
@@ -203,6 +231,7 @@ class EdificioFormState extends State<EdificioForm> {
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             // MyNumericInput(label: "Edificio", noValidValidationMessage: "Por favor ingresa el número de edificio"),
             TextFormField(
+              initialValue: noEdificio != null ? noEdificio!.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Edificio'),
               validator: (value) {
@@ -560,46 +589,7 @@ class EdificioFormState extends State<EdificioForm> {
   // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   void _agregarEdificio() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Nuevo registro'),
-            content: Text('Formulario para nueva instancia'),
-            // content: _PropiedadAux(),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  setState(
-                    () async => edificiosDelPredio.add(
-                      db.Edificio(
-                        // Claves
-                        idPredio: widget.formGlobalStatus["idPredio"],
-                        noEdificio: widget.formGlobalStatus["noEdificio"],
-                        // noEdificio: noEdificio!,
-                        distrito: _distrito!,
-                        cantidadPisos: _cantidadPisos!,
-                        cantidadSotanos: _cantidadSotanos!,
-                        antejardin: _antejardin!,
-                        materialFachada: _materialFachada!,
-                        canoasBajantes: _canoasBajantes!,
-                        observacionesEdificacion: _observacionesEdificacion,
-                        estadoInmueble: _estadoInmueble!,
-                        imagenConstruccion:
-                            await _imagenConstruccion.getImageBytes,
-                        observacionesConstruccion: _observacionesConstruccion,
-                        cantidadMedidores: _cantidadMedidores!,
-                        observacionesMedidores: _observacionesMedidores,
-                      ),
-                    ),
-                  );
-                  Navigator.pop(context);
-                },
-                child: Text('Guardar'),
-              ),
-            ],
-          ),
-    );
+    widget.formGlobalStatus["noEdificio"] = null;
   }
 
   void _editarEdificio(int idx) {

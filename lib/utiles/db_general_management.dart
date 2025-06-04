@@ -16,6 +16,9 @@ Future<Database> openDB() async {
   final pathToDB = join(await getDatabasesPath(), 'inventario.db');
   // await deleteDatabase(pathToDB);
   final scripts = [
+    // "DROP TABLE IF EXISTS propiedades;",
+    // "DROP TABLE IF EXISTS edificios;",
+    // "DROP TABLE IF EXISTS predios;",
     """CREATE TABLE predios(
         id_predio INTEGER PRIMARY KEY, 
         nivelPredio1 FLOAT NOT NULL,
@@ -217,8 +220,17 @@ abstract class InventarioDbTable {
     required this.primaryKeysWhere,
   });
 
-  Future<void> insertInDB() async {
+  Future<void> insertInDB({String? where, List<int>? whereArgs}) async {
     final db = await openDB();
+    var args = (
+      tableName,
+      where ?? primaryKeysWhere,
+      (where == null || whereArgs == null) ? primaryKeysWhereArgs : whereArgs,
+    );
+    // dynamic tuple = await db.query(args.$1, where: args.$2, whereArgs: args.$3);
+    // if (tuple == null) {
+    //   await db.delete(args.$1, where: args.$2, whereArgs: args.$3);
+    // }
     await db.insert(
       tableName,
       toMap(),
@@ -408,7 +420,7 @@ class Edificio extends InventarioDbTable {
 class Propiedad extends InventarioDbTable {
   final int idPredio;
   final int noEdificio;
-  final int noLocal;
+  int noLocal;
 
   // ++++++ Módulo Uso de suelo y Patentes comerciales ++++++ //
   final String nivelPiso;
