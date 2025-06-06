@@ -23,6 +23,18 @@ class EdificioForm extends StatefulWidget {
 }
 
 class EdificioFormState extends State<EdificioForm> {
+  TextEditingController _noEdificioController = TextEditingController();
+  TextEditingController _distritoController = TextEditingController();
+  TextEditingController _cantidadPisosController = TextEditingController();
+  TextEditingController _cantidadSotanosController = TextEditingController();
+  TextEditingController _observacionesEdificacionController =
+      TextEditingController();
+  TextEditingController _imagenConstruccionController = TextEditingController();
+  TextEditingController _observacionesConstruccionController =
+      TextEditingController();
+  TextEditingController _cantidadMedidoresController = TextEditingController();
+  TextEditingController _observacionesMedidoresController =
+      TextEditingController();
   List<db.Edificio> edificiosDelPredio = [];
   bool editingState = false;
   final _formKey = GlobalKey<FormState>();
@@ -93,6 +105,24 @@ class EdificioFormState extends State<EdificioForm> {
               .then((currentEdificio) {
                 if (currentEdificio != null) {
                   setState(() {
+                    _noEdificioController.text =
+                        widget.formGlobalStatus["noEdificio"].toString();
+                    _distritoController.text =
+                        currentEdificio.distrito.toString();
+                    _cantidadPisosController.text =
+                        currentEdificio.cantidadPisos.toString();
+                    _cantidadSotanosController.text =
+                        currentEdificio.cantidadSotanos.toString();
+                    _observacionesEdificacionController.text =
+                        currentEdificio.observacionesEdificacion.toString();
+                    _imagenConstruccionController.text =
+                        currentEdificio.imagenConstruccion.toString();
+                    _observacionesConstruccionController.text =
+                        currentEdificio.observacionesConstruccion.toString();
+                    _cantidadMedidoresController.text =
+                        currentEdificio.cantidadMedidores.toString();
+                    _observacionesMedidoresController.text =
+                        currentEdificio.observacionesMedidores.toString();
                     noEdificio = widget.formGlobalStatus["noEdificio"];
                     _distrito = currentEdificio.distrito;
                     _cantidadPisos = currentEdificio.cantidadPisos;
@@ -229,9 +259,18 @@ class EdificioFormState extends State<EdificioForm> {
             // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+            Divider(
+              color: Colors.blueAccent, // Color de la línea
+              height: 30, // Espacio vertical que ocupa el divisor
+              thickness: 2, // Grosor de la línea
+              indent: 20, // Margen izquierdo
+              endIndent: 20, // Margen derecho
+              // radius: const Radius.circular(5.0), // Esquinas redondeadas (Flutter 3.x+)
+            ),
             // MyNumericInput(label: "Edificio", noValidValidationMessage: "Por favor ingresa el número de edificio"),
             TextFormField(
-              initialValue: noEdificio != null ? noEdificio!.toString() : "",
+              controller: _noEdificioController,
+              // initialValue: noEdificio?.toString(),
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Edificio'),
               validator: (value) {
@@ -270,6 +309,7 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
+              controller: _cantidadPisosController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad pisos'),
               validator: (value) {
@@ -285,6 +325,7 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
+              controller: _cantidadSotanosController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad sótanos'),
               validator: (value) {
@@ -366,6 +407,7 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
+              controller: _observacionesEdificacionController,
               decoration: InputDecoration(
                 labelText: 'Observaciones edificaciones',
               ),
@@ -405,6 +447,7 @@ class EdificioFormState extends State<EdificioForm> {
             ),
             _imagenConstruccion,
             TextFormField(
+              controller: _observacionesConstruccionController,
               decoration: InputDecoration(
                 labelText: 'Observaciones Construcción',
               ),
@@ -421,6 +464,7 @@ class EdificioFormState extends State<EdificioForm> {
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             TextFormField(
+              controller: _cantidadMedidoresController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad Medidores'),
               validator: (value) {
@@ -436,6 +480,7 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
+              controller: _observacionesMedidoresController,
               decoration: InputDecoration(labelText: 'Observaciones Medidores'),
               onChanged: (value) {
                 _observacionesMedidores = value;

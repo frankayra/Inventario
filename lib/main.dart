@@ -127,6 +127,7 @@ class MyScafold extends StatefulWidget {
 class _MyScafoldState extends State<MyScafold> {
   late Future<MbTilesTileProvider> _tileProviderFuture;
   int _selectedIndex = 0;
+  int _tappedLocation = -1;
   String? _map_path;
   File? _map_file;
   @override
@@ -140,7 +141,17 @@ class _MyScafoldState extends State<MyScafold> {
           ],
         ),
         actions: [
-          ElevatedButton(onPressed: _selectFile, child: Icon(Icons.file_open)),
+          ElevatedButton(
+            onPressed: () async {
+              var result = await selectFile();
+              if (result == null) return;
+              setState(() {
+                _map_path = result;
+                _map_file = File(_map_path!);
+              });
+            },
+            child: Icon(Icons.file_open),
+          ),
           IconButton(
             icon: Icon(Icons.info),
             onPressed: () {
@@ -169,11 +180,17 @@ class _MyScafoldState extends State<MyScafold> {
                     color: Colors.red,
                   ),
                 ],
+                onLocationTap: (int tappedLocation) {
+                  setState(() {
+                    _tappedLocation = tappedLocation;
+                    _selectedIndex = 1;
+                  });
+                },
 
                 /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
               )
               // : EdificacionForm(),
-              : FormularioInspeccion(idPredio: 1000000000),
+              : FormularioInspeccion(idPredio: _tappedLocation),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
@@ -200,34 +217,16 @@ class _MyScafoldState extends State<MyScafold> {
       _selectedIndex = index;
     });
   }
-
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-
-  Future<void> _selectFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      setState(() {
-        _map_path = result.files.single.path;
-        _map_file = File(_map_path!);
-      });
-      print('Ruta del archivo seleccionado: $_map_path');
-      print('Archivo seleccionado: $_map_file');
-      // Aquí puedes usar _map_path o _map_file para cargar el archivo.
-    } else {
-      // El usuario canceló la selección.
-      print('Selección de archivo cancelada.');
-    }
-  }
 }
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //

@@ -73,3 +73,13 @@ Future<void> manageMapAndDlimitiationDirectories() async {
     path.join(appDirectory.path, 'Delimitaciones'),
   ).exists()) {}
 }
+
+Future<String?> selectFile() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+  if (result != null) {
+    return result.files.single.path;
+  } else {
+    return null;
+  }
+}

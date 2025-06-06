@@ -64,7 +64,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
           EDIFICIOS,
           EdificioForm(
             key: ValueKey(
-              'edificio-${formGlobalStatusWrapper.variables["idPredio"]}',
+              'edificio-${formGlobalStatusWrapper.variables["idPredio"]}-${formGlobalStatusWrapper.variables["noEdificio"]}',
             ),
             formGlobalStatus: formGlobalStatusWrapper,
           ),
@@ -75,7 +75,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
           PROPIEDADES,
           PropiedadForm(
             key: ValueKey(
-              'propiedad-${formGlobalStatusWrapper.variables["noEdificio"]}',
+              'propiedad-${formGlobalStatusWrapper.variables["idPredio"]}-${formGlobalStatusWrapper.variables["noEdificio"]}-${formGlobalStatusWrapper.variables["noLocal"]}',
             ),
             formGlobalStatus: formGlobalStatusWrapper,
           ),
@@ -150,7 +150,10 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
           ...secciones,
           Padding(
             padding: EdgeInsets.all(16.0),
-            child: ElevatedButton(onPressed: () async {}, child: Text("Listo")),
+            child: ElevatedButton(
+              onPressed: () async {},
+              child: Text("Predio Visitado!"),
+            ),
           ),
         ],
         //     ],
@@ -194,64 +197,64 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   void idPredioChanged(int? idPredio) {
     setState(() {
-      if (secciones.length >= 3) secciones.removeAt(2);
-      if (secciones.length >= 2) secciones.removeAt(1);
-      if (secciones.length >= 1) secciones.removeAt(0);
+      // if (secciones.length >= 3) secciones.removeAt(2);
+      // if (secciones.length >= 2) secciones.removeAt(1);
+      // if (secciones.length >= 1) secciones.removeAt(0);
       formGlobalStatusWrapper.variables["idPredio"] = idPredio;
       formGlobalStatusWrapper.variables["noEdificio"] = null;
       formGlobalStatusWrapper.variables["noLocal"] = null;
-      secciones.addAll([
-        _buildSection(
-          PREDIO,
-          PredioForm(formGlobalStatus: formGlobalStatusWrapper),
-          0,
-        ),
-        _buildSection(
-          EDIFICIOS,
-          EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
-          1,
-        ),
-        _buildSection(
-          PROPIEDADES,
-          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
-          2,
-        ),
-      ]);
+      // secciones.addAll([
+      //   _buildSection(
+      //     PREDIO,
+      //     PredioForm(formGlobalStatus: formGlobalStatusWrapper),
+      //     0,
+      //   ),
+      //   _buildSection(
+      //     EDIFICIOS,
+      //     EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
+      //     1,
+      //   ),
+      //   _buildSection(
+      //     PROPIEDADES,
+      //     PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+      //     2,
+      //   ),
+      // ]);
     });
   }
 
   void noEdificioChanged(int? noEdificio) {
     setState(() {
-      if (secciones.length >= 3) secciones.removeAt(2);
-      if (secciones.length >= 2) secciones.removeAt(1);
+      // if (secciones.length >= 3) secciones.removeAt(2);
+      // if (secciones.length >= 2) secciones.removeAt(1);
       formGlobalStatusWrapper.variables["noEdificio"] = noEdificio;
       formGlobalStatusWrapper.variables["noLocal"] = null;
-      secciones.addAll([
-        _buildSection(
-          EDIFICIOS,
-          EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
-          1,
-        ),
-        _buildSection(
-          PROPIEDADES,
-          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
-          2,
-        ),
-      ]);
+      // secciones.addAll([
+      //   _buildSection(
+      //     EDIFICIOS,
+      //     EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
+      //     1,
+      //   ),
+      //   _buildSection(
+      //     PROPIEDADES,
+      //     PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+      //     2,
+      //   ),
+      // ]);
     });
   }
 
   void noLocalChanged(int? noLocal) {
     setState(() {
-      if (secciones.length >= 3) secciones.removeAt(2);
+      // if (secciones.length >= 3) secciones.removeAt(2);
       formGlobalStatusWrapper.variables["noLocal"] = noLocal;
-      secciones.addAll([
-        _buildSection(
-          PROPIEDADES,
-          PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
-          2,
-        ),
-      ]);
+      // secciones.addAll([
+      //   _buildSection(
+      //     PROPIEDADES,
+      //     PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
+      //     2,
+      //   ),
+      // ]);
     });
   }
 }

@@ -21,9 +21,11 @@ const CALIFORNIA = LatLng(36.1555182044328, -115.13386501485957); // California
 class OfflineMapWidget extends StatefulWidget {
   final String mbtilesFilePath;
   List<({String path, Color color})>? delimitationLayers;
+  void Function(int tappedLocation)? onLocationTap;
   OfflineMapWidget({
     required this.mbtilesFilePath,
-    List<({String path, Color color})>? this.delimitationLayers,
+    this.delimitationLayers,
+    this.onLocationTap,
     super.key,
   });
 
@@ -96,14 +98,11 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
                   initialZoom: 16.0,
                   maxZoom: 18.0,
                   minZoom: 10.0,
-                  onTap: (TapPosition details, LatLng point) {
-                    setState(() {
-                      print(
-                        'Coordenadas del clic: ${point.latitude}, ${point.longitude}',
-                      );
-                      // Aquí se puede realizar otras acciones con las coordenadas del clic
-                    });
-                  },
+                  // onTap: (TapPosition details, LatLng point) {
+                  //   setState(() {
+                  //     // Aquí se puede realizar otras acciones con las coordenadas del clic
+                  //   });
+                  // },
                 ),
                 children: [
                   TileLayer(tileProvider: tileProvider),
@@ -114,6 +113,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
                               geoJsonPath: layerDescription.path,
                               borderColor: layerDescription.color,
                               loadFromAssets: true,
+                              onLocationTap: widget.onLocationTap,
                             ),
                           )
                           .toList()

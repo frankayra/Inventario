@@ -10,13 +10,18 @@ import 'package:path_provider/path_provider.dart';
 class DelimitationsLayer extends StatefulWidget {
   final String geoJsonPath;
   final Color borderColor;
+  final Color locationDoneBackground = Colors.blue;
   final bool loadFromAssets;
+  final void Function(int idPredio)? onLocationTap;
+  final List<int>? markedPolygons;
 
   const DelimitationsLayer({
     super.key,
     required this.geoJsonPath,
     required this.borderColor,
     required this.loadFromAssets,
+    this.onLocationTap,
+    this.markedPolygons,
   });
 
   @override
@@ -25,8 +30,7 @@ class DelimitationsLayer extends StatefulWidget {
 
 class _DelimitationsLayerState extends State<DelimitationsLayer> {
   List<Polygon> _polygons = [];
-  List<Polyline> _polylines = [];
-  List<Marker> _markers = [];
+  List<Marker> _centroids = [];
 
   @override
   void initState() {
@@ -41,12 +45,8 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
               ? await rootBundle.loadString(widget.geoJsonPath)
               : await File(widget.geoJsonPath).readAsString();
       final geoJson = jsonDecode(data);
-      print(
-        "Se cargo satisfactoriamente el geojson desde la ruta ${widget.geoJsonPath}",
-      );
       if (geoJson['type'] == 'FeatureCollection') {
         List<Polygon> polygons = [];
-        List<Polyline> polylines = [];
         List<Marker> markers = [];
 
         for (var feature in geoJson['features']) {
@@ -57,60 +57,83 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
                   as Map<String, dynamic>?; // Acceder a las propiedades
 
           if (geometryType == 'Polygon') {
+            double lat = 0;
+            double lon = 0;
             for (var polygonCoordsList in coordinates) {
               List<LatLng> points = [];
               for (var coord in polygonCoordsList) {
                 points.add(
                   LatLng(coord[1], coord[0]),
                 ); // GeoJSON is [longitude, latitude]
+                lat += coord[1];
+                lon += coord[0];
               }
+              LatLng coordinatesCentroid = LatLng(
+                lat / points.length,
+                lon / points.length,
+              );
               polygons.add(
                 Polygon(
                   points: points,
-                  // color: Colors.blue.withOpacity(0.5),
+                  // color: ,
                   borderColor: widget.borderColor,
                   // color: widget.borderColor.withOpacity(0.2),
                   borderStrokeWidth: 2,
+
                   // Puedes usar las propiedades aquí para personalizar cada polígono
-                  // data: properties,
                 ),
               );
+              if (properties != null && properties.isNotEmpty) {
+                Widget markerToShow;
+                double markerWidth, markerHeight;
+                if (properties["localizacion"] != null) {
+                  markerToShow = IconButton(
+                    onPressed: () {
+                      if (widget.onLocationTap != null) {
+                        widget.onLocationTap!(properties["localizacion"]);
+                      }
+                    },
+                    icon: Icon(Icons.circle),
+                  );
+                  markerWidth = 120;
+                  markerHeight = 50;
+                } else {
+                  markerToShow = Text(
+                    // properties.entries.map((entry)=>"${entry.key}: ${entry.value}").join("\n"),
+                    properties.entries
+                        .map((entry) => "${entry.value}")
+                        .join("\n"),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                      backgroundColor: Colors.white70,
+                    ),
+                  );
+                  markerWidth = 30;
+                  markerHeight = 30;
+                }
+                markers.add(
+                  Marker(
+                    width: markerWidth,
+                    height: markerHeight,
+                    point: coordinatesCentroid,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: markerToShow,
+                    ),
+                  ),
+                );
+              }
             }
-          } else if (geometryType == 'LineString') {
-            List<LatLng> points = [];
-            for (var coord in coordinates) {
-              points.add(LatLng(coord[1], coord[0]));
-            }
-            polylines.add(
-              Polyline(
-                points: points,
-                color: widget.borderColor,
-                strokeWidth: 3,
-                // Puedes usar las propiedades aquí para personalizar cada polilínea
-                // data: properties,
-              ),
-            );
-          } else if (geometryType == 'Point') {
-            markers.add(
-              Marker(
-                point: LatLng(coordinates[1], coordinates[0]),
-                width: 20,
-                height: 20,
-                child: Icon(Icons.location_pin, color: widget.borderColor),
-                // Puedes usar las propiedades aquí para personalizar cada marcador
-                // data: properties,
-              ),
-            );
           }
         }
         setState(() {
+          _centroids = markers;
           _polygons = polygons;
-          _polylines = polylines;
-          _markers = markers;
         });
       }
     } catch (e) {
-      print('No se encontraron delimitaciones: $e');
+      print('El formato del archivo de limites no es correcto: $e');
     }
   }
 
@@ -119,8 +142,7 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
     return Stack(
       children: [
         if (_polygons.isNotEmpty) PolygonLayer(polygons: _polygons),
-        if (_polylines.isNotEmpty) PolylineLayer(polylines: _polylines),
-        if (_markers.isNotEmpty) MarkerLayer(markers: _markers),
+        if (_centroids.isNotEmpty) MarkerLayer(markers: _centroids),
       ],
     );
   }

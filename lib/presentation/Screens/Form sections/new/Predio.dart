@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:inventario/utiles/wrappers.dart';
+import 'package:inventario/presentation/Widgets/dialogs.dart';
 
 class PredioForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;
@@ -26,6 +27,12 @@ class PredioFormState extends State<PredioForm> {
   int? _acera;
   double? _anchoAcera;
   String? _observacionesTerreno;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     idPredio = widget.formGlobalStatus["idPredio"];
@@ -130,6 +137,15 @@ class PredioFormState extends State<PredioForm> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    var oldPredio = await db.getPredio(idPredio: idPredio!);
+                    if (oldPredio != null) {
+                      var override = await showAcceptDismissAlertDialog(
+                        context,
+                        message:
+                            "Ya existe un predio con ese identificador. ¿Desea sobrescribirlo?",
+                      );
+                      if (override == null || !override) return;
+                    }
                     final predio = db.Predio(
                       idPredio: widget.formGlobalStatus["idPredio"]!,
                       nivelPredio1: _nivelPredio1!,
@@ -139,10 +155,16 @@ class PredioFormState extends State<PredioForm> {
                       anchoAcera: _anchoAcera!,
                       observacionesTerreno: _observacionesTerreno,
                     );
-                    await predio.insertInDB();
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Datos guardados')));
+                    try {
+                      await predio.insertInDB();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('✅ Datos guardados')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('❌ Error al guardar los datos')),
+                      );
+                    }
                   }
                 },
                 child: Text('Guardar'),
