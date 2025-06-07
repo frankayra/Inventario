@@ -1,16 +1,9 @@
-import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:inventario/presentation/Widgets/text.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
-import 'package:inventario/presentation/Widgets/selection.dart';
-import 'package:inventario/presentation/Widgets/numeric.dart';
 import 'package:inventario/presentation/Widgets/dialogs.dart';
+import 'package:inventario/presentation/Widgets/animations/countdown_circle.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:inventario/utiles/wrappers.dart';
 import 'package:inventario/utiles/hash.dart';
@@ -144,7 +137,7 @@ class EdificioFormState extends State<EdificioForm> {
   // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
   int? _estadoInmueble;
   Uint8List? _imagenConstruccion;
-  int _imageVersion = Random().nextInt(2000000);
+  // int _imageVersion = Random().nextInt(2000000);
   String? _observacionesConstruccion;
 
   // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
@@ -179,7 +172,7 @@ class EdificioFormState extends State<EdificioForm> {
                   return InputChip(
                     label: Text('Ed. ${entry.value.noEdificio}'),
                     backgroundColor: chipBackgroundColor,
-                    onDeleted: () => _eliminarEdificio(idx),
+                    onDeleted: () => _eliminarEdificio(context, idx),
                     deleteIcon: Icon(Icons.close),
                     onPressed: () => _editarEdificio(idx),
                   );
@@ -417,7 +410,7 @@ class EdificioFormState extends State<EdificioForm> {
               decoration: InputDecoration(labelText: 'Estado del inmueble'),
               validator: (value) {
                 if (value == null) {
-                  return 'Por favor selecciona una opción';
+                  return 'Selecciona una opción';
                 }
                 return null;
               },
@@ -430,13 +423,14 @@ class EdificioFormState extends State<EdificioForm> {
               initialValue: _imagenConstruccion,
               context: context,
               validator: (imagebytes) {
+                if (imagebytes == null) return "Selecciona una imagen";
                 _imagenConstruccion = imagebytes;
                 return null;
               },
               onChanged: (imageBytes) {
-                setState(() {
-                  _imageVersion++;
-                });
+                // setState(() {
+                //   _imageVersion++;
+                // });
               },
             ),
             TextFormField(
@@ -610,18 +604,18 @@ class EdificioFormState extends State<EdificioForm> {
                     }
 
                     widget.formGlobalStatus["noEdificio"] = null;
-                    if (casoEncontrado != 5) {
-                      return;
-                    }
-                    db
-                        .getAllEdificios(
-                          idPredio: widget.formGlobalStatus["idPredio"],
-                        )
-                        .then((List<db.Edificio> edificios) {
-                          setState(() {
-                            edificiosDelPredio = edificios;
-                          });
-                        });
+                    // if (casoEncontrado != 5) {
+                    //   return;
+                    // }
+                    // db
+                    //     .getAllEdificios(
+                    //       idPredio: widget.formGlobalStatus["idPredio"],
+                    //     )
+                    //     .then((List<db.Edificio> edificios) {
+                    //       setState(() {
+                    //         edificiosDelPredio = edificios;
+                    //       });
+                    //     });
                   }
                 },
                 child: Text('Guardar'),
@@ -645,11 +639,11 @@ class EdificioFormState extends State<EdificioForm> {
   }
 
   void _editarEdificio(int idx) {
-    _imageVersion++;
+    // _imageVersion++;
     widget.formGlobalStatus["noEdificio"] = edificiosDelPredio[idx].noEdificio;
   }
 
-  void _eliminarEdificio(int idx) {
+  void _eliminarEdificio(BuildContext context, int idx) {
     var currentEdificio = edificiosDelPredio[idx];
     bool dismissAction = false;
     // widget.formGlobalStatus["noEdificio"] = null;
@@ -659,37 +653,25 @@ class EdificioFormState extends State<EdificioForm> {
           children: [
             Text('Edificio Eliminado'),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                dismissAction = true;
+              },
               child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text("Deshacer"),
-                  // CircularCountDownTimer(
-                  //   duration: 5,
-                  //   initialDuration: 0,
-                  //   controller: CountDownController(),
-                  //   width: 20,
-                  //   height: 20,
-                  //   ringColor: Colors.blue[600]!,
-                  //   fillColor: Colors.transparent,
-                  //   backgroundColor: Colors.white,
-                  //   strokeWidth: 3.0,
-                  //   textStyle: TextStyle(fontSize: 12, color: Colors.black),
-                  //   isReverse: true,
-                  //   isReverseAnimation: true,
-                  //   onComplete: () {
-                  //     // Acción al finalizar
-                  //     if (!dismissAction) {
-                  //       currentEdificio.deleteInDB();
-                  //     }
-                  //   },
-                  // ),
+                  SizedBox(width: 15.0),
+                  CountdownCircle(
+                    duration: Duration(seconds: 5),
+                    onEnd: () => currentEdificio.deleteInDB(),
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
-      // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 5)),
+      // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
     );
   }
 }

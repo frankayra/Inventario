@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:image_picker/image_picker.dart';
@@ -154,18 +153,30 @@ class PropiedadFormState extends State<PropiedadForm> {
 
                         if (_afectacionesCovidPersonalDesempennoEmpresa !=
                             null) {
-                          _afectacionesCovidPersonalDesempennoEmpresaList =
+                          List<String> stringValues =
                               _afectacionesCovidPersonalDesempennoEmpresa!
-                                  .split(",")
-                                  .map((item) => int.parse(item))
-                                  .toList();
+                                  .split(", ");
+
+                          for (var entry
+                              in _dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]!
+                                  .entries) {
+                            if (stringValues.contains(entry.value)) {
+                              _afectacionesCovidPersonalDesempennoEmpresaList
+                                  .add(entry.key);
+                            }
+                          }
                         }
                         if (_afectacionesCovidSobreVentas != null) {
-                          _afectacionesCovidSobreVentasList =
-                              _afectacionesCovidSobreVentas!
-                                  .split(",")
-                                  .map((item) => int.parse(item))
-                                  .toList();
+                          List<String> stringValues =
+                              _afectacionesCovidSobreVentas!.split(", ");
+
+                          for (var entry
+                              in _dropdownOptions["afectacionesCovidSobreVentas"]!
+                                  .entries) {
+                            if (stringValues.contains(entry.value)) {
+                              _afectacionesCovidSobreVentasList.add(entry.key);
+                            }
+                          }
                         }
                       });
                     }
@@ -214,7 +225,7 @@ class PropiedadFormState extends State<PropiedadForm> {
   String? _codigoCIIUActividadComplementaria;
   String? _observacionesPatentes;
   Uint8List? _imagenDocumentoLegal;
-  int _imageVersion = Random().nextInt(2000000);
+  // int _imageVersion = Random().nextInt(2000000);
 
   @override
   Widget build(BuildContext context) {
@@ -594,7 +605,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                       : "",
               firstDate: DateTime(2000, 1, 1),
               lastDate: DateTime(2100),
-              labelText: 'Fecha de vigencia del permiso de salud',
+              labelText: 'Fecha de vigencia del permiso de salud (AAAA-MM-DD)',
               onChanged: (value) {
                 _fechaVigenciaPermisoSalud = value;
               },
@@ -947,13 +958,14 @@ class PropiedadFormState extends State<PropiedadForm> {
               initialValue: _imagenDocumentoLegal,
               context: context,
               validator: (imagebytes) {
+                if (imagebytes == null) return "Selecciona una imagen";
                 _imagenDocumentoLegal = imagebytes;
                 return null;
               },
               onChanged: (imageBytes) {
-                setState(() {
-                  _imageVersion++;
-                });
+                // setState(() {
+                //   _imageVersion++;
+                // });
               },
             ),
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
@@ -987,7 +999,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                     bool nadieEnElNuevoLugar = propiedadEnElNuevoLugar == null;
                     bool alguienEnElNuevoLugar = !nadieEnElNuevoLugar;
                     bool mismoLugarDeDestino =
-                        widget.formGlobalStatus["idPredio"] == noEdificio &&
+                        widget.formGlobalStatus["idPredio"] == idPredio &&
                         widget.formGlobalStatus["noEdificio"] == noEdificio &&
                         widget.formGlobalStatus["noLocal"] == noLocal;
                     int casoEncontrado = -1;
@@ -1056,12 +1068,18 @@ class PropiedadFormState extends State<PropiedadForm> {
                           bool? accepted = await showAcceptDismissAlertDialog(
                             context,
                             message:
-                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
+                                "Se va a sobrescribir una propiedad ya existente. ¿Desea continuar?",
                           );
                           if (accepted == null || !accepted) return;
                           await propiedadEnElNuevoLugar!.deleteInDB();
                           await newPropiedad.insertInDB();
                         case 3:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Se cambiará el numero de local de la propiedad. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
                           newPropiedad.updateInDB(
                             where: "id_predio = ? and no_edificio = ?",
                             whereArgs: [
@@ -1073,7 +1091,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                           bool? accepted = await showAcceptDismissAlertDialog(
                             context,
                             message:
-                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
+                                "Se va a sobrescribir una propiedad ya existente. ¿Desea continuar?",
                           );
                           if (accepted == null || !accepted) return;
                           await propiedadEnElNuevoLugar!.deleteInDB();
@@ -1098,20 +1116,20 @@ class PropiedadFormState extends State<PropiedadForm> {
                       );
                     }
 
-                    if (casoEncontrado != 5) {
-                      widget.formGlobalStatus["noLocal"] = null;
-                      return;
-                    }
-                    db
-                        .getAllPropiedades(
-                          idPredio: widget.formGlobalStatus["idPredio"],
-                          noEdificio: widget.formGlobalStatus["noEdificio"],
-                        )
-                        .then((List<db.Propiedad> propiedades) {
-                          setState(() {
-                            propiedadesDelEdificio = propiedades;
-                          });
-                        });
+                    widget.formGlobalStatus["noLocal"] = null;
+                    // if (casoEncontrado != 5) {
+                    //   return;
+                    // }
+                    // db
+                    //     .getAllPropiedades(
+                    //       idPredio: widget.formGlobalStatus["idPredio"],
+                    //       noEdificio: widget.formGlobalStatus["noEdificio"],
+                    //     )
+                    //     .then((List<db.Propiedad> propiedades) {
+                    //       setState(() {
+                    //         propiedadesDelEdificio = propiedades;
+                    //       });
+                    //     });
                   }
                 },
                 child: Text('Guardar'),
@@ -1135,7 +1153,7 @@ class PropiedadFormState extends State<PropiedadForm> {
   }
 
   void _editarPropiedad(int idx) {
-    _imageVersion++;
+    // _imageVersion++;
     widget.formGlobalStatus["noLocal"] = propiedadesDelEdificio[idx].noLocal;
   }
 }
