@@ -55,7 +55,7 @@ Future<Database> openDB() async {
         nivelPiso TEXT NOT NULL,
         actividadPrimaria TEXT NOT NULL,
         actividadComplementaria TEXT,
-        estadoNegocio TEXT,
+        estadoNegocio INTEGER,
         nombreNegocio TEXT,
         cantidadParqueos INTEGER NOT NULL,
         documentoMostrado INTEGER,

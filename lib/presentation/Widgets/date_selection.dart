@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 
 class DateInput extends StatefulWidget {
-  final DateTime startDate;
+  final DateTime firstDate;
   final DateTime lastDate;
   final String labelText;
-  final void Function(DateTime date)? onChanged;
+  final void Function(int date)? onChanged;
+  final String? Function(String? value)? validator;
+  final String? initialValue;
+  bool Function()? enabled;
   DateInput({
     super.key,
-    required this.startDate,
+    required this.firstDate,
     required this.lastDate,
     required this.labelText,
+    this.initialValue,
     this.onChanged,
+    this.validator,
+    this.enabled,
   });
 
   @override
@@ -18,52 +24,49 @@ class DateInput extends StatefulWidget {
 }
 
 class _DateInputState extends State<DateInput> {
-  final TextEditingController _controller = TextEditingController();
-  DateTime? _selectedDate;
+  TextEditingController _fechaController = TextEditingController();
 
-  Future<void> _seleccionarFecha(BuildContext context) async {
-    final DateTime? date = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(
-        widget.startDate.year,
-        widget.startDate.month,
-        widget.startDate.day,
-      ),
-      lastDate: DateTime(
-        widget.lastDate.year,
-        widget.lastDate.month,
-        widget.lastDate.day,
-      ),
-      locale: const Locale("es", "ES"), // Opcional: para idioma español
-    );
+  @override
+  void dispose() {
+    _fechaController.dispose();
+    super.dispose();
+  }
 
-    if (date != null) {
-      setState(() {
-        _selectedDate = date;
-        _controller.text =
-            "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _fechaController.text = widget.initialValue ?? "";
   }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: _controller,
+      controller: _fechaController,
       readOnly: true,
       decoration: InputDecoration(
         labelText: widget.labelText,
         suffixIcon: Icon(Icons.calendar_today),
       ),
-      onTap: () => _seleccionarFecha(context),
-      onChanged: (value) => widget.onChanged?.call(_selectedDate!),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor seleccione una fecha';
+      onTap: () async {
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: widget.firstDate,
+          lastDate: widget.lastDate,
+        );
+
+        if (pickedDate != null) {
+          _fechaController.text =
+              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+          widget.onChanged?.call(
+            int.parse(
+              "${pickedDate.year}${pickedDate.month.toString().padLeft(2, '0')}${pickedDate.day.toString().padLeft(2, '0')}",
+            ),
+          );
         }
-        return null;
       },
+      validator: widget.validator,
+      enabled: widget.enabled != null ? widget.enabled!() : true,
     );
   }
 }

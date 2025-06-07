@@ -14,6 +14,7 @@ class PredioForm extends StatefulWidget {
 }
 
 // TODO: Al presionar "Guardar", si se encuentra una tupla con el mismo ID, preguntar por confirmacion de cambio.
+// TODO: Cuando ya existe el predio en la BD, este formulario debe autorellenar sus campos con los datos de la tupla presentes en la BD.
 class PredioFormState extends State<PredioForm> {
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {

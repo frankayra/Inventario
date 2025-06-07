@@ -1,10 +1,5 @@
 import 'dart:typed_data';
 
-class ImageWrapper {
-  Uint8List bytes = Uint8List(0);
-  bool imageLoaded = false;
-}
-
 class FormGlobalStatusWrapper<T> {
   bool listeningToChangeEvents = true;
   final Map<String, T?> variables = {

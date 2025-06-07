@@ -17,6 +17,9 @@ class FormularioInspeccion extends StatefulWidget {
 
 class _FormularioInspeccionState extends State<FormularioInspeccion> {
   final _formKey = GlobalKey<FormState>();
+  int _predioFormVersion = 0;
+  int _edificioFormVersion = 0;
+  int _propiedadFormVersion = 0;
 
   bool changePredio = false;
   List<Widget> secciones = [];
@@ -53,7 +56,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
         PREDIO,
         PredioForm(
           key: ValueKey(
-            'predio-${formGlobalStatusWrapper.variables["idPredio"]}',
+            'predio-${formGlobalStatusWrapper.variables["idPredio"]}-$_predioFormVersion',
           ),
           formGlobalStatus: formGlobalStatusWrapper,
         ),
@@ -64,7 +67,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
           EDIFICIOS,
           EdificioForm(
             key: ValueKey(
-              'edificio-${formGlobalStatusWrapper.variables["idPredio"]}-${formGlobalStatusWrapper.variables["noEdificio"]}',
+              'edificio-${formGlobalStatusWrapper.variables["idPredio"]}-${formGlobalStatusWrapper.variables["noEdificio"]}-$_edificioFormVersion',
             ),
             formGlobalStatus: formGlobalStatusWrapper,
           ),
@@ -75,7 +78,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
           PROPIEDADES,
           PropiedadForm(
             key: ValueKey(
-              'propiedad-${formGlobalStatusWrapper.variables["idPredio"]}-${formGlobalStatusWrapper.variables["noEdificio"]}-${formGlobalStatusWrapper.variables["noLocal"]}',
+              'propiedad-${formGlobalStatusWrapper.variables["idPredio"]}-${formGlobalStatusWrapper.variables["noEdificio"]}-${formGlobalStatusWrapper.variables["noLocal"]}-$_propiedadFormVersion',
             ),
             formGlobalStatus: formGlobalStatusWrapper,
           ),
@@ -197,64 +200,25 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   void idPredioChanged(int? idPredio) {
     setState(() {
-      // if (secciones.length >= 3) secciones.removeAt(2);
-      // if (secciones.length >= 2) secciones.removeAt(1);
-      // if (secciones.length >= 1) secciones.removeAt(0);
       formGlobalStatusWrapper.variables["idPredio"] = idPredio;
       formGlobalStatusWrapper.variables["noEdificio"] = null;
       formGlobalStatusWrapper.variables["noLocal"] = null;
-      // secciones.addAll([
-      //   _buildSection(
-      //     PREDIO,
-      //     PredioForm(formGlobalStatus: formGlobalStatusWrapper),
-      //     0,
-      //   ),
-      //   _buildSection(
-      //     EDIFICIOS,
-      //     EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
-      //     1,
-      //   ),
-      //   _buildSection(
-      //     PROPIEDADES,
-      //     PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
-      //     2,
-      //   ),
-      // ]);
+      _predioFormVersion = (_predioFormVersion + 1) % 40;
     });
   }
 
   void noEdificioChanged(int? noEdificio) {
     setState(() {
-      // if (secciones.length >= 3) secciones.removeAt(2);
-      // if (secciones.length >= 2) secciones.removeAt(1);
       formGlobalStatusWrapper.variables["noEdificio"] = noEdificio;
       formGlobalStatusWrapper.variables["noLocal"] = null;
-      // secciones.addAll([
-      //   _buildSection(
-      //     EDIFICIOS,
-      //     EdificioForm(formGlobalStatus: formGlobalStatusWrapper),
-      //     1,
-      //   ),
-      //   _buildSection(
-      //     PROPIEDADES,
-      //     PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
-      //     2,
-      //   ),
-      // ]);
+      _edificioFormVersion = (_edificioFormVersion + 1) % 40;
     });
   }
 
   void noLocalChanged(int? noLocal) {
     setState(() {
-      // if (secciones.length >= 3) secciones.removeAt(2);
       formGlobalStatusWrapper.variables["noLocal"] = noLocal;
-      // secciones.addAll([
-      //   _buildSection(
-      //     PROPIEDADES,
-      //     PropiedadForm(formGlobalStatus: formGlobalStatusWrapper),
-      //     2,
-      //   ),
-      // ]);
+      _propiedadFormVersion = (_propiedadFormVersion + 1) % 40;
     });
   }
 }

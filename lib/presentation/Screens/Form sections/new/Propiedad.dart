@@ -1,13 +1,19 @@
+import 'dart:typed_data';
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Widgets/date_selection.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:inventario/utiles/db_general_management.dart' as db;
-import 'package:inventario/utiles/wrappers.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:inventario/presentation/Widgets/date_selection.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
 import 'package:inventario/presentation/Widgets/dialogs.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:inventario/utiles/db_general_management.dart' as db;
+import 'package:inventario/utiles/wrappers.dart';
+import 'package:inventario/utiles/hash.dart';
 
+// TODO: Acabar de arreglar lo de los campos a la hora de la validacion
+// TODO: Que se guarde bien una propiedad.
 // TODO: Como sera que se agregan nuevas instancias y se cambian los valores automaticamente.
+
 // TODO: arreglar los validadores de los campos opcionales que se activan con los campos check.
 // TODO: Arreglar el widget de fecha.
 // TODO: Verificar la correcta funcion al presionar en una propiedad.
@@ -137,12 +143,30 @@ class PropiedadFormState extends State<PropiedadForm> {
                                 .afectacionesCovidPersonalDesempennoEmpresa;
                         _afectacionesCovidSobreVentas =
                             currentPropiedad.afectacionesCovidSobreVentas;
-                        _codigoCIUUActividadPrimaria =
+                        _codigoCIIUActividadPrimaria =
                             currentPropiedad.codigoCIUUActividadPrimaria;
-                        _codigoCIUUActividadComplementaria =
+                        _codigoCIIUActividadComplementaria =
                             currentPropiedad.codigoCIUUActividadComplementaria;
                         _observacionesPatentes =
                             currentPropiedad.observacionesPatentes;
+                        _imagenDocumentoLegal =
+                            currentPropiedad.imagenDocumentoLegal;
+
+                        if (_afectacionesCovidPersonalDesempennoEmpresa !=
+                            null) {
+                          _afectacionesCovidPersonalDesempennoEmpresaList =
+                              _afectacionesCovidPersonalDesempennoEmpresa!
+                                  .split(",")
+                                  .map((item) => int.parse(item))
+                                  .toList();
+                        }
+                        if (_afectacionesCovidSobreVentas != null) {
+                          _afectacionesCovidSobreVentasList =
+                              _afectacionesCovidSobreVentas!
+                                  .split(",")
+                                  .map((item) => int.parse(item))
+                                  .toList();
+                        }
                       });
                     }
                   });
@@ -186,12 +210,11 @@ class PropiedadFormState extends State<PropiedadForm> {
   String? _afectacionesCovidSobreVentas;
   List<int> _afectacionesCovidPersonalDesempennoEmpresaList = [];
   List<int> _afectacionesCovidSobreVentasList = [];
-  String? _codigoCIUUActividadPrimaria;
-  String? _codigoCIUUActividadComplementaria;
+  String? _codigoCIIUActividadPrimaria;
+  String? _codigoCIIUActividadComplementaria;
   String? _observacionesPatentes;
-  final MyImagePickerInput _imagenDocumentoLegal = MyImagePickerInput(
-    imageLabel: "Imagen de documento legal",
-  );
+  Uint8List? _imagenDocumentoLegal;
+  int _imageVersion = Random().nextInt(2000000);
 
   @override
   Widget build(BuildContext context) {
@@ -273,6 +296,7 @@ class PropiedadFormState extends State<PropiedadForm> {
             //   ],
             // ),
             TextFormField(
+              key: ValueKey("noLocal-$noLocal"),
               initialValue: noLocal != null ? noLocal.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Numero Local'),
@@ -289,23 +313,56 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("nivelPiso-$_nivelPiso"),
+              initialValue: _nivelPiso != null ? _nivelPiso.toString() : "",
               decoration: InputDecoration(labelText: 'Nivel piso'),
               onChanged: (value) {
                 _nivelPiso = value;
               },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ingresa el campo Nivel Piso';
+                }
+                return null;
+              },
             ),
             TextFormField(
+              key: ValueKey("actividadPrimaria-$_actividadPrimaria"),
+              initialValue:
+                  _actividadPrimaria != null
+                      ? _actividadPrimaria.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Actividad primaria'),
               onChanged: (value) {
                 _actividadPrimaria = value;
               },
+
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ingresa la Actividad primaria';
+                }
+                return null;
+              },
             ),
             TextFormField(
+              key: ValueKey(
+                "actividadComplementaria-$_actividadComplementaria",
+              ),
+              initialValue:
+                  _actividadComplementaria != null
+                      ? _actividadComplementaria.toString()
+                      : "",
               decoration: InputDecoration(
                 labelText: 'Actividad complementaria',
               ),
               onChanged: (value) {
                 _actividadComplementaria = value;
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ingresa la Actividad complementario';
+                }
+                return null;
               },
             ),
             DropdownButtonFormField(
@@ -332,12 +389,24 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("nombreNegocio-$_nombreNegocio"),
+              initialValue:
+                  _nombreNegocio != null ? _nombreNegocio.toString() : "",
               decoration: InputDecoration(labelText: 'Nombre negocio'),
               onChanged: (value) {
                 _nombreNegocio = value;
               },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ingresa el nombre del negocio';
+                }
+                return null;
+              },
             ),
             TextFormField(
+              key: ValueKey("cantidadParqueos-$_cantidadParqueos"),
+              initialValue:
+                  _cantidadParqueos != null ? _cantidadParqueos.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad de parqueos'),
               validator: (value) {
@@ -363,9 +432,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                   })
                   .toList(growable: false),
               onChanged: (value) {
-                setState(() {
-                  _documentoMostrado = value;
-                });
+                _documentoMostrado = value;
               },
               decoration: InputDecoration(labelText: 'Documento mostrado'),
               validator: (value) {
@@ -376,12 +443,25 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("nombrePatentado-$_nombrePatentado"),
+              initialValue:
+                  _nombrePatentado != null ? _nombrePatentado.toString() : "",
               decoration: InputDecoration(labelText: 'Nombre del patentado'),
               onChanged: (value) {
                 _nombrePatentado = value;
               },
+              validator:
+                  (value) =>
+                      value != null && value.isNotEmpty
+                          ? null
+                          : "Ingrese el nombre del patentado",
             ),
             TextFormField(
+              key: ValueKey("numeroPatenteComercial-$_numeroPatenteComercial"),
+              initialValue:
+                  _numeroPatenteComercial != null
+                      ? _numeroPatenteComercial.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Número de patente comercial',
@@ -399,6 +479,9 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("cedulaPatentado-$_cedulaPatentado"),
+              initialValue:
+                  _cedulaPatentado != null ? _cedulaPatentado.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cédula patentado'),
               validator: (value) {
@@ -414,11 +497,22 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("nombreActividadPatente-$_nombreActividadPatente"),
+              initialValue:
+                  _nombreActividadPatente != null
+                      ? _nombreActividadPatente.toString()
+                      : "",
               decoration: InputDecoration(
                 labelText: 'Nombre de la actividad registrada en la patente',
               ),
               onChanged: (value) {
                 _nombreActividadPatente = value;
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Ingresa el nombre de la actividad registrada';
+                }
+                return null;
               },
             ),
             SizedBox(height: 20),
@@ -437,6 +531,9 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             TextFormField(
               enabled: _tieneMasPatentes,
+              key: ValueKey("numeroPatente_2-$_numeroPatente_2"),
+              initialValue:
+                  _numeroPatente_2 != null ? _numeroPatente_2.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Número de patente 2'),
               validator: (value) {
@@ -469,11 +566,16 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             TextFormField(
               enabled: _tienePermisoSalud,
+              key: ValueKey("numeroPermisoSalud-$_numeroPermisoSalud"),
+              initialValue:
+                  _numeroPermisoSalud != null
+                      ? _numeroPermisoSalud.toString()
+                      : "",
               decoration: InputDecoration(
                 labelText: 'Número de permiso de salud',
               ),
               onChanged: (value) {
-                _nombrePatentado = value;
+                _numeroPermisoSalud = value;
               },
               validator: (value) {
                 if (_tienePermisoSalud && (value == null || value.isEmpty)) {
@@ -483,18 +585,35 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             DateInput(
-              startDate: DateTime(2000, 1, 1),
+              key: ValueKey(
+                'fechaVigenciaPermisoSalud-$_tienePermisoSalud-$_fechaVigenciaPermisoSalud',
+              ),
+              initialValue:
+                  _fechaVigenciaPermisoSalud != null
+                      ? _fechaVigenciaPermisoSalud.toString()
+                      : "",
+              firstDate: DateTime(2000, 1, 1),
               lastDate: DateTime(2100),
               labelText: 'Fecha de vigencia del permiso de salud',
               onChanged: (value) {
-                _fechaVigenciaPermisoSalud = int.parse(
-                  "${value.year}${value.month.toString().padLeft(2, '0')}${value.day.toString().padLeft(2, '0')}",
-                );
+                _fechaVigenciaPermisoSalud = value;
               },
+              validator: (value) {
+                if (!_tienePermisoSalud) return null;
+                if (value == null || value.isEmpty) {
+                  return "Ingresa la fecha de vigencia del permiso de salud";
+                }
+              },
+              enabled: () => _tienePermisoSalud,
               // enabled: _tienePermisoSalud,
             ),
             TextFormField(
               enabled: _tienePermisoSalud,
+              key: ValueKey("codigoCIIUPermisoSalud-$_codigoCIIUPermisoSalud"),
+              initialValue:
+                  _codigoCIIUPermisoSalud != null
+                      ? _codigoCIIUPermisoSalud.toString()
+                      : "",
               decoration: InputDecoration(
                 labelText: 'Código CIIU del permiso de salud',
               ),
@@ -524,14 +643,19 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             TextFormField(
               enabled: _seTrataDeLocalMercado,
+              key: ValueKey("numeroLocalMercado-$_numeroLocalMercado"),
+              initialValue:
+                  _numeroLocalMercado != null
+                      ? _numeroLocalMercado.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Número de local mercado'),
               validator: (value) {
-                if (_seTrataDeLocalMercado &&
-                    (value == null || value.isEmpty)) {
+                if (!_seTrataDeLocalMercado) return null;
+                if (value == null || value.isEmpty) {
                   return 'Por favor ingresa el número de local mercado';
                 }
-                final number = int.tryParse(value!);
+                final number = int.tryParse(value);
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
@@ -555,15 +679,21 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             TextFormField(
               enabled: _tienePatenteLicores,
+              key: ValueKey("numeroPatenteLicores-$_numeroPatenteLicores"),
+              initialValue:
+                  _numeroPatenteLicores != null
+                      ? _numeroPatenteLicores.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Número de patente licores',
               ),
               validator: (value) {
-                if (_tienePatenteLicores && (value == null || value.isEmpty)) {
+                if (!_tienePatenteLicores) return null;
+                if (value == null || value.isEmpty) {
                   return 'Por favor ingresa el número de patente licores';
                 }
-                final number = int.tryParse(value!);
+                final number = int.tryParse(value);
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
@@ -595,6 +725,11 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("telefonoPatentado-$_telefonoPatentado"),
+              initialValue:
+                  _telefonoPatentado != null
+                      ? _telefonoPatentado.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Teléfono patentado'),
               validator: (value) {
@@ -610,12 +745,29 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("correoElectronico-$_correoElectronico"),
+              initialValue:
+                  _correoElectronico != null
+                      ? _correoElectronico.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Correo electrónico'),
               onChanged: (value) {
                 _correoElectronico = value;
               },
+              validator:
+                  (value) =>
+                      value != null && value.isNotEmpty
+                          ? null
+                          : "Ingrese el correo electronico",
             ),
             TextFormField(
+              key: ValueKey(
+                "cantidadEmpleadosAntesCovid-$_cantidadEmpleadosAntesCovid",
+              ),
+              initialValue:
+                  _cantidadEmpleadosAntesCovid != null
+                      ? _cantidadEmpleadosAntesCovid.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Cantidad de empleados antes del COVID-19',
@@ -633,6 +785,13 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
+              key: ValueKey(
+                "cantidadEmpleadosActual-$_cantidadEmpleadosActual",
+              ),
+              initialValue:
+                  _cantidadEmpleadosActual != null
+                      ? _cantidadEmpleadosActual.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Cantidad de empleados actual',
@@ -655,6 +814,9 @@ class PropiedadFormState extends State<PropiedadForm> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             ListView(
+              key: ValueKey(
+                "afectacionesCovidPersonalDesempennoEmpresa-$_afectacionesCovidPersonalDesempennoEmpresa",
+              ),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children:
@@ -695,6 +857,9 @@ class PropiedadFormState extends State<PropiedadForm> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             ListView(
+              key: ValueKey(
+                "afectacionesCovidSobreVentas-$_afectacionesCovidSobreVentas",
+              ),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children:
@@ -725,29 +890,72 @@ class PropiedadFormState extends State<PropiedadForm> {
                   }).toList(),
             ),
             TextFormField(
+              key: ValueKey(
+                "codigoCIIUActividadPrimaria-$_codigoCIIUActividadPrimaria",
+              ),
+              initialValue:
+                  _codigoCIIUActividadPrimaria != null
+                      ? _codigoCIIUActividadPrimaria.toString()
+                      : "",
               decoration: InputDecoration(
                 labelText: 'Código CIIU actividad primaria',
               ),
-              onChanged: (value) {
-                _codigoCIUUActividadPrimaria = value;
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  _codigoCIIUActividadPrimaria = value;
+                  return null;
+                }
+                return "Ingrese el codigo CIIU de la actividad primaria";
               },
             ),
             TextFormField(
+              key: ValueKey(
+                "_codigoCIIUActividadComplementaria-$_codigoCIIUActividadComplementaria",
+              ),
+              initialValue:
+                  _codigoCIIUActividadComplementaria != null
+                      ? _codigoCIIUActividadComplementaria.toString()
+                      : "",
               decoration: InputDecoration(
                 labelText: 'Código CIIU actividad complementaria',
               ),
-              onChanged: (value) {
-                _codigoCIUUActividadComplementaria = value;
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  _codigoCIIUActividadComplementaria = value;
+                  return null;
+                }
+                return "Ingrese el codigo CIIU de la actividad complementaria";
               },
             ),
             TextFormField(
+              key: ValueKey("observacionesPatentes-$_observacionesPatentes"),
+              initialValue:
+                  _observacionesPatentes != null
+                      ? _observacionesPatentes.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Observaciones patentes'),
               onChanged: (value) {
                 _observacionesPatentes = value;
               },
             ),
             SizedBox(height: 20),
-            _imagenDocumentoLegal,
+            MyImagePicker(
+              key: ValueKey(
+                "imagenDocumentoLegal-${shortHash(_imagenDocumentoLegal ?? Uint8List(1))}",
+              ),
+              label: "Imagen de documento legal",
+              initialValue: _imagenDocumentoLegal,
+              context: context,
+              validator: (imagebytes) {
+                _imagenDocumentoLegal = imagebytes;
+                return null;
+              },
+              onChanged: (imageBytes) {
+                setState(() {
+                  _imageVersion++;
+                });
+              },
+            ),
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++               +++++++++++++++++++++++++++ //
@@ -834,12 +1042,11 @@ class PropiedadFormState extends State<PropiedadForm> {
                           _afectacionesCovidPersonalDesempennoEmpresa,
                       afectacionesCovidSobreVentas:
                           _afectacionesCovidSobreVentas,
-                      codigoCIUUActividadPrimaria: _codigoCIUUActividadPrimaria,
+                      codigoCIUUActividadPrimaria: _codigoCIIUActividadPrimaria,
                       codigoCIUUActividadComplementaria:
-                          _codigoCIUUActividadComplementaria,
+                          _codigoCIIUActividadComplementaria,
                       observacionesPatentes: _observacionesPatentes,
-                      imagenDocumentoLegal:
-                          await _imagenDocumentoLegal.getImageBytes,
+                      imagenDocumentoLegal: _imagenDocumentoLegal!,
                     );
                     try {
                       switch (casoEncontrado) {
@@ -893,6 +1100,7 @@ class PropiedadFormState extends State<PropiedadForm> {
 
                     if (casoEncontrado != 5) {
                       widget.formGlobalStatus["noLocal"] = null;
+                      return;
                     }
                     db
                         .getAllPropiedades(
@@ -927,6 +1135,7 @@ class PropiedadFormState extends State<PropiedadForm> {
   }
 
   void _editarPropiedad(int idx) {
+    _imageVersion++;
     widget.formGlobalStatus["noLocal"] = propiedadesDelEdificio[idx].noLocal;
   }
 }

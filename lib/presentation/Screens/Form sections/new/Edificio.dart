@@ -1,17 +1,20 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:inventario/presentation/Widgets/text.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
 import 'package:inventario/presentation/Widgets/selection.dart';
 import 'package:inventario/presentation/Widgets/numeric.dart';
 import 'package:inventario/presentation/Widgets/dialogs.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:inventario/utiles/wrappers.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:inventario/utiles/hash.dart';
+// import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 
 class EdificioForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;
@@ -23,18 +26,6 @@ class EdificioForm extends StatefulWidget {
 }
 
 class EdificioFormState extends State<EdificioForm> {
-  TextEditingController _noEdificioController = TextEditingController();
-  TextEditingController _distritoController = TextEditingController();
-  TextEditingController _cantidadPisosController = TextEditingController();
-  TextEditingController _cantidadSotanosController = TextEditingController();
-  TextEditingController _observacionesEdificacionController =
-      TextEditingController();
-  TextEditingController _imagenConstruccionController = TextEditingController();
-  TextEditingController _observacionesConstruccionController =
-      TextEditingController();
-  TextEditingController _cantidadMedidoresController = TextEditingController();
-  TextEditingController _observacionesMedidoresController =
-      TextEditingController();
   List<db.Edificio> edificiosDelPredio = [];
   bool editingState = false;
   final _formKey = GlobalKey<FormState>();
@@ -105,24 +96,6 @@ class EdificioFormState extends State<EdificioForm> {
               .then((currentEdificio) {
                 if (currentEdificio != null) {
                   setState(() {
-                    _noEdificioController.text =
-                        widget.formGlobalStatus["noEdificio"].toString();
-                    _distritoController.text =
-                        currentEdificio.distrito.toString();
-                    _cantidadPisosController.text =
-                        currentEdificio.cantidadPisos.toString();
-                    _cantidadSotanosController.text =
-                        currentEdificio.cantidadSotanos.toString();
-                    _observacionesEdificacionController.text =
-                        currentEdificio.observacionesEdificacion.toString();
-                    _imagenConstruccionController.text =
-                        currentEdificio.imagenConstruccion.toString();
-                    _observacionesConstruccionController.text =
-                        currentEdificio.observacionesConstruccion.toString();
-                    _cantidadMedidoresController.text =
-                        currentEdificio.cantidadMedidores.toString();
-                    _observacionesMedidoresController.text =
-                        currentEdificio.observacionesMedidores.toString();
                     noEdificio = widget.formGlobalStatus["noEdificio"];
                     _distrito = currentEdificio.distrito;
                     _cantidadPisos = currentEdificio.cantidadPisos;
@@ -133,6 +106,7 @@ class EdificioFormState extends State<EdificioForm> {
                     _observacionesEdificacion =
                         currentEdificio.observacionesEdificacion;
                     _estadoInmueble = currentEdificio.estadoInmueble;
+                    _imagenConstruccion = currentEdificio.imagenConstruccion;
                     _observacionesConstruccion =
                         currentEdificio.observacionesConstruccion;
                     _cantidadMedidores = currentEdificio.cantidadMedidores;
@@ -151,6 +125,8 @@ class EdificioFormState extends State<EdificioForm> {
   // TODO: Al guardar un formulario, resetearlo hacia abajo por ende vaciar los campos
   // TODO: Ver razon por la que cuando se rellena uno o varios campos de un subformulario, luego se despliega otro y se vuelve a desplegar el primero, no tiene nada rellenado.
   // TODO: ver el tema de los edificios que se transfieren a predios inexistentes en la base de datos.
+  // TODO: Cuando se termina de agregar un edificio y se quedan los datos rellenados, estos deberian NO DESAPARECER automaticamente, sino cuando se aprieta el boton "+"
+  // TODO: Al Darle al boton "+", si el formulario tiene algun cambio, preguntar si se quieren perder los cambios hechos. Yo siempre preguntaria, aunque no hubiese cambios.
   // DONE: Analizar el caso en que se este editando el noEdificio de un edificio que ya existia.
 
   // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
@@ -167,9 +143,8 @@ class EdificioFormState extends State<EdificioForm> {
 
   // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
   int? _estadoInmueble;
-  final MyImagePickerInput _imagenConstruccion = MyImagePickerInput(
-    imageLabel: "Imagen de construcción",
-  );
+  Uint8List? _imagenConstruccion;
+  int _imageVersion = Random().nextInt(2000000);
   String? _observacionesConstruccion;
 
   // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
@@ -204,8 +179,7 @@ class EdificioFormState extends State<EdificioForm> {
                   return InputChip(
                     label: Text('Ed. ${entry.value.noEdificio}'),
                     backgroundColor: chipBackgroundColor,
-                    onDeleted:
-                        () => setState(() => edificiosDelPredio.removeAt(idx)),
+                    onDeleted: () => _eliminarEdificio(idx),
                     deleteIcon: Icon(Icons.close),
                     onPressed: () => _editarEdificio(idx),
                   );
@@ -259,18 +233,11 @@ class EdificioFormState extends State<EdificioForm> {
             // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-            Divider(
-              color: Colors.blueAccent, // Color de la línea
-              height: 30, // Espacio vertical que ocupa el divisor
-              thickness: 2, // Grosor de la línea
-              indent: 20, // Margen izquierdo
-              endIndent: 20, // Margen derecho
-              // radius: const Radius.circular(5.0), // Esquinas redondeadas (Flutter 3.x+)
-            ),
             // MyNumericInput(label: "Edificio", noValidValidationMessage: "Por favor ingresa el número de edificio"),
             TextFormField(
-              controller: _noEdificioController,
-              // initialValue: noEdificio?.toString(),
+              // controller: _noEdificioController,
+              key: ValueKey('noEdificio-$noEdificio'),
+              initialValue: noEdificio?.toString(),
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Edificio'),
               validator: (value) {
@@ -309,7 +276,9 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
-              controller: _cantidadPisosController,
+              key: ValueKey("cantidadPisos-$_cantidadPisos"),
+              initialValue:
+                  _cantidadPisos != null ? _cantidadPisos.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad pisos'),
               validator: (value) {
@@ -325,7 +294,9 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
-              controller: _cantidadSotanosController,
+              key: ValueKey("cantidadSotanos-$_cantidadSotanos"),
+              initialValue:
+                  _cantidadSotanos != null ? _cantidadSotanos.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad sótanos'),
               validator: (value) {
@@ -407,9 +378,15 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
-              controller: _observacionesEdificacionController,
+              key: ValueKey(
+                "observacionesEdificacion-$_observacionesEdificacion",
+              ),
+              initialValue:
+                  _observacionesEdificacion != null
+                      ? _observacionesEdificacion.toString()
+                      : "",
               decoration: InputDecoration(
-                labelText: 'Observaciones edificaciones',
+                labelText: 'Observaciones edificacion',
               ),
               onChanged: (value) {
                 _observacionesEdificacion = value;
@@ -445,9 +422,31 @@ class EdificioFormState extends State<EdificioForm> {
                 return null;
               },
             ),
-            _imagenConstruccion,
+            MyImagePicker(
+              key: ValueKey(
+                "imagenConstruccion-${shortHash(_imagenConstruccion ?? Uint8List(1))}",
+              ),
+              label: "Imagen de construcción",
+              initialValue: _imagenConstruccion,
+              context: context,
+              validator: (imagebytes) {
+                _imagenConstruccion = imagebytes;
+                return null;
+              },
+              onChanged: (imageBytes) {
+                setState(() {
+                  _imageVersion++;
+                });
+              },
+            ),
             TextFormField(
-              controller: _observacionesConstruccionController,
+              key: ValueKey(
+                "observacionesConstruccion-$_observacionesConstruccion",
+              ),
+              initialValue:
+                  _observacionesConstruccion != null
+                      ? _observacionesConstruccion.toString()
+                      : "",
               decoration: InputDecoration(
                 labelText: 'Observaciones Construcción',
               ),
@@ -464,7 +463,11 @@ class EdificioFormState extends State<EdificioForm> {
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             TextFormField(
-              controller: _cantidadMedidoresController,
+              key: ValueKey("cantidadMedidores-$_cantidadMedidores"),
+              initialValue:
+                  _cantidadMedidores != null
+                      ? _cantidadMedidores.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad Medidores'),
               validator: (value) {
@@ -480,7 +483,11 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
-              controller: _observacionesMedidoresController,
+              key: ValueKey("observacionesMedidores-$_observacionesMedidores"),
+              initialValue:
+                  _observacionesMedidores != null
+                      ? _observacionesMedidores.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Observaciones Medidores'),
               onChanged: (value) {
                 _observacionesMedidores = value;
@@ -547,8 +554,7 @@ class EdificioFormState extends State<EdificioForm> {
                       canoasBajantes: _canoasBajantes!,
                       observacionesEdificacion: _observacionesEdificacion,
                       estadoInmueble: _estadoInmueble!,
-                      imagenConstruccion:
-                          await _imagenConstruccion.getImageBytes,
+                      imagenConstruccion: _imagenConstruccion!,
                       observacionesConstruccion: _observacionesConstruccion,
                       cantidadMedidores: _cantidadMedidores!,
                       observacionesMedidores: _observacionesMedidores,
@@ -603,8 +609,9 @@ class EdificioFormState extends State<EdificioForm> {
                       );
                     }
 
+                    widget.formGlobalStatus["noEdificio"] = null;
                     if (casoEncontrado != 5) {
-                      widget.formGlobalStatus["noEdificio"] = null;
+                      return;
                     }
                     db
                         .getAllEdificios(
@@ -638,6 +645,51 @@ class EdificioFormState extends State<EdificioForm> {
   }
 
   void _editarEdificio(int idx) {
+    _imageVersion++;
     widget.formGlobalStatus["noEdificio"] = edificiosDelPredio[idx].noEdificio;
+  }
+
+  void _eliminarEdificio(int idx) {
+    var currentEdificio = edificiosDelPredio[idx];
+    bool dismissAction = false;
+    // widget.formGlobalStatus["noEdificio"] = null;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Text('Edificio Eliminado'),
+            TextButton(
+              onPressed: () {},
+              child: Wrap(
+                children: [
+                  Text("Deshacer"),
+                  // CircularCountDownTimer(
+                  //   duration: 5,
+                  //   initialDuration: 0,
+                  //   controller: CountDownController(),
+                  //   width: 20,
+                  //   height: 20,
+                  //   ringColor: Colors.blue[600]!,
+                  //   fillColor: Colors.transparent,
+                  //   backgroundColor: Colors.white,
+                  //   strokeWidth: 3.0,
+                  //   textStyle: TextStyle(fontSize: 12, color: Colors.black),
+                  //   isReverse: true,
+                  //   isReverseAnimation: true,
+                  //   onComplete: () {
+                  //     // Acción al finalizar
+                  //     if (!dismissAction) {
+                  //       currentEdificio.deleteInDB();
+                  //     }
+                  //   },
+                  // ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 5)),
+    );
   }
 }
