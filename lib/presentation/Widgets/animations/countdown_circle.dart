@@ -37,8 +37,8 @@ class _CountdownCircleState extends State<CountdownCircle> {
               child: CircularProgressIndicator(
                 value: value,
                 strokeWidth: 4,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                backgroundColor: Theme.of(context).disabledColor,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[800]!),
               ),
             ),
             Text(

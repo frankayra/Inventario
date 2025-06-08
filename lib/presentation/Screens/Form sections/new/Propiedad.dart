@@ -1,21 +1,20 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:inventario/presentation/Widgets/date_selection.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
 import 'package:inventario/presentation/Widgets/dialogs.dart';
 import 'package:inventario/utiles/db_general_management.dart' as db;
 import 'package:inventario/utiles/wrappers.dart';
 import 'package:inventario/utiles/hash.dart';
+import 'package:inventario/presentation/Widgets/animations/countdown_circle.dart';
 
-// TODO: Acabar de arreglar lo de los campos a la hora de la validacion
-// TODO: Que se guarde bien una propiedad.
-// TODO: Como sera que se agregan nuevas instancias y se cambian los valores automaticamente.
+// DONE: Acabar de arreglar lo de los campos a la hora de la validacion
+// DONE: Que se guarde bien una propiedad.
+// DONE: Como sera que se agregan nuevas instancias y se cambian los valores automaticamente.
 
-// TODO: arreglar los validadores de los campos opcionales que se activan con los campos check.
-// TODO: Arreglar el widget de fecha.
-// TODO: Verificar la correcta funcion al presionar en una propiedad.
+// DONE: arreglar los validadores de los campos opcionales que se activan con los campos check.
+// DONE: Arreglar el widget de fecha.
+// DONE: Verificar la correcta funcion al presionar en una propiedad.
 
 class PropiedadForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;
@@ -27,6 +26,8 @@ class PropiedadForm extends StatefulWidget {
 
 class PropiedadFormState extends State<PropiedadForm> {
   List<db.Propiedad> propiedadesDelEdificio = [];
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? snackbaractions;
+  bool overridingDelete = false;
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "estadoNegocio": {
@@ -256,10 +257,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                   return InputChip(
                     label: Text('P. ${entry.value.noLocal}'),
                     backgroundColor: chipBackgroundColor,
-                    onDeleted:
-                        () => setState(
-                          () => propiedadesDelEdificio.removeAt(idx),
-                        ),
+                    onDeleted: () => _eliminarPropiedad(context, idx),
                     deleteIcon: Icon(Icons.close),
                     onPressed: () => _editarPropiedad(idx),
                   );
@@ -1013,10 +1011,10 @@ class PropiedadFormState extends State<PropiedadForm> {
                     } else if (edicion) {
                       if (mismoLugarDeDestino) {
                         casoEncontrado = 5;
-                      } else if (nadieEnElNuevoLugar) {
-                        casoEncontrado = 3;
                       } else if (alguienEnElNuevoLugar) {
                         casoEncontrado = 4;
+                      } else if (nadieEnElNuevoLugar) {
+                        casoEncontrado = 3;
                       }
                     }
 
@@ -1036,15 +1034,23 @@ class PropiedadFormState extends State<PropiedadForm> {
                       cedulaPatentado: _cedulaPatentado,
                       nombreActividadPatente: _nombreActividadPatente,
                       tieneMasPatentes: _tieneMasPatentes,
-                      numeroPatente_2: _numeroPatente_2,
+                      numeroPatente_2:
+                          _tieneMasPatentes ? _numeroPatente_2 : null,
                       tienePermisoSalud: _tienePermisoSalud,
-                      numeroPermisoSalud: _numeroPermisoSalud,
-                      fechaVigenciaPermisoSalud: _fechaVigenciaPermisoSalud,
-                      codigoCIIUPermisoSalud: _codigoCIIUPermisoSalud,
+                      numeroPermisoSalud:
+                          _tienePermisoSalud ? _numeroPermisoSalud : null,
+                      fechaVigenciaPermisoSalud:
+                          _tienePermisoSalud
+                              ? _fechaVigenciaPermisoSalud
+                              : null,
+                      codigoCIIUPermisoSalud:
+                          _tienePermisoSalud ? _codigoCIIUPermisoSalud : null,
                       seTrataDeLocalMercado: _seTrataDeLocalMercado,
-                      numeroLocalMercado: _numeroLocalMercado,
+                      numeroLocalMercado:
+                          _seTrataDeLocalMercado ? _numeroLocalMercado : null,
                       tienePatenteLicores: _tienePatenteLicores,
-                      numeroPatenteLicores: _numeroPatenteLicores,
+                      numeroPatenteLicores:
+                          _tienePatenteLicores ? _numeroPatenteLicores : null,
                       areaActividad: _areaActividad,
                       telefonoPatentado: _telefonoPatentado,
                       correoElectronico: _correoElectronico,
@@ -1077,7 +1083,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                           bool? accepted = await showAcceptDismissAlertDialog(
                             context,
                             message:
-                                "Se cambiará el numero de local de la propiedad. ¿Desea continuar?",
+                                "Se cambiará el numero de local de la propiedad actual. ¿Desea continuar?",
                           );
                           if (accepted == null || !accepted) return;
                           newPropiedad.updateInDB(
@@ -1103,6 +1109,12 @@ class PropiedadFormState extends State<PropiedadForm> {
                             ],
                           );
                         case 5:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Se modificarán los datos de esta propiedad. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
                           newPropiedad.updateInDB();
                           break;
                         default:
@@ -1155,5 +1167,67 @@ class PropiedadFormState extends State<PropiedadForm> {
   void _editarPropiedad(int idx) {
     // _imageVersion++;
     widget.formGlobalStatus["noLocal"] = propiedadesDelEdificio[idx].noLocal;
+  }
+
+  void _eliminarPropiedad(BuildContext context, int idx) async {
+    var currentPropiedad = propiedadesDelEdificio[idx];
+    bool dismissAction = false;
+    bool iWasNotOverriden = true;
+    if (snackbaractions != null) {
+      overridingDelete = true;
+      snackbaractions!.close();
+    }
+    snackbaractions = ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Propiedad eliminada'),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    dismissAction = true;
+                  },
+                  child: Text(
+                    "Deshacer",
+                    style: TextStyle(color: Colors.blue[400]),
+                  ),
+                ),
+                SizedBox(width: 15.0),
+                CountdownCircle(duration: Duration(seconds: 5)),
+              ],
+            ),
+          ],
+        ),
+      ),
+
+      // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
+    );
+    final start = DateTime.now();
+    while (DateTime.now().difference(start) < Duration(seconds: 5)) {
+      await Future.delayed(Duration(milliseconds: 200));
+      if (overridingDelete) {
+        overridingDelete = false;
+        iWasNotOverriden = false;
+        break;
+      }
+      if (dismissAction) {
+        snackbaractions!.close();
+        snackbaractions = null;
+        return;
+      }
+    }
+
+    ///\  /\  /\  /\  /\  /\  /\  /\  /\
+    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
+    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
+    //            Acciones
+    await currentPropiedad.deleteInDB();
+    if (iWasNotOverriden) {
+      snackbaractions = null;
+      widget.formGlobalStatus["noLocal"] = widget.formGlobalStatus["noLocal"];
+    }
   }
 }

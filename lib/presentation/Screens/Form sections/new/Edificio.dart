@@ -20,7 +20,8 @@ class EdificioForm extends StatefulWidget {
 
 class EdificioFormState extends State<EdificioForm> {
   List<db.Edificio> edificiosDelPredio = [];
-  bool editingState = false;
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? snackbaractions;
+  bool overridingDelete = false;
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
     "distrito": {
@@ -112,11 +113,11 @@ class EdificioFormState extends State<EdificioForm> {
       });
     }
   }
-  // TODO: Eliminar del diccionario el edificio que cambie de predio.
-  // TODO: Marcar como activo(en edicion) el edificio que me mandaron si es que me mandaron.
-  // TODO: Rellenar los campos de edificio si es que me mandaron un edificio.
-  // TODO: Al guardar un formulario, resetearlo hacia abajo por ende vaciar los campos
-  // TODO: Ver razon por la que cuando se rellena uno o varios campos de un subformulario, luego se despliega otro y se vuelve a desplegar el primero, no tiene nada rellenado.
+  // DONE: Eliminar del diccionario el edificio que cambie de predio.
+  // DONE: Marcar como activo(en edicion) el edificio que me mandaron si es que me mandaron.
+  // DONE: Rellenar los campos de edificio si es que me mandaron un edificio.
+  // DONE: Al guardar un formulario, resetearlo hacia abajo por ende vaciar los campos
+  // DONE: Ver razon por la que cuando se rellena uno o varios campos de un subformulario, luego se despliega otro y se vuelve a desplegar el primero, no tiene nada rellenado.
   // TODO: ver el tema de los edificios que se transfieren a predios inexistentes en la base de datos.
   // TODO: Cuando se termina de agregar un edificio y se quedan los datos rellenados, estos deberian NO DESAPARECER automaticamente, sino cuando se aprieta el boton "+"
   // TODO: Al Darle al boton "+", si el formulario tiene algun cambio, preguntar si se quieren perder los cambios hechos. Yo siempre preguntaria, aunque no hubiese cambios.
@@ -180,45 +181,46 @@ class EdificioFormState extends State<EdificioForm> {
               ],
             ),
             SizedBox(height: 40),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue:
-                        widget.formGlobalStatus["idPredio"].toString(),
-                    decoration: InputDecoration(labelText: 'Localización'),
-                    enabled: changePredio,
-                    validator: (value) {
-                      final number = int.tryParse(value!);
-                      if (number == null ||
-                          number < 1000000000 ||
-                          number >= 10000000000) {
-                        return "Ingresa una Localización válida";
-                      }
-                      idPredio = number;
-                    },
-                  ),
-                ),
-                Column(
-                  children: [
-                    Icon(
-                      Icons.edit,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                    Checkbox(
-                      value: changePredio,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          changePredio = newValue!;
-                        });
+            if (widget.formGlobalStatus["noEdificio"] != null)
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      initialValue:
+                          widget.formGlobalStatus["idPredio"].toString(),
+                      decoration: InputDecoration(labelText: 'Localización'),
+                      enabled: changePredio,
+                      validator: (value) {
+                        final number = int.tryParse(value!);
+                        if (number == null ||
+                            number < 1000000000 ||
+                            number >= 10000000000) {
+                          return "Ingresa una Localización válida";
+                        }
+                        idPredio = number;
                       },
-                      // activeColor: Colors.blue,
-                      // checkColor: Colors.white,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.edit,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      Checkbox(
+                        value: changePredio,
+                        onChanged: (bool? newValue) {
+                          setState(() {
+                            changePredio = newValue!;
+                          });
+                        },
+                        // activeColor: Colors.blue,
+                        // checkColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // +++++++++++++++++++++++++                +++++++++++++++++++++++++ //
@@ -530,10 +532,10 @@ class EdificioFormState extends State<EdificioForm> {
                     } else if (edicion) {
                       if (mismoLugarDeDestino) {
                         casoEncontrado = 5;
-                      } else if (nadieEnElNuevoLugar) {
-                        casoEncontrado = 3;
                       } else if (alguienEnElNuevoLugar) {
                         casoEncontrado = 4;
+                      } else if (nadieEnElNuevoLugar) {
+                        casoEncontrado = 3;
                       }
                     }
 
@@ -567,6 +569,12 @@ class EdificioFormState extends State<EdificioForm> {
                           await edificioEnElNuevoLugar!.deleteInDB();
                           await newEdificio.insertInDB();
                         case 3:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Se cambiará el numero de edificio del edificio actual. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
                           newEdificio.updateInDB(
                             where: "id_predio = ? and no_edificio = ?",
                             whereArgs: [
@@ -590,6 +598,12 @@ class EdificioFormState extends State<EdificioForm> {
                             ],
                           );
                         case 5:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "Se modificarán los datos de este edificio. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
                           newEdificio.updateInDB();
                           break;
                         default:
@@ -643,35 +657,66 @@ class EdificioFormState extends State<EdificioForm> {
     widget.formGlobalStatus["noEdificio"] = edificiosDelPredio[idx].noEdificio;
   }
 
-  void _eliminarEdificio(BuildContext context, int idx) {
+  void _eliminarEdificio(BuildContext context, int idx) async {
     var currentEdificio = edificiosDelPredio[idx];
     bool dismissAction = false;
-    // widget.formGlobalStatus["noEdificio"] = null;
-    ScaffoldMessenger.of(context).showSnackBar(
+    bool iWasNotOverriden = true;
+    if (snackbaractions != null) {
+      overridingDelete = true;
+      snackbaractions!.close();
+    }
+    snackbaractions = ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Edificio Eliminado'),
-            TextButton(
-              onPressed: () {
-                dismissAction = true;
-              },
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text("Deshacer"),
-                  SizedBox(width: 15.0),
-                  CountdownCircle(
-                    duration: Duration(seconds: 5),
-                    onEnd: () => currentEdificio.deleteInDB(),
+            Text('Edificio eliminado'),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    dismissAction = true;
+                  },
+                  child: Text(
+                    "Deshacer",
+                    style: TextStyle(color: Colors.blue[400]),
                   ),
-                ],
-              ),
+                ),
+                SizedBox(width: 15.0),
+                CountdownCircle(duration: Duration(seconds: 5)),
+              ],
             ),
           ],
         ),
       ),
+
       // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
     );
+    final start = DateTime.now();
+    while (DateTime.now().difference(start) < Duration(seconds: 5)) {
+      await Future.delayed(Duration(milliseconds: 200));
+      if (overridingDelete) {
+        overridingDelete = false;
+        iWasNotOverriden = false;
+        break;
+      }
+      if (dismissAction) {
+        snackbaractions!.close();
+        snackbaractions = null;
+        return;
+      }
+    }
+
+    ///\  /\  /\  /\  /\  /\  /\  /\  /\
+    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
+    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
+    //            Acciones
+    await currentEdificio.deleteInDB();
+    if (iWasNotOverriden) {
+      snackbaractions = null;
+      widget.formGlobalStatus["noEdificio"] =
+          widget.formGlobalStatus["noEdificio"];
+    }
   }
 }
