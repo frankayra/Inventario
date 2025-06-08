@@ -38,7 +38,7 @@ class _CountdownCircleState extends State<CountdownCircle> {
                 value: value,
                 strokeWidth: 4,
                 backgroundColor: Theme.of(context).disabledColor,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[800]!),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
               ),
             ),
             Text(

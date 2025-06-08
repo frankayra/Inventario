@@ -1227,7 +1227,12 @@ class PropiedadFormState extends State<PropiedadForm> {
     await currentPropiedad.deleteInDB();
     if (iWasNotOverriden) {
       snackbaractions = null;
-      widget.formGlobalStatus["noLocal"] = widget.formGlobalStatus["noLocal"];
+      if (widget.formGlobalStatus["noLocal"] ==
+          propiedadesDelEdificio[idx].noLocal) {
+        widget.formGlobalStatus["noLocal"] = null;
+      } else {
+        widget.formGlobalStatus["noLocal"] = widget.formGlobalStatus["noLocal"];
+      }
     }
   }
 }

@@ -715,8 +715,13 @@ class EdificioFormState extends State<EdificioForm> {
     await currentEdificio.deleteInDB();
     if (iWasNotOverriden) {
       snackbaractions = null;
-      widget.formGlobalStatus["noEdificio"] =
-          widget.formGlobalStatus["noEdificio"];
+      if (widget.formGlobalStatus["noEdificio"] ==
+          edificiosDelPredio[idx].noEdificio) {
+        widget.formGlobalStatus["noEdificio"] = null;
+      } else {
+        widget.formGlobalStatus["noEdificio"] =
+            widget.formGlobalStatus["noEdificio"];
+      }
     }
   }
 }
