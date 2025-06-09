@@ -32,11 +32,33 @@ class PredioFormState extends State<PredioForm> {
   @override
   void initState() {
     super.initState();
+    if (widget.formGlobalStatus["idPredio"] != null) {
+      idPredio = widget.formGlobalStatus["idPredio"];
+      db.getPredio(idPredio: idPredio!).then((predio) {
+        if (predio != null) {
+          print("""
+            nivelPredio1: ${predio.nivelPredio1}
+            nivelPredio2: ${predio.nivelPredio2}
+            nivelPredio3: ${predio.nivelPredio3}
+            acera: ${predio.acera}
+            anchoAcera: ${predio.anchoAcera}
+            observacionesTerreno: ${predio.observacionesTerreno}
+          """);
+          setState(() {
+            _nivelPredio1 = predio.nivelPredio1;
+            _nivelPredio2 = predio.nivelPredio2;
+            _nivelPredio3 = predio.nivelPredio3;
+            _acera = predio.acera;
+            _anchoAcera = predio.anchoAcera;
+            _observacionesTerreno = predio.observacionesTerreno;
+          });
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    idPredio = widget.formGlobalStatus["idPredio"];
     return Form(
       key: _formKey,
       child: Padding(
@@ -45,6 +67,9 @@ class PredioFormState extends State<PredioForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextFormField(
+              key: ValueKey("nivelPredio1-$_nivelPredio1"),
+              initialValue:
+                  _nivelPredio1 != null ? _nivelPredio1.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Nivel predio 1'),
               validator: (value) {
@@ -53,13 +78,16 @@ class PredioFormState extends State<PredioForm> {
                 }
                 final number = double.tryParse(value);
                 if (number == null) {
-                  return 'Por favor ingresa un número válido';
+                  return 'Por favor ingresa un número decimal válido';
                 }
                 _nivelPredio1 = number;
                 return null;
               },
             ),
             TextFormField(
+              key: ValueKey("nivelPredio2-$_nivelPredio2"),
+              initialValue:
+                  _nivelPredio2 != null ? _nivelPredio2.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Nivel predio 2'),
               validator: (value) {
@@ -68,13 +96,16 @@ class PredioFormState extends State<PredioForm> {
                 }
                 final number = double.tryParse(value);
                 if (number == null) {
-                  return 'Por favor ingresa un número válido';
+                  return 'Por favor ingresa un número decimal válido';
                 }
                 _nivelPredio2 = number;
                 return null;
               },
             ),
             TextFormField(
+              key: ValueKey("nivelPredio3-$_nivelPredio3"),
+              initialValue:
+                  _nivelPredio3 != null ? _nivelPredio3.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Nivel predio 3'),
               validator: (value) {
@@ -83,7 +114,7 @@ class PredioFormState extends State<PredioForm> {
                 }
                 final number = double.tryParse(value);
                 if (number == null) {
-                  return 'Por favor ingresa un número válido';
+                  return 'Por favor ingresa un número decimal válido';
                 }
                 _nivelPredio3 = number;
                 return null;
@@ -113,6 +144,8 @@ class PredioFormState extends State<PredioForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("anchoAcera-$_anchoAcera"),
+              initialValue: _anchoAcera != null ? _anchoAcera.toString() : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Ancho de la acera'),
               validator: (value) {
@@ -128,6 +161,11 @@ class PredioFormState extends State<PredioForm> {
               },
             ),
             TextFormField(
+              key: ValueKey("observacionesTerreno-$_observacionesTerreno"),
+              initialValue:
+                  _observacionesTerreno != null
+                      ? _observacionesTerreno.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Observaciones terreno'),
               onChanged: (value) {
                 _observacionesTerreno = value;
@@ -143,7 +181,7 @@ class PredioFormState extends State<PredioForm> {
                       var override = await showAcceptDismissAlertDialog(
                         context,
                         message:
-                            "Ya existe un predio con ese identificador. ¿Desea sobrescribirlo?",
+                            "Se sobrescribirá la información del predio actual. ¿Desea continuar?",
                       );
                       if (override == null || !override) return;
                     }
