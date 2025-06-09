@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/new/Predio.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/new/Edificio.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/new/Propiedad.dart';
-import 'package:inventario/utiles/wrappers.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/Predio.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/Edificio.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/Propiedad.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/wrappers.dart';
 
 const PREDIO = 'Predio';
 const EDIFICIOS = 'Edificios';
@@ -17,6 +17,7 @@ class FormularioInspeccion extends StatefulWidget {
 
 class _FormularioInspeccionState extends State<FormularioInspeccion> {
   final _formKey = GlobalKey<FormState>();
+  late int lastValidPredioId = widget.idPredio;
   int _predioFormVersion = 0;
   int _edificioFormVersion = 0;
   int _propiedadFormVersion = 0;
@@ -115,9 +116,10 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
                           number >= 1000000000 &&
                           number < 10000000000) {
                         setState(() {
+                          lastValidPredioId = number;
                           formGlobalStatusWrapper["idPredio"] = number;
                         });
-                      }
+                      } else {}
                     },
                     validator: (value) {
                       final number = int.tryParse(value!);

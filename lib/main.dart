@@ -6,95 +6,29 @@ import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
-import 'utiles/file_management.dart';
+import 'presentation/Screens/Form sections/Widgets/utiles/file_management.dart';
 import 'presentation/Screens/offline_map_screen.dart';
 // import 'presentation/Screens/form_screen.dart';
 // import 'presentation/Screens/form2_screen.dart';
 import 'presentation/Screens/form3_screen.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:inventario/utiles/db_general_management.dart' as db;
-import 'package:inventario/utiles/db_debug.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_general_management.dart'
+    as db;
+import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_debug.dart';
+import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/tools_selection.dart';
 
 class AppContext {
-  static late String mapName = "habana.mbtiles";
-  static late String assetsMapPath = "assets/tiles/$mapName";
+  static String mapName = "managua18.mbtiles";
+  static String assetsMapPath = "assets/tiles/$mapName";
   static late String appDocumentsMapPath;
   static Future<void> initializeVariables() async {
-    // Variables que se inicializan al inicio de la aplicacion
-    // Se pueden usar en cualquier parte de la aplicacion
     appDocumentsMapPath =
         '${(await getApplicationDocumentsDirectory()).path}/$mapName';
   }
-
-  static Future<void> updateVariables() async {}
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/ DEBUG \/\/\/\/\/\/\/\/\/\/\/\/\/\/\\
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-  // var predio = db.Predio(
-  //   idPredio: 1000000000,
-  //   nivelPredio1: 1,
-  //   nivelPredio2: 1,
-  //   nivelPredio3: 1,
-  //   acera: 1,
-  //   anchoAcera: 1,
-  // );
-  // var edificio = db.Edificio(
-  //   idPredio: 1000000000,
-  //   noEdificio: 1,
-  //   distrito: 1,
-  //   cantidadPisos: 1,
-  //   cantidadSotanos: 1,
-  //   antejardin: 1,
-  //   materialFachada: 1,
-  //   canoasBajantes: 1,
-  //   estadoInmueble: 1,
-  //   imagenConstruccion: Uint8List(8),
-  //   cantidadMedidores: 1,
-  //   observacionesConstruccion: "bla bla bla",
-  //   observacionesEdificacion: "bla bla",
-  //   observacionesMedidores: "bla bla bla bla",
-  // );
-  // final propiedad1 = db.Propiedad(
-  //   idPredio: 1000000000,
-  //   noEdificio: 1,
-  //   noLocal: 1,
-  //   nivelPiso: 'Planta Baja',
-  //   actividadPrimaria: 'Comercio',
-  //   cantidadParqueos: 2,
-  //   tieneMasPatentes: false,
-  //   tienePermisoSalud: true,
-  //   seTrataDeLocalMercado: false,
-  //   tienePatenteLicores: false,
-  //   imagenDocumentoLegal: Uint8List(0),
-  //   nombreNegocio: 'Mi Tienda',
-  // );
-  // var propiedad2 = db.Propiedad.fromRawTuple(propiedad1.toMap());
-  // propiedad2.noLocal = 2;
-  // var propiedad3 = db.Propiedad.fromRawTuple(propiedad1.toMap());
-  // propiedad3.noLocal = 3;
-  // var propiedad4 = db.Propiedad.fromRawTuple(propiedad1.toMap());
-  // propiedad4.noLocal = 4;
-  // await predio.insertInDB();
-  // await edificio.insertInDB();
-  // await propiedad1.insertInDB();
-  // await propiedad2.insertInDB();
-  // await propiedad3.insertInDB();
-  // await propiedad4.insertInDB();
-  // List<db.Predio>? predios;
-  // List<db.Edificio>? edificios;
-  // predios = await db.getAllPredios();
-  // edificios = await db.getAllEdificios(idPredio: predio.idPredio);
-  // print("Predios: ${predios}");
-  // print("Edificios: ${edificios}");
-
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
-  //\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
 
   await AppContext.initializeVariables();
   final mapNewPath = await copyFileToDocuments(
@@ -113,6 +47,7 @@ void main() async {
       title: 'Inventario',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: MyScafold(),
+      debugShowCheckedModeBanner: false,
     ),
   );
 }
@@ -143,12 +78,20 @@ class _MyScafoldState extends State<MyScafold> {
         actions: [
           ElevatedButton(
             onPressed: () async {
-              var result = await selectFile();
-              if (result == null) return;
-              setState(() {
-                _map_path = result;
-                _map_file = File(_map_path!);
-              });
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => ToolsSelection()),
+              // );
+              showDialog(
+                context: context,
+                barrierDismissible: true,
+                barrierColor: Colors.black.withOpacity(
+                  0.2,
+                ), // fondo semitransparente
+                builder: (context) {
+                  return ToolsSelection();
+                },
+              );
             },
             child: Icon(Icons.file_open),
           ),
@@ -172,13 +115,17 @@ class _MyScafoldState extends State<MyScafold> {
                 mbtilesFilePath: AppContext.appDocumentsMapPath,
                 delimitationLayers: [
                   (
-                    path: 'assets/Delimitations/manzanas_habana.geojson',
+                    path: 'assets/Delimitations/manzanas_managua.geojson',
                     color: Colors.green,
                   ),
                   (
-                    path: 'assets/Delimitations/predios_habana.geojson',
-                    color: Colors.red,
+                    path: 'assets/Delimitations/predios_managua.geojson',
+                    color: Colors.black,
                   ),
+                  // (
+                  //   path: 'assets/Delimitations/managuaPredio.geojson',
+                  //   color: Colors.black,
+                  // ),
                 ],
                 onLocationTap: (int tappedLocation) {
                   setState(() {
