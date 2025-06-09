@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:image/image.dart' as img;
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++    ++++++++++++++++++++++++++++++ //
@@ -12,7 +14,10 @@ import 'package:sqflite/sqflite.dart';
 // ++++++++++++++++++++++++++++++++    ++++++++++++++++++++++++++++++ //
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
-Future<Database> openDB() async {
+Future<Database> openDB({
+  bool compressImages = true,
+  bool storeImagesInDB = true,
+}) async {
   final pathToDB = join(await getDatabasesPath(), 'inventario.db');
   // await deleteDatabase(pathToDB);
   final scripts = [
@@ -39,7 +44,7 @@ Future<Database> openDB() async {
         canoasBajantes INTEGER NOT NULL, 
         observacionesEdificacion TEXT, 
         estadoInmueble INTEGER NOT NULL, 
-        imagenConstruccion BLOB NOT NULL,
+        imagenConstruccion ${storeImagesInDB ? "BLOB" : "TEXT"} NOT NULL,
         observacionesConstruccion TEXT, 
         cantidadMedidores INTEGER NOT NULL, 
         observacionesMedidores TEXT, 
@@ -83,7 +88,7 @@ Future<Database> openDB() async {
         codigoCIUUActividadPrimaria TEXT,
         codigoCIUUActividadComplementaria TEXT,
         observacionesPatentes TEXT,
-        imagenDocumentoLegal BLOB,
+        imagenDocumentoLegal ${storeImagesInDB ? "BLOB" : "TEXT"},
         PRIMARY KEY(id_predio, no_edificio, no_local),
         FOREIGN KEY (id_predio, no_edificio) REFERENCES edificios(id_predio, no_edificio) 
           ON UPDATE CASCADE 
@@ -341,7 +346,7 @@ class Edificio extends InventarioDbTable {
 
   // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
   final int estadoInmueble;
-  final Uint8List imagenConstruccion;
+  Uint8List imagenConstruccion;
   final String? observacionesConstruccion;
 
   // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
@@ -366,7 +371,14 @@ class Edificio extends InventarioDbTable {
   }) : super(
          tableName: 'edificios',
          primaryKeysWhere: "id_predio = ? AND no_edificio = ?",
-       );
+       ) {
+    checkAndCompress(imagenConstruccion).then((compressedImage) {
+      if (compressedImage == null) {
+        throw Exception("La imagen no se pudo comprimir");
+      }
+      imagenConstruccion = compressedImage;
+    });
+  }
   Edificio.fromRawTuple(Map<String, dynamic> rawTuple)
     : this(
         idPredio: rawTuple["id_predio"],
@@ -454,7 +466,7 @@ class Propiedad extends InventarioDbTable {
   final String? codigoCIUUActividadPrimaria;
   final String? codigoCIUUActividadComplementaria;
   final String? observacionesPatentes;
-  final Uint8List imagenDocumentoLegal;
+  Uint8List imagenDocumentoLegal;
   Propiedad({
     required this.idPredio,
     required this.noEdificio,
@@ -494,7 +506,14 @@ class Propiedad extends InventarioDbTable {
   }) : super(
          tableName: 'propiedades',
          primaryKeysWhere: "id_predio = ? AND no_edificio = ? AND no_local = ?",
-       );
+       ) {
+    checkAndCompress(imagenDocumentoLegal).then((compressedImage) {
+      if (compressedImage == null) {
+        throw Exception("La imagen no se pudo comprimir");
+      }
+      imagenDocumentoLegal = compressedImage;
+    });
+  }
 
   Propiedad.fromRawTuple(Map<String, dynamic> rawTuple)
     : this(
@@ -582,4 +601,48 @@ class Propiedad extends InventarioDbTable {
 
   @override
   List<int> get primaryKeysWhereArgs => [idPredio, noEdificio, noLocal];
+}
+
+// class ImageForDB {
+//   final Uint8List? imagebytes;
+//   final String? imagePath;
+//   final bool compressImage;
+//   final bool storeImageInDB;
+//   ImageForDB({
+//     this.imagePath,
+//     this.imagebytes,
+//     this.compressImage = true,
+//     this.storeImageInDB = true,
+//   }) {
+//     if (storeImageInDB) {
+//     } else {}
+//   }
+//   Uint8List? get imageBytes {
+//     if (imagebytes == null) {
+//       if (imagePath == null) return null;
+//       File imageFile = File(imagePath!);
+//       if (!imageFile.existsSync()) return null;
+//       return imageFile.readAsBytesSync();
+//     }
+//     return imagebytes;
+//   }
+// }
+
+Future<Uint8List?> checkAndCompress(Uint8List originalBytes) async {
+  const bytesLimit = 1887436; // 1.8 MB en bytes
+  final imageLengthInBytes = originalBytes.lengthInBytes;
+  if (imageLengthInBytes < bytesLimit) return originalBytes;
+
+  final decoded = img.decodeImage(originalBytes);
+  if (decoded == null) {
+    return null;
+  }
+  final resized = img.copyResize(
+    decoded,
+    width: 1024,
+  ); // opcional, redimensiona
+  int newImageQuality = (bytesLimit * 100) ~/ imageLengthInBytes;
+  return Uint8List.fromList(
+    img.encodeJpg(resized, quality: newImageQuality),
+  ); // calidad 0-100
 }

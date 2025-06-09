@@ -510,6 +510,9 @@ class EdificioFormState extends State<EdificioForm> {
                       idPredio: idPredio!,
                       noEdificio: noEdificio!,
                     );
+                    db.Predio? newPredio = await db.getPredio(
+                      idPredio: idPredio!,
+                    );
 
                     ///\  /\  /\  /\  /\  /\  /\  /\  /\
                     ///\\//\\//\\//\\//\\//\\//\\//\\//\\
@@ -519,13 +522,19 @@ class EdificioFormState extends State<EdificioForm> {
                     bool edicion = !nuevoIngreso;
                     bool nadieEnElNuevoLugar = edificioEnElNuevoLugar == null;
                     bool alguienEnElNuevoLugar = !nadieEnElNuevoLugar;
-                    bool mismoLugarDeDestino =
-                        widget.formGlobalStatus["idPredio"] == idPredio &&
+                    bool mismoPredioDestino =
+                        widget.formGlobalStatus["idPredio"] == idPredio;
+                    bool mismoNoEdificioDestino =
                         widget.formGlobalStatus["noEdificio"] == noEdificio;
+                    bool noExisteElNuevoPredio = newPredio == null;
+                    bool mismoLugarDeDestino =
+                        mismoPredioDestino && mismoNoEdificioDestino;
                     int casoEncontrado = -1;
 
                     if (nuevoIngreso) {
-                      if (nadieEnElNuevoLugar) {
+                      if (noExisteElNuevoPredio) {
+                        casoEncontrado = 0;
+                      } else if (nadieEnElNuevoLugar) {
                         casoEncontrado = 1;
                       } else if (alguienEnElNuevoLugar) {
                         casoEncontrado = 2;
@@ -535,6 +544,8 @@ class EdificioFormState extends State<EdificioForm> {
                         casoEncontrado = 5;
                       } else if (alguienEnElNuevoLugar) {
                         casoEncontrado = 4;
+                      } else if (noExisteElNuevoPredio) {
+                        casoEncontrado = 6;
                       } else if (nadieEnElNuevoLugar) {
                         casoEncontrado = 3;
                       }
@@ -558,6 +569,26 @@ class EdificioFormState extends State<EdificioForm> {
                     );
                     try {
                       switch (casoEncontrado) {
+                        case 0:
+                          await showDialog<bool>(
+                            context: context,
+                            barrierDismissible: true,
+                            builder:
+                                (dialogContext) => AlertDialog(
+                                  content: Text(
+                                    "El predio al que quiere agregar el edificio actual, aún no esta registrado en la BD. Agréguelo primeramente y luego vuelva a intentar agregar el edificio",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(dialogContext).pop(false);
+                                      },
+                                      child: Text('Cancelar'),
+                                    ),
+                                  ],
+                                ),
+                          );
+                          return;
                         case 1:
                           await newEdificio.insertInDB();
                         case 2:
@@ -603,6 +634,14 @@ class EdificioFormState extends State<EdificioForm> {
                             context,
                             message:
                                 "Se modificarán los datos de este edificio. ¿Desea continuar?",
+                          );
+                          if (accepted == null || !accepted) return;
+                          newEdificio.updateInDB();
+                        case 6:
+                          bool? accepted = await showAcceptDismissAlertDialog(
+                            context,
+                            message:
+                                "El predio al que se desea mover el edificio actual aún no está en la BD . Debe introducirlo primeramente para luego agregarle edificios",
                           );
                           if (accepted == null || !accepted) return;
                           newEdificio.updateInDB();

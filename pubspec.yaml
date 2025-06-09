@@ -20,6 +20,7 @@ dependencies:
   mbtiles: ^0.4.0
   flutter_launcher_icons: "^0.14.3"
   circular_countdown_timer: ^0.2.4
+  image: ^4.5.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
