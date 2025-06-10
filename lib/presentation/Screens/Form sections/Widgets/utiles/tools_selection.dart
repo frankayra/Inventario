@@ -5,9 +5,9 @@ import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/f
 
 class ToolsSelection extends StatelessWidget {
   final tools = [
-    'Importar Mapa',
-    "Exportar BD",
-    "Importar capa de delimitaciones",
+    ("Importar Mapa", () => null),
+    ("Exportar BD",),
+    ("Importar capa de delimitaciones",),
   ];
   ToolsSelection({super.key});
 
@@ -26,52 +26,66 @@ class ToolsSelection extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children:
-                  tools.map((tool) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 20,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          // Acción al presionar el botón
-                          var selectedPath = await selectFile();
-                          if (selectedPath == null) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("path cargado: $selectedPath"),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: const Color.fromARGB(
-                            255,
-                            65,
-                            65,
-                            65,
-                          ),
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            255,
-                            255,
-                            255,
-                          ),
-                          minimumSize: const Size.fromHeight(120),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 4,
-                          textStyle: const TextStyle(fontSize: 20),
+              children: [
+                BigButton(context, "Importar Mapa", () async {
+                  var selectedPath = await selectFile();
+                  if (selectedPath == null) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("path cargado: $selectedPath")),
+                  );
+                }),
+                BigButton(context, "Exportar BD", () async {
+                  final selectedDirectory = await exportDBAsFile();
+                  if (selectedDirectory != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "✅ Base de datos exportada a la ruta: $selectedDirectory",
                         ),
-                        child: Text(tool),
                       ),
                     );
-                  }).toList(),
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("❌ No se pudo exportar la base de datos"),
+                      ),
+                    );
+                  }
+                }),
+                BigButton(context, "Importar capa de Delimitaciones", () async {
+                  var selectedPath = await selectDirectory();
+                  if (selectedPath == null) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("path cargado: $selectedPath")),
+                  );
+                }),
+              ],
             ),
           ),
         ),
       ],
     );
   }
+}
+
+Widget BigButton(
+  BuildContext context,
+  String label,
+  void Function() onPressed,
+) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+    child: ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: const Color.fromARGB(255, 65, 65, 65),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        minimumSize: const Size.fromHeight(120),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 4,
+        textStyle: const TextStyle(fontSize: 20),
+      ),
+      child: Text(label),
+    ),
+  );
 }

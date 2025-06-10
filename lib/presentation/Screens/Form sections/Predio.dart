@@ -14,8 +14,9 @@ class PredioForm extends StatefulWidget {
   State<PredioForm> createState() => PredioFormState();
 }
 
-// TODO: Al presionar "Guardar", si se encuentra una tupla con el mismo ID, preguntar por confirmacion de cambio.
-// TODO: Cuando ya existe el predio en la BD, este formulario debe autorellenar sus campos con los datos de la tupla presentes en la BD.
+// TODO: No se deben crear predios si el idPredio no es valido.
+// DONE: Al presionar "Guardar", si se encuentra una tupla con el mismo ID, preguntar por confirmacion de cambio.
+// DONE: Cuando ya existe el predio en la BD, este formulario debe autorellenar sus campos con los datos de la tupla presentes en la BD.
 class PredioFormState extends State<PredioForm> {
   final _formKey = GlobalKey<FormState>();
   final _dropdownOptions = {
@@ -177,6 +178,16 @@ class PredioFormState extends State<PredioForm> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    if (idPredio == null ||
+                        idPredio! < 1000000000 ||
+                        idPredio! >= 10000000000) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('❌ Número de localización no válido'),
+                        ),
+                      );
+                      return;
+                    }
                     var oldPredio = await db.getPredio(idPredio: idPredio!);
                     if (oldPredio != null) {
                       var override = await showAcceptDismissAlertDialog(

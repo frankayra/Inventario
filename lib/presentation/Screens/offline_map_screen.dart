@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 const ALAMAR = LatLng(23.17053428523392, -82.27196563176855); // Alamar
 const HABANA = LatLng(23.14467, -82.35550); // Habana
 const MANAGUA = LatLng(12.145643078921182, -86.26495747803298); // Managua
+const MANAGUA2 = LatLng(12.149240047336635, -86.25278121320335); // Managua
 const NICARAGUA = LatLng(-85.170815, 12.864564999999999); // Centro de Nicaragua
 const TORONTO = LatLng(43.66404747551534, -79.3884040582291); // Toronto
 const CALIFORNIA = LatLng(36.1555182044328, -115.13386501485957); // California
@@ -49,7 +50,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
     //   return;
     // }
     _isTileProviderInitialized = true;
-    _tileProviderFuture = _initializeTileProvider();
+    _tileProviderFuture = _initializeTileProvider(context);
   }
 
   @override
@@ -60,7 +61,9 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(
+            child: Text('Error al cargar el mapa: ${snapshot.error}'),
+          );
         } else {
           final tileProvider = snapshot.data!;
           return Stack(
@@ -68,7 +71,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  initialCenter: MANAGUA,
+                  initialCenter: MANAGUA2,
                   initialZoom: 16.0,
                   maxZoom: 20.0,
                   minZoom: 0.0,
@@ -134,14 +137,27 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
   // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 
-  Future<MbTilesTileProvider> _initializeTileProvider() async {
+  Future<MbTilesTileProvider> _initializeTileProvider(
+    BuildContext context,
+  ) async {
     if (!await File(mbtilesFilePath).exists()) {
       throw Exception(
         'El archivo mapa.mbtiles no se encontró en $mbtilesFilePath',
       );
     }
 
-    return MbTilesTileProvider.fromPath(path: mbtilesFilePath);
+    try {
+      final result = MbTilesTileProvider.fromPath(path: mbtilesFilePath);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("✅ Mapa cargado correctamente!")));
+      return result;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("❌ No fue posible cargar el mapa")),
+      );
+      throw Future.error("❌ No fue posible cargar el mapa");
+    }
   }
 
   @override
@@ -156,31 +172,22 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      return null;
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
+        return null;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
       return Future.error(
         'Location permissions are permanently denied, we cannot request permissions.',
       );
     }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
   }
 }

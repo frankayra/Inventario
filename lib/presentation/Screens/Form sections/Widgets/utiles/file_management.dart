@@ -69,10 +69,14 @@ Future<String> copyFileToDocuments({
 
 Future<void> manageMapAndDlimitiationDirectories() async {
   Directory appDirectory = await getApplicationDocumentsDirectory();
-  if (!await Directory(path.join(appDirectory.path, 'Mapas')).exists()) {}
+  if (!await Directory(path.join(appDirectory.path, 'Mapas')).exists()) {
+    appDirectory.create(recursive: true);
+  }
   if (!await Directory(
     path.join(appDirectory.path, 'Delimitaciones'),
-  ).exists()) {}
+  ).exists()) {
+    appDirectory.create(recursive: true);
+  }
 }
 
 Future<String?> selectFile() async {
@@ -85,24 +89,28 @@ Future<String?> selectFile() async {
   }
 }
 
-void exportDBAsFile(BuildContext context) async {
+Future<String?> selectDirectory() async {
   String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-  if (selectedDirectory == null) return;
-  File dbFile = File("${await getDatabasesPath()}/inventario.db");
-  if (!await dbFile.exists()) {
+
+  if (selectedDirectory != null) {
+    return selectedDirectory;
+  } else {
+    return null;
+  }
+}
+
+Future<String?> exportDBAsFile() async {
+  String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+  if (selectedDirectory == null) return null;
+  File dbFile = File(path.join(await getDatabasesPath(), 'inventario.db'));
+  if (await dbFile.exists()) {
     try {
-      await dbFile.copy("$selectedDirectory/inventario.db");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "✅ Base de datos exportada a la ruta: $selectedDirectory",
-          ),
-        ),
-      );
+      await dbFile.copy(path.join(selectedDirectory, "inventario.db"));
+      return selectedDirectory;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Error al exportar la base de datos")),
-      );
+      print("Hubo un error al exportar la BD: $e");
+      return null;
     }
   }
+  print("No existia el archivo");
 }

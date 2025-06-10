@@ -85,8 +85,8 @@ class _MyScafoldState extends State<MyScafold> {
               showDialog(
                 context: context,
                 barrierDismissible: true,
-                barrierColor: Colors.black.withOpacity(
-                  0.2,
+                barrierColor: Colors.black.withValues(
+                  alpha: 0.2,
                 ), // fondo semitransparente
                 builder: (context) {
                   return ToolsSelection();

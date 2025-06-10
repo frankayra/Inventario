@@ -86,7 +86,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
           2,
         ),
     ];
-    int idPredio = formGlobalStatusWrapper["idPredio"];
+    int? idPredio = formGlobalStatusWrapper["idPredio"];
     return Form(
       key: _formKey,
       child: ListView(
@@ -119,7 +119,9 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
                           lastValidPredioId = number;
                           formGlobalStatusWrapper["idPredio"] = number;
                         });
-                      } else {}
+                      } else if (formGlobalStatusWrapper["idPredio"] != null) {
+                        formGlobalStatusWrapper["idPredio"] = null;
+                      }
                     },
                     validator: (value) {
                       final number = int.tryParse(value!);
