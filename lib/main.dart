@@ -83,7 +83,8 @@ class MyScafold extends StatefulWidget {
 class _MyScafoldState extends State<MyScafold> {
   int _selectedIndex = 0;
   int _tappedLocation = -1;
-  late Widget offlineMap;
+  List<int> prediosListos = [];
+  static late Widget offlineMap;
 
   @override
   void initState() {
@@ -125,6 +126,7 @@ class _MyScafoldState extends State<MyScafold> {
                       exportPath: widget.appContext.customDBExportPath,
                       importMapsPath: widget.appContext.customMapsPath,
                       importDelimitationsPath: widget.appContext.customMapsPath,
+                      clearDBFunction: clearDBFunction,
                     );
                   },
                 );
@@ -210,29 +212,42 @@ class _MyScafoldState extends State<MyScafold> {
               _selectedIndex = 1;
             });
           },
+          prediosListos: prediosListos,
 
           /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
         );
-        ;
       case 1:
-        return FormularioInspeccion(idPredio: _tappedLocation);
+        return FormularioInspeccion(
+          idPredio: _tappedLocation,
+          predioListoCallbackFunction: predioListoCallbackFunction,
+        );
       default:
         return Container();
     }
   }
 
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++   Callbacks   ++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
-}
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
-// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++   Callbacks   ++++++++++++++++++++++++++ //
-// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
-// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-void mapPointTapCallbackFunction(LatLng point) {}
+  void mapPointTapCallbackFunction(LatLng point) {}
+  void predioListoCallbackFunction(int idPredio) {
+    prediosListos.add(idPredio);
+    setState(() {
+      _selectedIndex = 0;
+    });
+  }
+
+  void clearDBFunction() {
+    db.clearDB();
+  }
+}

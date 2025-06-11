@@ -27,10 +27,12 @@ class OfflineMapWidget extends StatefulWidget {
   static LatLng? newMapCoords;
   final String mbtilesFilePath;
   List<({String path, Color color})>? delimitationLayers;
+  List<int> prediosListos;
   void Function(int tappedLocation)? onLocationTap;
   bool loadFromAssets;
   OfflineMapWidget({
     required this.mbtilesFilePath,
+    required this.prediosListos,
     this.delimitationLayers,
     this.onLocationTap,
     this.loadFromAssets = false,
@@ -131,6 +133,12 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                                       ) ==
                                   "assets",
                               onLocationTap: widget.onLocationTap,
+                              markedPolygons:
+                                  layerDescription.path.endsWith(
+                                        "_predios.geojson",
+                                      )
+                                      ? widget.prediosListos
+                                      : [],
                             ),
                           )
                           .toList()

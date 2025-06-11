@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 class DelimitationsLayer extends StatefulWidget {
   final String geoJsonPath;
   final Color borderColor;
-  final Color locationDoneBackground = Colors.blue;
+  final Color locationDoneBackground = const Color.fromARGB(104, 76, 175, 79);
   final bool loadFromAssets;
   final void Function(int idPredio)? onLocationTap;
   final List<int>? markedPolygons;
@@ -76,8 +76,22 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
                 Polygon(
                   points: points,
                   // color: ,
-                  borderColor: widget.borderColor,
-                  // color: widget.borderColor.withOpacity(0.2),
+                  borderColor:
+                      widget.markedPolygons != null &&
+                              properties != null &&
+                              widget.markedPolygons!.contains(
+                                properties["localizacion"],
+                              )
+                          ? widget.locationDoneBackground
+                          : widget.borderColor,
+                  color:
+                      widget.markedPolygons != null &&
+                              properties != null &&
+                              widget.markedPolygons!.contains(
+                                properties["localizacion"],
+                              )
+                          ? widget.locationDoneBackground
+                          : Colors.transparent,
                   borderStrokeWidth: 2,
 
                   // Puedes usar las propiedades aquí para personalizar cada polígono
@@ -104,7 +118,7 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
                         .map((entry) => "${entry.value}")
                         .join("\n"),
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 15,
                       color: Colors.black,
                       backgroundColor: Colors.white70,
                     ),

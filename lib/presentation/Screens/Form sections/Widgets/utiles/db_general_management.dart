@@ -110,6 +110,21 @@ Future<Database> openDB({
   );
 }
 
+void clearDB() {
+  getDatabasesPath().then((DBsPath) {
+    final pathToDB = join(DBsPath, 'inventario.db');
+    openDatabase(pathToDB).then((db) {
+      db.transaction((txn) async {
+        var batch = txn.batch();
+        batch.delete('predios');
+        batch.delete('edificios');
+        batch.delete('propiedades');
+        await batch.commit(noResult: true);
+      });
+    });
+  });
+}
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 // +++++++++++++++++++++++ SELECT ++++++++++++++++++++++ //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //

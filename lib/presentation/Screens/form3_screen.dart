@@ -10,7 +10,11 @@ const PROPIEDADES = 'Propiedades';
 
 class FormularioInspeccion extends StatefulWidget {
   final int idPredio;
-  const FormularioInspeccion({required this.idPredio});
+  final void Function(int idPredio) predioListoCallbackFunction;
+  const FormularioInspeccion({
+    required this.idPredio,
+    required this.predioListoCallbackFunction,
+  });
   @override
   _FormularioInspeccionState createState() => _FormularioInspeccionState();
 }
@@ -158,7 +162,13 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
           Padding(
             padding: EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: () async {},
+              onPressed: () async {
+                if (idPredio != null &&
+                    idPredio < 10000000000 &&
+                    idPredio >= 1000000000) {
+                  widget.predioListoCallbackFunction(idPredio);
+                }
+              },
               child: Text("Predio Visitado!"),
             ),
           ),

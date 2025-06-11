@@ -7,11 +7,13 @@ class ToolsSelection extends StatelessWidget {
   String exportPath;
   String importMapsPath;
   String importDelimitationsPath;
+  void Function() clearDBFunction;
   ToolsSelection({
     super.key,
     required this.exportPath,
     required this.importMapsPath,
     required this.importDelimitationsPath,
+    required this.clearDBFunction,
   });
 
   @override
@@ -93,6 +95,25 @@ class ToolsSelection extends StatelessWidget {
                       SnackBar(
                         content: Text(
                           "❌ No se pudo importar la capa de delimitación",
+                        ),
+                      ),
+                    );
+                  }
+                  Navigator.pop(context);
+                }),
+                BigButton(context, "Limpiar BD", () async {
+                  try {
+                    clearDBFunction();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("✅ Se limpió la BD correctamente"),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "❌ No se pudo limpiar la BD por algún motivo",
                         ),
                       ),
                     );
