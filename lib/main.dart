@@ -22,18 +22,22 @@ import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/d
 import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/tools_selection.dart';
 
 class AppContext {
-  final String customRootPath = "/storage/emulated/0/CADIC";
-  final String customMapsPath = "/storage/emulated/0/CADIC/Maps";
-  final String customConfigPath = "/storage/emulated/0/CADIC/config";
-  final String customDBExportPath = "/storage/emulated/0/CADIC/Exportado";
-  final String customDelimitationsPath =
-      "/storage/emulated/0/CADIC/Delimitaciones";
+  String customRootPath = "/storage/emulated/0/CADIC";
+  String customMapsPath = "/storage/emulated/0/CADIC/Maps";
+  String customConfigPath = "/storage/emulated/0/CADIC/config";
+  String customDBExportPath = "/storage/emulated/0/CADIC/Exportado";
+  String customDelimitationsPath = "/storage/emulated/0/CADIC/Delimitaciones";
   String _mapName;
   late String assetsMapPath;
   late String customMapPath;
   bool storagePermissionGranted = false;
 
   AppContext({required String mapName}) : _mapName = mapName {
+    customRootPath = path.normalize(customRootPath);
+    customMapsPath = path.normalize(customMapsPath);
+    customConfigPath = path.normalize(customConfigPath);
+    customDBExportPath = path.normalize(customDBExportPath);
+    customDelimitationsPath = path.normalize(customDelimitationsPath);
     assetsMapPath = "assets/tiles/$mapName";
     customMapPath = path.join(customMapsPath, _mapName);
   }
@@ -50,7 +54,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var appContext = AppContext(mapName: "managua18.mbtiles");
   final foldersCreated = await initializeAppDirectories([
-    appContext.customMapPath,
+    appContext.customMapsPath,
     appContext.customDelimitationsPath,
     appContext.customDBExportPath,
   ]);
@@ -84,31 +88,16 @@ class _MyScafoldState extends State<MyScafold> {
   @override
   void initState() {
     super.initState();
-    offlineMap = OfflineMapWidget(
-      /// ++++++++++++++++++++++++++++++++ ///
-      /// +++++++++ MAP SETTINGS +++++++++ ///
-      /// ++++++++++++++++++++++++++++++++ ///
-      mbtilesFilePath: widget.appContext.assetsMapPath,
-
-      delimitationLayers: [
-        (
-          path: 'assets/Delimitations/manzanas_managua.geojson',
-          color: Colors.green,
-        ),
-        (
-          path: 'assets/Delimitations/predios_managua.geojson',
-          color: Colors.black,
-        ),
-      ],
-      onLocationTap: (int tappedLocation) {
-        setState(() {
-          _tappedLocation = tappedLocation;
-          _selectedIndex = 1;
-        });
-      },
-
-      /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
-    );
+    String? mapPath;
+    if (!File(widget.appContext.customMapPath).existsSync()) {
+      mapPath = pickMapFromMapsFolder(widget.appContext.customMapsPath);
+      if (mapPath != null) {
+        widget.appContext.mapName = path.split(mapPath).last;
+      } else {
+        // widget.appContext.mapName = "managua18.mbtiles";
+        widget.appContext.customMapPath = widget.appContext.assetsMapPath;
+      }
+    }
   }
 
   @override
@@ -134,6 +123,8 @@ class _MyScafoldState extends State<MyScafold> {
                   builder: (context) {
                     return ToolsSelection(
                       exportPath: widget.appContext.customDBExportPath,
+                      importMapsPath: widget.appContext.customMapsPath,
+                      importDelimitationsPath: widget.appContext.customMapsPath,
                     );
                   },
                 );
@@ -178,8 +169,9 @@ class _MyScafoldState extends State<MyScafold> {
                 onPressed: () async {
                   widget.appContext.storagePermissionGranted =
                       await initializeAppDirectories([
-                        widget.appContext.customMapPath,
+                        widget.appContext.customMapsPath,
                         widget.appContext.customDelimitationsPath,
+                        widget.appContext.customDBExportPath,
                       ]);
                   setState(() {});
                 },
@@ -203,7 +195,25 @@ class _MyScafoldState extends State<MyScafold> {
   Widget buildScaffoldBody() {
     switch (_selectedIndex) {
       case 0:
-        return offlineMap;
+        return OfflineMapWidget(
+          /// ++++++++++++++++++++++++++++++++ ///
+          /// +++++++++ MAP SETTINGS +++++++++ ///
+          /// ++++++++++++++++++++++++++++++++ ///
+          mbtilesFilePath: widget.appContext.customMapPath,
+
+          delimitationLayers: getAllDelimitations(
+            widget.appContext.customDelimitationsPath,
+          ),
+          onLocationTap: (int tappedLocation) {
+            setState(() {
+              _tappedLocation = tappedLocation;
+              _selectedIndex = 1;
+            });
+          },
+
+          /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
+        );
+        ;
       case 1:
         return FormularioInspeccion(idPredio: _tappedLocation);
       default:

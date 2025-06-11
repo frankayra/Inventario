@@ -583,7 +583,7 @@ class EdificioFormState extends State<EdificioForm> {
                                       onPressed: () {
                                         Navigator.of(dialogContext).pop(false);
                                       },
-                                      child: Text('Cancelar'),
+                                      child: Text('Cerrar'),
                                     ),
                                   ],
                                 ),

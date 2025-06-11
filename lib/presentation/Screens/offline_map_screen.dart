@@ -4,12 +4,14 @@ import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
 import 'package:mbtiles/mbtiles.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'dart:async';
 import 'dart:io';
 import 'Form sections/Widgets/utiles/file_management.dart';
 import 'Map layers/terrains_limits_layer.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:inventario/presentation/Screens/Form sections/Widgets/utiles/find_map_centroid.dart';
 
 const ALAMAR = LatLng(23.17053428523392, -82.27196563176855); // Alamar
 const HABANA = LatLng(23.14467, -82.35550); // Habana
@@ -20,6 +22,9 @@ const TORONTO = LatLng(43.66404747551534, -79.3884040582291); // Toronto
 const CALIFORNIA = LatLng(36.1555182044328, -115.13386501485957); // California
 
 class OfflineMapWidget extends StatefulWidget {
+  static String? lastLoadedMapPath;
+  static bool newMapLoaded = true;
+  static LatLng? newMapCoords;
   final String mbtilesFilePath;
   List<({String path, Color color})>? delimitationLayers;
   void Function(int tappedLocation)? onLocationTap;
@@ -30,7 +35,12 @@ class OfflineMapWidget extends StatefulWidget {
     this.onLocationTap,
     this.loadFromAssets = false,
     super.key,
-  });
+  }) {
+    if (lastLoadedMapPath != mbtilesFilePath) {
+      lastLoadedMapPath = mbtilesFilePath;
+      newMapLoaded = true;
+    }
+  }
 
   @override
   _OfflineMapWidgetState createState() =>
@@ -43,8 +53,23 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
   String mbtilesFilePath;
   late Future<MbTilesTileProvider> _tileProviderFuture;
   bool _isTileProviderInitialized = false;
+  LatLng? mapCentroid;
 
-  _OfflineMapWidgetState({required this.mbtilesFilePath});
+  _OfflineMapWidgetState({required this.mbtilesFilePath}) {
+    if (OfflineMapWidget.newMapLoaded &&
+        OfflineMapWidget.newMapCoords == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Aquí el FlutterMap ya fue renderizado al menos una vez
+        print('FlutterMap renderizado');
+        // Aquí puedes hacer operaciones sobre _mapController
+        LatLng? coords = await findMBTilesCentroid(mbtilesFilePath);
+        if (coords != null) {
+          _mapController.move(coords, 16.0);
+          OfflineMapWidget.newMapCoords = coords;
+        }
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -74,7 +99,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  initialCenter: MANAGUA2,
+                  initialCenter: OfflineMapWidget.newMapCoords ?? MANAGUA2,
                   initialZoom: 16.0,
                   maxZoom: 20.0,
                   minZoom: 0.0,
@@ -96,7 +121,15 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                             (layerDescription) => DelimitationsLayer(
                               geoJsonPath: layerDescription.path,
                               borderColor: layerDescription.color,
-                              loadFromAssets: true,
+                              loadFromAssets:
+                                  path
+                                      .split(
+                                        path.normalize(layerDescription.path),
+                                      )
+                                      .firstWhere(
+                                        (value) => value.trim() != "",
+                                      ) ==
+                                  "assets",
                               onLocationTap: widget.onLocationTap,
                             ),
                           )
@@ -146,15 +179,19 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
     try {
       mbtilesFilePath = (await getMapFile(filePath: mbtilesFilePath))!.path;
       final result = MbTilesTileProvider.fromPath(path: mbtilesFilePath);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("✅ Mapa cargado correctamente!")));
+      if (OfflineMapWidget.newMapLoaded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("✅ Mapa cargado correctamente!")),
+        );
+        OfflineMapWidget.newMapLoaded = false;
+      }
       return result;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("❌ No fue posible cargar el mapa")),
       );
-      throw Future.error("❌ No fue posible cargar el mapa");
+      print("El errorfue: $e");
+      return Future.error("❌ No fue posible cargar el mapa");
     }
   }
 

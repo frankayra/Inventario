@@ -8,8 +8,15 @@ import 'package:sqflite/sqflite.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-// Copia el archivo <<fileName>> desde <<filePath>> hacia <<newSubPath>> dentro de la carpeta
-//   que el almacenamiento del telefono dedica a la aplicacion, con el nuevo nombre <<newFileName>>.
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++    Archivos   ++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+
+/// Copia el archivo &lt;fileName&gt; desde &lt;filePath&gt; hacia &lt;newSubPath&gt; dentro de la carpeta
+///   que el almacenamiento del telefono dedica a la aplicacion, con el nuevo nombre &lt;newFileName&gt;.
 Future<String> copyFileToDocuments({
   required String filePath,
   required String? fileName,
@@ -113,10 +120,16 @@ Future<String?> exportDBAsFile({required String exportPath}) async {
   }
 }
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++      Mapa     ++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
 /// Devuelve un archivo que referencia al mapa. En caso de estar en los assets de la app,
 /// copia el mapa al espacio privado de la app y devuelve un File apuntando hacia alli
 Future<File?> getMapFile({required String filePath}) async {
-  List<String> filePathSplitted = filePath.split("/");
+  List<String> filePathSplitted = path.split(path.normalize(filePath));
   String fileName = filePathSplitted.last;
   String fileSource = filePathSplitted.firstWhere(
     (value) => value.trim() != "",
@@ -146,6 +159,94 @@ Future<File?> getMapFile({required String filePath}) async {
     }
   }
   return mapFile;
+}
+
+String? pickMapFromMapsFolder(String mapsFolderPath) {
+  final mapsDirectory = Directory(mapsFolderPath);
+  if (!mapsDirectory.existsSync()) {
+    // El directorio no existe
+    return null;
+  }
+  final filesInDirectory = mapsDirectory.listSync(
+    recursive: true,
+    followLinks: false,
+  );
+  for (var file in filesInDirectory) {
+    if (file is File && file.path.toLowerCase().endsWith('.mbtiles')) {
+      return path.normalize(file.path);
+    }
+  }
+  // No se encontró ningún archivo
+  return null;
+}
+
+List<({String path, Color color})> getAllDelimitations(
+  String delimitationsFolderPath,
+) {
+  final mapsDirectory = Directory(delimitationsFolderPath);
+  if (!mapsDirectory.existsSync()) {
+    // El directorio no existe
+    return [];
+  }
+  final filesInDirectory = mapsDirectory.listSync(
+    recursive: true,
+    followLinks: false,
+  );
+  var colors = [Colors.black, Colors.blue, Colors.yellow];
+  int colorIndex = 0;
+  var result = <({String path, Color color})>[];
+  for (var file in filesInDirectory) {
+    if (file is File && file.path.toLowerCase().endsWith('.geojson')) {
+      if (file.path.toLowerCase().endsWith("_predios.geojson")) {
+        result.add((path: path.normalize(file.path), color: Colors.red));
+      } else {
+        result.add((
+          path: path.normalize(file.path),
+          color: colors[colorIndex++],
+        ));
+      }
+    }
+  }
+  return result;
+}
+
+Future<String?> importMap(
+  String mapPath, {
+  required String newFolderPath,
+}) async {
+  File mapFile = File(mapPath);
+  try {
+    if (await mapFile.exists() &&
+        mapFile.path.toLowerCase().endsWith('.mbtiles')) {
+      String newMapPath = path.join(newFolderPath, path.basename(mapPath));
+      await mapFile.rename(newMapPath);
+      return newMapPath;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
+Future<String?> importDelimitationsPath(
+  String delimitationPath, {
+  required String newFolderPath,
+}) async {
+  File delimitationFile = File(delimitationPath);
+  try {
+    if (await delimitationFile.exists() &&
+        delimitationFile.path.toLowerCase().endsWith('.geojson')) {
+      String newDelimitationPath = path.join(
+        newFolderPath,
+        path.basename(delimitationPath),
+      );
+      await delimitationFile.rename(newDelimitationPath);
+      return newDelimitationPath;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
@@ -182,13 +283,14 @@ Future<PermissionStatus> _askForStoragePermision(
     var permission = Permission.storage;
     return justGet ? await permission.status : await permission.request();
   } else if (sdkVersion >= 30) {
-    // Android 11+ / 13-
+    // Android 11+
     var permission = Permission.manageExternalStorage;
     if (justGet) return await permission.status;
     var startTime = DateTime.now();
     var request = await permission.request();
     if (request != PermissionStatus.granted &&
         DateTime.now().difference(startTime) < Duration(milliseconds: 500)) {
+      // Android 13+
       openAppSettings();
     }
   }

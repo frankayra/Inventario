@@ -5,7 +5,14 @@ import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/f
 
 class ToolsSelection extends StatelessWidget {
   String exportPath;
-  ToolsSelection({super.key, required this.exportPath});
+  String importMapsPath;
+  String importDelimitationsPath;
+  ToolsSelection({
+    super.key,
+    required this.exportPath,
+    required this.importMapsPath,
+    required this.importDelimitationsPath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +33,24 @@ class ToolsSelection extends StatelessWidget {
                 BigButton(context, "Importar Mapa", () async {
                   var selectedPath = await selectFile();
                   if (selectedPath == null) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("path cargado: $selectedPath")),
+                  String? newMapPath = await importMap(
+                    selectedPath,
+                    newFolderPath: importMapsPath,
                   );
+                  if (newMapPath != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "✅ Mapa importado correctamente hacia la ruta: $importMapsPath",
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("❌ No se pudo importar el mapa")),
+                    );
+                  }
+                  Navigator.pop(context);
                 }),
                 BigButton(context, "Exportar BD", () async {
                   final selectedDirectory = await exportDBAsFile(
@@ -52,11 +74,30 @@ class ToolsSelection extends StatelessWidget {
                   }
                 }),
                 BigButton(context, "Importar capa de Delimitaciones", () async {
-                  var selectedPath = await selectDirectory();
+                  var selectedPath = await selectFile();
                   if (selectedPath == null) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("path cargado: $selectedPath")),
+                  String? newDelimitationPath = await importMap(
+                    selectedPath,
+                    newFolderPath: importMapsPath,
                   );
+                  if (newDelimitationPath != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "✅ Capa de delimitación importada correctamente hacia la ruta: $importDelimitationsPath",
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "❌ No se pudo importar la capa de delimitación",
+                        ),
+                      ),
+                    );
+                  }
+                  Navigator.pop(context);
                 }),
               ],
             ),
