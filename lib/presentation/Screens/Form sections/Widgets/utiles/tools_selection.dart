@@ -4,12 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/file_management.dart';
 
 class ToolsSelection extends StatelessWidget {
-  final tools = [
-    ("Importar Mapa", () => null),
-    ("Exportar BD",),
-    ("Importar capa de delimitaciones",),
-  ];
-  ToolsSelection({super.key});
+  String exportPath;
+  ToolsSelection({super.key, required this.exportPath});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +31,9 @@ class ToolsSelection extends StatelessWidget {
                   );
                 }),
                 BigButton(context, "Exportar BD", () async {
-                  final selectedDirectory = await exportDBAsFile();
+                  final selectedDirectory = await exportDBAsFile(
+                    exportPath: exportPath,
+                  );
                   if (selectedDirectory != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -44,6 +42,7 @@ class ToolsSelection extends StatelessWidget {
                         ),
                       ),
                     );
+                    Navigator.pop(context);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

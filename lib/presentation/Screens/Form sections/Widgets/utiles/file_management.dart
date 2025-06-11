@@ -5,6 +5,8 @@ import 'package:path/path.dart' as path;
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 // Copia el archivo <<fileName>> desde <<filePath>> hacia <<newSubPath>> dentro de la carpeta
 //   que el almacenamiento del telefono dedica a la aplicacion, con el nuevo nombre <<newFileName>>.
@@ -67,16 +69,16 @@ Future<String> copyFileToDocuments({
   return newFilePath;
 }
 
-Future<void> manageMapAndDlimitiationDirectories() async {
-  Directory appDirectory = await getApplicationDocumentsDirectory();
-  if (!await Directory(path.join(appDirectory.path, 'Mapas')).exists()) {
-    appDirectory.create(recursive: true);
+Future<bool> initializeAppDirectories(List<String> appDirectoriesPaths) async {
+  if (!await requestStoragePermission()) return false;
+  for (var path in appDirectoriesPaths) {
+    final subDirectory = Directory(path);
+    if (!await subDirectory.exists()) {
+      subDirectory.create(recursive: true);
+      print("directorio creado: $subDirectory.path");
+    }
   }
-  if (!await Directory(
-    path.join(appDirectory.path, 'Delimitaciones'),
-  ).exists()) {
-    appDirectory.create(recursive: true);
-  }
+  return true;
 }
 
 Future<String?> selectFile() async {
@@ -99,18 +101,96 @@ Future<String?> selectDirectory() async {
   }
 }
 
-Future<String?> exportDBAsFile() async {
-  String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-  if (selectedDirectory == null) return null;
+Future<String?> exportDBAsFile({required String exportPath}) async {
   File dbFile = File(path.join(await getDatabasesPath(), 'inventario.db'));
   if (await dbFile.exists()) {
     try {
-      await dbFile.copy(path.join(selectedDirectory, "inventario.db"));
-      return selectedDirectory;
+      await dbFile.copy(path.join(exportPath, "inventario.db"));
+      return exportPath;
     } catch (e) {
-      print("Hubo un error al exportar la BD: $e");
       return null;
     }
   }
-  print("No existia el archivo");
+}
+
+/// Devuelve un archivo que referencia al mapa. En caso de estar en los assets de la app,
+/// copia el mapa al espacio privado de la app y devuelve un File apuntando hacia alli
+Future<File?> getMapFile({required String filePath}) async {
+  List<String> filePathSplitted = filePath.split("/");
+  String fileName = filePathSplitted.last;
+  String fileSource = filePathSplitted.firstWhere(
+    (value) => value.trim() != "",
+  );
+  String mapDocumentsPath = path.join(
+    (await getApplicationDocumentsDirectory()).path,
+    fileName,
+  );
+  File mapFile = File(filePath);
+  if (await mapFile.exists()) {
+    return mapFile;
+  } else if (fileSource == "assets") {
+    mapFile = File(mapDocumentsPath);
+    if (!await mapFile.exists()) {
+      try {
+        mapFile = File(
+          await copyFileToDocuments(
+            fileName: fileName,
+            filePath: filePath,
+            fromAssets: true,
+            override: true,
+          ),
+        );
+      } catch (e) {
+        return null;
+      }
+    }
+  }
+  return mapFile;
+}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++    Permisos   ++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++             +++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++++++       ++++++++++++++++++++++++++++++ //
+
+Future<bool> requestStoragePermission() async {
+  int sdkInt = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+  PermissionStatus status = await _askForStoragePermision(
+    sdkInt,
+    justGet: true,
+  );
+  if (!status.isGranted) {
+    if (status.isDenied) {
+      status = await _askForStoragePermision(sdkInt);
+    } else if (status.isPermanentlyDenied) {
+      // Esto abre la configuración del sistema para conceder MANAGE_EXTERNAL_STORAGE
+      bool settingsWereOppened = await openAppSettings();
+      if (!settingsWereOppened) return false;
+    }
+  }
+  return status.isGranted;
+}
+
+Future<PermissionStatus> _askForStoragePermision(
+  int sdkVersion, {
+  bool justGet = false,
+}) async {
+  if (sdkVersion < 30) {
+    // Android 10-
+    var permission = Permission.storage;
+    return justGet ? await permission.status : await permission.request();
+  } else if (sdkVersion >= 30) {
+    // Android 11+ / 13-
+    var permission = Permission.manageExternalStorage;
+    if (justGet) return await permission.status;
+    var startTime = DateTime.now();
+    var request = await permission.request();
+    if (request != PermissionStatus.granted &&
+        DateTime.now().difference(startTime) < Duration(milliseconds: 500)) {
+      openAppSettings();
+    }
+  }
+  return await Permission.manageExternalStorage.status;
 }

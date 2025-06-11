@@ -23,10 +23,12 @@ class OfflineMapWidget extends StatefulWidget {
   final String mbtilesFilePath;
   List<({String path, Color color})>? delimitationLayers;
   void Function(int tappedLocation)? onLocationTap;
+  bool loadFromAssets;
   OfflineMapWidget({
     required this.mbtilesFilePath,
     this.delimitationLayers,
     this.onLocationTap,
+    this.loadFromAssets = false,
     super.key,
   });
 
@@ -35,20 +37,21 @@ class OfflineMapWidget extends StatefulWidget {
       _OfflineMapWidgetState(mbtilesFilePath: mbtilesFilePath);
 }
 
-class _OfflineMapWidgetState extends State<OfflineMapWidget> {
+class _OfflineMapWidgetState extends State<OfflineMapWidget>
+    with AutomaticKeepAliveClientMixin {
   final MapController _mapController = MapController();
-  final String mbtilesFilePath;
-  static late Future<MbTilesTileProvider> _tileProviderFuture;
-  static bool _isTileProviderInitialized = false;
+  String mbtilesFilePath;
+  late Future<MbTilesTileProvider> _tileProviderFuture;
+  bool _isTileProviderInitialized = false;
 
   _OfflineMapWidgetState({required this.mbtilesFilePath});
 
   @override
   void initState() {
     super.initState();
-    // if (_isTileProviderInitialized) {
-    //   return;
-    // }
+    if (_isTileProviderInitialized) {
+      return;
+    }
     _isTileProviderInitialized = true;
     _tileProviderFuture = _initializeTileProvider(context);
   }
@@ -140,13 +143,8 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
   Future<MbTilesTileProvider> _initializeTileProvider(
     BuildContext context,
   ) async {
-    if (!await File(mbtilesFilePath).exists()) {
-      throw Exception(
-        'El archivo mapa.mbtiles no se encontró en $mbtilesFilePath',
-      );
-    }
-
     try {
+      mbtilesFilePath = (await getMapFile(filePath: mbtilesFilePath))!.path;
       final result = MbTilesTileProvider.fromPath(path: mbtilesFilePath);
       ScaffoldMessenger.of(
         context,
@@ -184,10 +182,11 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.',
-      );
+      return null;
     }
     return await Geolocator.getCurrentPosition();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
