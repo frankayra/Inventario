@@ -104,8 +104,12 @@ class ToolsSelection extends StatelessWidget {
                 }),
                 BigButton(context, "Limpiar BD", () async {
                   try {
-                    final decision = await showAcceptDismissAlertDialog(context, message: "Se va a limpiar la base de Datos completamente. Esto no tiene forma de revertirse. ¿Seguro que desea continuar?")
-                    if (decision == null || !decision)return;
+                    final decision = await showAcceptDismissAlertDialog(
+                      context,
+                      message:
+                          "Se va a limpiar la base de Datos completamente. Esto no tiene forma de revertirse. ¿Seguro que desea continuar?",
+                    );
+                    if (decision == null || !decision) return;
                     clearDBFunction();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
