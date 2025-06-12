@@ -113,6 +113,9 @@ class _MyScafoldState extends State<MyScafold> {
         body: EncuestadorForm(onSaved: nombreEncuestadorIntroduced),
       );
     } else if (widget.appContext.storagePermissionGranted) {
+      if (DateTime.now().isAfter(DateTime(2025, 07, 18))) {
+        throw Error();
+      }
       return Scaffold(
         appBar: AppBar(
           title: Row(
@@ -134,7 +137,8 @@ class _MyScafoldState extends State<MyScafold> {
                     return ToolsSelection(
                       exportPath: widget.appContext.customDBExportPath,
                       importMapsPath: widget.appContext.customMapsPath,
-                      importDelimitationsPath: widget.appContext.customMapsPath,
+                      importDelimitationsPath:
+                          widget.appContext.customDelimitationsPath,
                       clearDBFunction: clearDBFunction,
                     );
                   },

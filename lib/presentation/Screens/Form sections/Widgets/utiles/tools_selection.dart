@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/file_management.dart';
+import 'package:inventario/presentation/Screens/Form sections/Widgets/dialogs.dart';
 
 class ToolsSelection extends StatelessWidget {
   String exportPath;
@@ -54,6 +55,32 @@ class ToolsSelection extends StatelessWidget {
                   }
                   Navigator.pop(context);
                 }),
+                BigButton(context, "Importar capa de Delimitaciones", () async {
+                  var selectedPath = await selectFile();
+                  if (selectedPath == null) return;
+                  String? newDelimitationPath = await importDelimitations(
+                    selectedPath,
+                    newFolderPath: importDelimitationsPath,
+                  );
+                  if (newDelimitationPath != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "✅ Capa de delimitación importada correctamente hacia la ruta: $importDelimitationsPath",
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "❌ No se pudo importar la capa de delimitación",
+                        ),
+                      ),
+                    );
+                  }
+                  Navigator.pop(context);
+                }),
                 BigButton(context, "Exportar BD", () async {
                   final selectedDirectory = await exportDBAsFile(
                     exportPath: exportPath,
@@ -75,34 +102,10 @@ class ToolsSelection extends StatelessWidget {
                     );
                   }
                 }),
-                BigButton(context, "Importar capa de Delimitaciones", () async {
-                  var selectedPath = await selectFile();
-                  if (selectedPath == null) return;
-                  String? newDelimitationPath = await importMap(
-                    selectedPath,
-                    newFolderPath: importMapsPath,
-                  );
-                  if (newDelimitationPath != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          "✅ Capa de delimitación importada correctamente hacia la ruta: $importDelimitationsPath",
-                        ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          "❌ No se pudo importar la capa de delimitación",
-                        ),
-                      ),
-                    );
-                  }
-                  Navigator.pop(context);
-                }),
                 BigButton(context, "Limpiar BD", () async {
                   try {
+                    final decision = await showAcceptDismissAlertDialog(context, message: "Se va a limpiar la base de Datos completamente. Esto no tiene forma de revertirse. ¿Seguro que desea continuar?")
+                    if (decision == null || !decision)return;
                     clearDBFunction();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

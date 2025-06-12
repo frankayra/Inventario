@@ -215,36 +215,52 @@ Future<String?> importMap(
   required String newFolderPath,
 }) async {
   File mapFile = File(mapPath);
+  String newMapPath = path.join(newFolderPath, path.basename(mapPath));
   try {
     if (await mapFile.exists() &&
         mapFile.path.toLowerCase().endsWith('.mbtiles')) {
-      String newMapPath = path.join(newFolderPath, path.basename(mapPath));
       await mapFile.rename(newMapPath);
       return newMapPath;
     }
   } catch (e) {
-    return null;
+    try {
+      // File newMapFile = File(newMapPath);
+      // await newMapFile.writeAsBytes(await mapFile.readAsBytes());
+      await mapFile.copy(newMapPath);
+      await mapFile.delete();
+      return newMapPath;
+    } catch (e) {
+      return null;
+    }
   }
   return null;
 }
 
-Future<String?> importDelimitationsPath(
+Future<String?> importDelimitations(
   String delimitationPath, {
   required String newFolderPath,
 }) async {
   File delimitationFile = File(delimitationPath);
+  String newDelimitationPath = path.join(
+    newFolderPath,
+    path.basename(delimitationPath),
+  );
   try {
     if (await delimitationFile.exists() &&
         delimitationFile.path.toLowerCase().endsWith('.geojson')) {
-      String newDelimitationPath = path.join(
-        newFolderPath,
-        path.basename(delimitationPath),
-      );
       await delimitationFile.rename(newDelimitationPath);
       return newDelimitationPath;
     }
   } catch (e) {
-    return null;
+    try {
+      // File newMapFile = File(newMapPath);
+      // await newMapFile.writeAsBytes(await mapFile.readAsBytes());
+      await delimitationFile.copy(newDelimitationPath);
+      await delimitationFile.delete();
+      return newDelimitationPath;
+    } catch (e) {
+      return null;
+    }
   }
   return null;
 }

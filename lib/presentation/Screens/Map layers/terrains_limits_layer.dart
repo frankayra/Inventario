@@ -73,29 +73,22 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
                 lon / points.length,
               );
               polygons.add(
-                Polygon(
-                  points: points,
-                  // color: ,
-                  borderColor:
-                      widget.markedPolygons != null &&
-                              properties != null &&
-                              widget.markedPolygons!.contains(
-                                properties["localizacion"],
-                              )
-                          ? widget.locationDoneBackground
-                          : widget.borderColor,
-                  color:
-                      widget.markedPolygons != null &&
-                              properties != null &&
-                              widget.markedPolygons!.contains(
-                                properties["localizacion"],
-                              )
-                          ? widget.locationDoneBackground
-                          : Colors.transparent,
-                  borderStrokeWidth: 2,
-
-                  // Puedes usar las propiedades aquí para personalizar cada polígono
-                ),
+                widget.markedPolygons != null &&
+                        properties != null &&
+                        widget.markedPolygons!.contains(
+                          properties["localizacion"],
+                        )
+                    ? Polygon(
+                      points: points,
+                      borderColor: Colors.green,
+                      color: widget.locationDoneBackground,
+                      borderStrokeWidth: 2,
+                    )
+                    : Polygon(
+                      points: points,
+                      borderColor: widget.borderColor,
+                      borderStrokeWidth: 2,
+                    ),
               );
               if (properties != null && properties.isNotEmpty) {
                 Widget markerToShow;
@@ -155,7 +148,11 @@ class _DelimitationsLayerState extends State<DelimitationsLayer> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        if (_polygons.isNotEmpty) PolygonLayer(polygons: _polygons),
+        if (_polygons.isNotEmpty)
+          IgnorePointer(
+            ignoring: true,
+            child: PolygonLayer(polygons: _polygons, polygonCulling: false),
+          ),
         if (_centroids.isNotEmpty) MarkerLayer(markers: _centroids),
       ],
     );
