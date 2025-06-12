@@ -20,6 +20,7 @@ import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/d
     as db;
 import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_debug.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/tools_selection.dart';
+import 'package:inventario/presentation/Screens/Form sections/Encuestador.dart';
 
 class AppContext {
   String customRootPath = "/storage/emulated/0/CADIC";
@@ -31,6 +32,7 @@ class AppContext {
   late String assetsMapPath;
   late String customMapPath;
   bool storagePermissionGranted = false;
+  bool nombreEncuestadorGranted = false;
 
   AppContext({required String mapName}) : _mapName = mapName {
     customRootPath = path.normalize(customRootPath);
@@ -61,6 +63,9 @@ void main() async {
 
   if (foldersCreated) {
     appContext.storagePermissionGranted = true;
+  }
+  if ((await db.getEncuestador()) != null) {
+    appContext.nombreEncuestadorGranted = true;
   }
   runApp(
     MaterialApp(
@@ -103,7 +108,11 @@ class _MyScafoldState extends State<MyScafold> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.appContext.storagePermissionGranted) {
+    if (!widget.appContext.nombreEncuestadorGranted) {
+      return Scaffold(
+        body: EncuestadorForm(onSaved: nombreEncuestadorIntroduced),
+      );
+    } else if (widget.appContext.storagePermissionGranted) {
       return Scaffold(
         appBar: AppBar(
           title: Row(
@@ -203,16 +212,11 @@ class _MyScafoldState extends State<MyScafold> {
           /// ++++++++++++++++++++++++++++++++ ///
           mbtilesFilePath: widget.appContext.customMapPath,
 
+          prediosListos: prediosListos,
           delimitationLayers: getAllDelimitations(
             widget.appContext.customDelimitationsPath,
           ),
-          onLocationTap: (int tappedLocation) {
-            setState(() {
-              _tappedLocation = tappedLocation;
-              _selectedIndex = 1;
-            });
-          },
-          prediosListos: prediosListos,
+          onLocationTap: predioTapped,
 
           /// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ ///
         );
@@ -236,6 +240,19 @@ class _MyScafoldState extends State<MyScafold> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  void predioTapped(int tappedLocation) {
+    setState(() {
+      _tappedLocation = tappedLocation;
+      _selectedIndex = 1;
+    });
+  }
+
+  void nombreEncuestadorIntroduced(String nombreEncuestador) async {
+    setState(() {
+      widget.appContext.nombreEncuestadorGranted = true;
     });
   }
 

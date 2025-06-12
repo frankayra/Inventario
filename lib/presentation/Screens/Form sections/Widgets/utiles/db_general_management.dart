@@ -24,6 +24,10 @@ Future<Database> openDB({
     // "DROP TABLE IF EXISTS propiedades;",
     // "DROP TABLE IF EXISTS edificios;",
     // "DROP TABLE IF EXISTS predios;",
+    // "DROP TABLE IF EXISTS encuestador;",
+    """CREATE TABLE encuestador(
+        name TEXT PRIMARY KEY);""",
+
     """CREATE TABLE predios(
         id_predio INTEGER PRIMARY KEY, 
         nivelPredio1 FLOAT NOT NULL,
@@ -128,6 +132,13 @@ void clearDB() {
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 // +++++++++++++++++++++++ SELECT ++++++++++++++++++++++ //
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+Future<Encuestador?> getEncuestador() async {
+  final db = await openDB();
+  var encuestadores = await db.query("encuestador");
+  if (encuestadores.isEmpty) return null;
+  return Encuestador.fromRawTuple(encuestadores[0]);
+}
+
 Future<Predio?> getPredio({required int idPredio}) async {
   final db = await openDB();
   List<Map<String, dynamic>> rawTuples = await db.query(
@@ -230,17 +241,24 @@ Future<List<Propiedad>> getAllPropiedades({
   return [];
 }
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++++    ++++++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++          +++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++  DB Table  ++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++         ++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++++    ++++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 abstract class InventarioDbTable {
   final String tableName;
   final String primaryKeysWhere;
-  List<int> get primaryKeysWhereArgs;
+  List<dynamic> get primaryKeysWhereArgs;
   Map<String, dynamic> toMap();
   const InventarioDbTable({
     required this.tableName,
     required this.primaryKeysWhere,
   });
 
-  Future<void> insertInDB({String? where, List<int>? whereArgs}) async {
+  Future<void> insertInDB({String? where, List<dynamic>? whereArgs}) async {
     final db = await openDB();
     var args = (
       tableName,
@@ -261,7 +279,7 @@ abstract class InventarioDbTable {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   // +++++++++++++++++++++++ UPDATE ++++++++++++++++++++++ //
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  Future<void> updateInDB({String? where, List<int>? whereArgs}) async {
+  Future<void> updateInDB({String? where, List<dynamic>? whereArgs}) async {
     final db = await openDB();
     await db.update(
       tableName,
@@ -274,13 +292,36 @@ abstract class InventarioDbTable {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   // +++++++++++++++++++++++ DELETE ++++++++++++++++++++++ //
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  Future<void> deleteInDB({String? where, List<int>? whereArgs}) async {
+  Future<void> deleteInDB({String? where, List<dynamic>? whereArgs}) async {
     final db = await openDB();
     await db.delete(
       tableName,
       where: where ?? primaryKeysWhere,
       whereArgs: where == null ? primaryKeysWhereArgs : whereArgs,
     );
+  }
+}
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++++        ++++++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++              +++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++   Encuestador  ++++++++++++++++++++++++++++ //
+// ++++++++++++++++++++++++++++              +++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++++        ++++++++++++++++++++++++++++++++ //
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+
+class Encuestador extends InventarioDbTable {
+  String name;
+  Encuestador({required this.name})
+    : super(tableName: "encuestador", primaryKeysWhere: "name = ?");
+
+  Encuestador.fromRawTuple(Map<String, dynamic> rawTuple)
+    : this(name: rawTuple["name"]);
+  @override
+  get primaryKeysWhereArgs => [name];
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {"name": name};
   }
 }
 

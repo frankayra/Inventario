@@ -150,11 +150,6 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                 right: 16.0,
                 child: FloatingActionButton(
                   onPressed: () async {
-                    ///
-                    ///
-                    ///
-                    ///
-                    ///
                     Position? currentPosition = await _determinePosition();
                     if (currentPosition == null) return;
                     LatLng currentCoords = LatLng(
