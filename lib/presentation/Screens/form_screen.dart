@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/Predio.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/Edificio.dart';
 import 'package:inventario/presentation/Screens/Form%20sections/Propiedad.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/wrappers.dart';
+import 'package:inventario/Model/wrappers.dart';
 
 const PREDIO = 'Predio';
 const EDIFICIOS = 'Edificios';

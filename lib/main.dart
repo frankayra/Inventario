@@ -1,25 +1,15 @@
-import 'dart:math';
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/dialogs.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import 'presentation/Screens/Form sections/Widgets/utiles/file_management.dart';
+import 'package:inventario/Model/file_management.dart';
 import 'presentation/Screens/offline_map_screen.dart';
-import 'presentation/Screens/form3_screen.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_general_management.dart'
-    as db;
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_debug.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/tools_selection.dart';
+import 'presentation/Screens/form_screen.dart';
+import 'package:inventario/Model/db_general_management.dart' as db;
+import 'package:inventario/Model/db_debug.dart';
+import 'package:inventario/Model/tools_selection.dart';
 import 'package:inventario/presentation/Screens/Form sections/Encuestador.dart';
 
 class AppContext {

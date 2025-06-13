@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/file_management.dart';
-import 'package:inventario/presentation/Screens/Form sections/Widgets/dialogs.dart';
+import 'file_management.dart';
+import 'package:inventario/presentation/Widgets/dialogs.dart';
 
 class ToolsSelection extends StatelessWidget {
   String exportPath;

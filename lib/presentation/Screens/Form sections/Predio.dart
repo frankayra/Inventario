@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_general_management.dart'
-    as db;
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/wrappers.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/dialogs.dart';
+import 'package:inventario/Model/db_general_management.dart' as db;
+import 'package:inventario/Model/wrappers.dart';
+import 'package:inventario/presentation/Widgets/dialogs.dart';
 
 class PredioForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;

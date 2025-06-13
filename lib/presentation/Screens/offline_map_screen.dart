@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
-import 'package:mbtiles/mbtiles.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'dart:async';
-import 'dart:io';
-import 'Form sections/Widgets/utiles/file_management.dart';
+import 'package:inventario/Model/file_management.dart';
+import 'package:inventario/Model/find_map_centroid.dart';
 import 'Map layers/terrains_limits_layer.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:inventario/presentation/Screens/Form sections/Widgets/utiles/find_map_centroid.dart';
 
 const ALAMAR = LatLng(23.17053428523392, -82.27196563176855); // Alamar
 const HABANA = LatLng(23.14467, -82.35550); // Habana

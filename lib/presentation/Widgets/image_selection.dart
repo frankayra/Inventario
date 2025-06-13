@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/wrappers.dart';
 
 class MyImagePickerInput extends StatefulWidget {
   final String? imageLabel;

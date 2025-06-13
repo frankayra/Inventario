@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_general_management.dart'
-    as db;
+import 'db_general_management.dart' as db;
 
 class DBDebugDialog extends StatefulWidget {
   const DBDebugDialog({super.key});

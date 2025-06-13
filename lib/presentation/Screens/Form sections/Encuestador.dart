@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Screens/Form sections/Widgets/utiles/db_general_management.dart'
-    as db;
+import 'package:inventario/Model/db_general_management.dart' as db;
 
 Widget EncuestadorForm({required void Function(String) onSaved}) {
   final _subformKey = GlobalKey<FormState>();

@@ -1,13 +1,12 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/date_selection.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/image_selection.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/dialogs.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/db_general_management.dart'
-    as db;
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/wrappers.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/utiles/hash.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Widgets/animations/countdown_circle.dart';
+import 'package:inventario/presentation/Widgets/date_selection.dart';
+import 'package:inventario/presentation/Widgets/image_selection.dart';
+import 'package:inventario/presentation/Widgets/dialogs.dart';
+import 'package:inventario/Model/db_general_management.dart' as db;
+import 'package:inventario/Model/wrappers.dart';
+import 'package:inventario/Model/hash.dart';
+import 'package:inventario/presentation/Widgets/countdown_circle.dart';
 
 // DONE: Acabar de arreglar lo de los campos a la hora de la validacion
 // DONE: Que se guarde bien una propiedad.
