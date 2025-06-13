@@ -46,28 +46,15 @@ class _DBDebugDialogState extends State<DBDebugDialog> {
 
       prediosWidgets =
           _predios.map((predio) {
-            return ListTile(
-              title: Text('Predio ${predio.idPredio}'),
-              subtitle: Text(''),
-            );
+            return Chip(label: Text('Pred. ${predio.idPredio}'));
           }).toList();
       edificiosWidgets +=
           _edificios
-              .map(
-                (e) => ListTile(
-                  title: Text('Edificio ${e.noEdificio}'),
-                  subtitle: Text(''),
-                ),
-              )
+              .map((e) => Chip(label: Text('Ed. ${e.noEdificio}')))
               .toList();
       propiedadesWidgets +=
           _propiedades
-              .map(
-                (p) => ListTile(
-                  title: Text('Propiedad ${p.noLocal}'),
-                  subtitle: Text(''),
-                ),
-              )
+              .map((p) => Chip(label: Text('Prop. ${p.noLocal}')))
               .toList();
     } catch (e) {
       loadingError = e;
@@ -75,9 +62,6 @@ class _DBDebugDialogState extends State<DBDebugDialog> {
     if (mounted) {
       setState(() {
         isLoaded = true;
-        print(
-          "Predios:$_predios........... \nEdificios:$_edificios........... \nPropiedades:$_propiedades...........",
-        );
       });
     }
   }

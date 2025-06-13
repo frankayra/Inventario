@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_mbtiles/flutter_map_mbtiles.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:path/path.dart' as path;
-import 'dart:async';
-import 'package:inventario/Model/file_management.dart';
-import 'package:inventario/Model/find_map_centroid.dart';
-import 'Map layers/terrains_limits_layer.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:path/path.dart' as path;
+import 'package:inventario/Model/file_management.dart';
+import 'package:inventario/presentation/Screens/Map%20utilities/find_map_centroid.dart';
+import 'Map utilities/terrains_limits_layer.dart';
 
 const ALAMAR = LatLng(23.17053428523392, -82.27196563176855); // Alamar
 const HABANA = LatLng(23.14467, -82.35550); // Habana
@@ -58,8 +58,6 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
         OfflineMapWidget.newMapCoords == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         // Aquí el FlutterMap ya fue renderizado al menos una vez
-        print('FlutterMap renderizado');
-        // Aquí puedes hacer operaciones sobre _mapController
         LatLng? coords = await findMBTilesCentroid(mbtilesFilePath);
         if (coords != null) {
           _mapController.move(coords, 16.0);
