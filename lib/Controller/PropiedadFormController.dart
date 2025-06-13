@@ -361,4 +361,86 @@ class PropiedadFormController {
       formGlobalStatus["noLocal"] = null;
     }
   }
+
+  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++   Utiles   ++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  void agregarPropiedad() {
+    formGlobalStatus["noLocal"] = null;
+  }
+
+  void editarPropiedad(int idx) {
+    // _imageVersion++;
+    formGlobalStatus["noLocal"] = propiedadesDelEdificio[idx].noLocal;
+  }
+
+  void eliminarPropiedad(BuildContext context, int idx) async {
+    var currentPropiedad = propiedadesDelEdificio[idx];
+    bool dismissAction = false;
+    bool iWasNotOverriden = true;
+    if (snackbaractions != null) {
+      overridingDelete = true;
+      snackbaractions!.close();
+    }
+    snackbaractions = ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Propiedad eliminada'),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    dismissAction = true;
+                  },
+                  child: Text(
+                    "Deshacer",
+                    style: TextStyle(color: Colors.blue[400]),
+                  ),
+                ),
+                SizedBox(width: 15.0),
+                CountdownCircle(duration: Duration(seconds: 5)),
+              ],
+            ),
+          ],
+        ),
+      ),
+
+      // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
+    );
+    final start = DateTime.now();
+    while (DateTime.now().difference(start) < Duration(seconds: 5)) {
+      await Future.delayed(Duration(milliseconds: 200));
+      if (overridingDelete) {
+        overridingDelete = false;
+        iWasNotOverriden = false;
+        break;
+      }
+      if (dismissAction) {
+        snackbaractions!.close();
+        snackbaractions = null;
+        return;
+      }
+    }
+
+    ///\  /\  /\  /\  /\  /\  /\  /\  /\
+    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
+    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
+    //            Acciones
+    await currentPropiedad.deleteInDB();
+    if (iWasNotOverriden) {
+      snackbaractions = null;
+      if (formGlobalStatus["noLocal"] == propiedadesDelEdificio[idx].noLocal) {
+        formGlobalStatus["noLocal"] = null;
+      } else {
+        formGlobalStatus["noLocal"] = formGlobalStatus["noLocal"];
+      }
+    }
+  }
 }

@@ -42,7 +42,7 @@ class PropiedadFormState extends State<PropiedadForm> {
               spacing: 8,
               children: [
                 ElevatedButton(
-                  onPressed: _agregarPropiedad,
+                  onPressed: controller.agregarPropiedad,
                   child: Icon(Icons.add_circle_outlined),
                 ),
 
@@ -60,9 +60,9 @@ class PropiedadFormState extends State<PropiedadForm> {
                   return InputChip(
                     label: Text('P. ${entry.value.noLocal}'),
                     backgroundColor: chipBackgroundColor,
-                    onDeleted: () => _eliminarPropiedad(context, idx),
+                    onDeleted: () => controller.eliminarPropiedad(context, idx),
                     deleteIcon: Icon(Icons.close),
-                    onPressed: () => _editarPropiedad(idx),
+                    onPressed: () => controller.editarPropiedad(idx),
                   );
                 }).toList()),
               ],
@@ -803,89 +803,5 @@ class PropiedadFormState extends State<PropiedadForm> {
         ),
       ),
     );
-  }
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
-  // ++++++++++++++++++++++++   Utiles   ++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  void _agregarPropiedad() {
-    widget.formGlobalStatus["noLocal"] = null;
-  }
-
-  void _editarPropiedad(int idx) {
-    // _imageVersion++;
-    widget.formGlobalStatus["noLocal"] =
-        controller.propiedadesDelEdificio[idx].noLocal;
-  }
-
-  void _eliminarPropiedad(BuildContext context, int idx) async {
-    var currentPropiedad = controller.propiedadesDelEdificio[idx];
-    bool dismissAction = false;
-    bool iWasNotOverriden = true;
-    if (controller.snackbaractions != null) {
-      controller.overridingDelete = true;
-      controller.snackbaractions!.close();
-    }
-    controller.snackbaractions = ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Propiedad eliminada'),
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    dismissAction = true;
-                  },
-                  child: Text(
-                    "Deshacer",
-                    style: TextStyle(color: Colors.blue[400]),
-                  ),
-                ),
-                SizedBox(width: 15.0),
-                CountdownCircle(duration: Duration(seconds: 5)),
-              ],
-            ),
-          ],
-        ),
-      ),
-
-      // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
-    );
-    final start = DateTime.now();
-    while (DateTime.now().difference(start) < Duration(seconds: 5)) {
-      await Future.delayed(Duration(milliseconds: 200));
-      if (controller.overridingDelete) {
-        controller.overridingDelete = false;
-        iWasNotOverriden = false;
-        break;
-      }
-      if (dismissAction) {
-        controller.snackbaractions!.close();
-        controller.snackbaractions = null;
-        return;
-      }
-    }
-
-    ///\  /\  /\  /\  /\  /\  /\  /\  /\
-    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
-    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
-    //            Acciones
-    await currentPropiedad.deleteInDB();
-    if (iWasNotOverriden) {
-      controller.snackbaractions = null;
-      if (widget.formGlobalStatus["noLocal"] ==
-          controller.propiedadesDelEdificio[idx].noLocal) {
-        widget.formGlobalStatus["noLocal"] = null;
-      } else {
-        widget.formGlobalStatus["noLocal"] = widget.formGlobalStatus["noLocal"];
-      }
-    }
   }
 }
