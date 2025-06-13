@@ -9,7 +9,7 @@ import 'presentation/Screens/offline_map_screen.dart';
 import 'presentation/Screens/form_screen.dart';
 import 'package:inventario/Model/db_general_management.dart' as db;
 import 'package:inventario/Model/db_debug.dart';
-import 'package:inventario/Model/tools_selection.dart';
+import 'package:inventario/Controller/user_tools.dart';
 import 'package:inventario/presentation/Screens/Form sections/Encuestador.dart';
 
 class AppContext {

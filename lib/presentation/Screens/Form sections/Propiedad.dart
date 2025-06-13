@@ -2,19 +2,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Widgets/date_selection.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
-import 'package:inventario/presentation/Widgets/dialogs.dart';
-import 'package:inventario/Model/db_general_management.dart' as db;
 import 'package:inventario/Model/wrappers.dart';
 import 'package:inventario/Model/hash.dart';
 import 'package:inventario/presentation/Widgets/countdown_circle.dart';
-
-// DONE: Acabar de arreglar lo de los campos a la hora de la validacion
-// DONE: Que se guarde bien una propiedad.
-// DONE: Como sera que se agregan nuevas instancias y se cambian los valores automaticamente.
-
-// DONE: arreglar los validadores de los campos opcionales que se activan con los campos check.
-// DONE: Arreglar el widget de fecha.
-// DONE: Verificar la correcta funcion al presionar en una propiedad.
+import 'package:inventario/Controller/PropiedadFormController.dart';
 
 class PropiedadForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;
@@ -25,208 +16,18 @@ class PropiedadForm extends StatefulWidget {
 }
 
 class PropiedadFormState extends State<PropiedadForm> {
-  List<db.Propiedad> propiedadesDelEdificio = [];
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? snackbaractions;
-  bool overridingDelete = false;
   final _formKey = GlobalKey<FormState>();
-  final _dropdownOptions = {
-    "estadoNegocio": {
-      1: 'En operación',
-      2: 'Cierre temporal',
-      3: 'Desocupado con Rótulo SE ALQUILA',
-      4: 'Cierre total',
-      5: 'Ha modificado la actividad \n      autorizada(EXPRESS u otra actividad)',
-    },
-    "documentoMostrado": {
-      1: 'Certificado Patente',
-      2: 'Recibo al día(Menos de dos meses de atraso)',
-      3: 'Recibo atrasado(Con más de dos meses de atraso)',
-      4: 'Certificado Trámite "CT". Indicar el número',
-      5: 'No muestra documentos de patente',
-    },
-    "areaActividad": {
-      1: 'Menos de 50m²',
-      2: '51 a 100m²',
-      3: '101 a 200m²',
-      4: '200 a 400m²',
-      5: '400 a 1000m²',
-      6: 'Más de 1000m²',
-      998: 'No aplica (Código 998)',
-      999: 'No visible (Código 999)',
-    },
-    "afectacionesCovidPersonalDesempennoEmpresa": {
-      1: 'Despido de empleados',
-      2: 'Reducción jornada laboral',
-      3: 'Suspensión del contrato laboral',
-      4: 'Se adelantaron vacaciones',
-      5: 'Se empezó a trabajar por turnos',
-      6: 'Se aumentaron las jornadas',
-      7: 'Se implementó modalidad de teletrabajo',
-    },
-    "afectacionesCovidSobreVentas": {
-      1: 'Ingresó "0" ante la afectación de una orden sanitaria',
-      2: 'Reducción de los ingresos entre un 50-90%',
-      3: 'Reducción de los ingresos entre un 20-50%',
-      4: 'Se mantuvieron dentro de lo esperado',
-      5: 'Aumentaron',
-      6: 'Ninguna',
-      7: 'NS-NR',
-    },
-  };
+  late PropiedadFormController controller;
+
   @override
   void initState() {
     super.initState();
-    if (widget.formGlobalStatus["idPredio"] != null &&
-        widget.formGlobalStatus["noEdificio"] != null) {
-      idPredio = widget.formGlobalStatus["idPredio"];
-      noEdificio = widget.formGlobalStatus["noEdificio"];
-      db
-          .getAllPropiedades(
-            idPredio: widget.formGlobalStatus["idPredio"],
-            noEdificio: widget.formGlobalStatus["noEdificio"],
-          )
-          .then((List<db.Propiedad> propiedades) {
-            setState(() {
-              propiedadesDelEdificio = propiedades;
-            });
-            if (widget.formGlobalStatus["noLocal"] != null) {
-              db
-                  .getPropiedad(
-                    idPredio: idPredio!,
-                    noEdificio: noEdificio!,
-                    noLocal: widget.formGlobalStatus["noLocal"]!,
-                  )
-                  .then((currentPropiedad) {
-                    if (currentPropiedad != null) {
-                      setState(() {
-                        noLocal = widget.formGlobalStatus["noLocal"];
-                        _nivelPiso = currentPropiedad.nivelPiso;
-                        _actividadPrimaria = currentPropiedad.actividadPrimaria;
-                        _actividadComplementaria =
-                            currentPropiedad.actividadComplementaria;
-                        _estadoNegocio = currentPropiedad.estadoNegocio;
-                        _nombreNegocio = currentPropiedad.nombreNegocio;
-                        _cantidadParqueos = currentPropiedad.cantidadParqueos;
-                        _documentoMostrado = currentPropiedad.documentoMostrado;
-                        _nombrePatentado = currentPropiedad.nombrePatentado;
-                        _numeroPatenteComercial =
-                            currentPropiedad.numeroPatenteComercial;
-                        _cedulaPatentado = currentPropiedad.cedulaPatentado;
-                        _nombreActividadPatente =
-                            currentPropiedad.nombreActividadPatente;
-                        _tieneMasPatentes = currentPropiedad.tieneMasPatentes;
-                        _numeroPatente_2 = currentPropiedad.numeroPatente_2;
-                        _tienePermisoSalud = currentPropiedad.tienePermisoSalud;
-                        _numeroPermisoSalud =
-                            currentPropiedad.numeroPermisoSalud;
-                        _fechaVigenciaPermisoSalud =
-                            currentPropiedad.fechaVigenciaPermisoSalud;
-                        _codigoCIIUPermisoSalud =
-                            currentPropiedad.codigoCIIUPermisoSalud;
-                        _seTrataDeLocalMercado =
-                            currentPropiedad.seTrataDeLocalMercado;
-                        _numeroLocalMercado =
-                            currentPropiedad.numeroLocalMercado;
-                        _tienePatenteLicores =
-                            currentPropiedad.tienePatenteLicores;
-                        _numeroPatenteLicores =
-                            currentPropiedad.numeroPatenteLicores;
-                        _areaActividad = currentPropiedad!.areaActividad;
-                        _telefonoPatentado = currentPropiedad.telefonoPatentado;
-                        _correoElectronico = currentPropiedad.correoElectronico;
-                        _cantidadEmpleadosAntesCovid =
-                            currentPropiedad.cantidadEmpleadosAntesCovid;
-                        _cantidadEmpleadosActual =
-                            currentPropiedad.cantidadEmpleadosActual;
-                        _afectacionesCovidPersonalDesempennoEmpresa =
-                            currentPropiedad
-                                .afectacionesCovidPersonalDesempennoEmpresa;
-                        _afectacionesCovidSobreVentas =
-                            currentPropiedad.afectacionesCovidSobreVentas;
-                        _codigoCIIUActividadPrimaria =
-                            currentPropiedad.codigoCIUUActividadPrimaria;
-                        _codigoCIIUActividadComplementaria =
-                            currentPropiedad.codigoCIUUActividadComplementaria;
-                        _observacionesPatentes =
-                            currentPropiedad.observacionesPatentes;
-                        _imagenDocumentoLegal =
-                            currentPropiedad.imagenDocumentoLegal;
-
-                        if (_afectacionesCovidPersonalDesempennoEmpresa !=
-                            null) {
-                          List<String> stringValues =
-                              _afectacionesCovidPersonalDesempennoEmpresa!
-                                  .split(", ");
-
-                          for (var entry
-                              in _dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]!
-                                  .entries) {
-                            if (stringValues.contains(entry.value)) {
-                              _afectacionesCovidPersonalDesempennoEmpresaList
-                                  .add(entry.key);
-                            }
-                          }
-                        }
-                        if (_afectacionesCovidSobreVentas != null) {
-                          List<String> stringValues =
-                              _afectacionesCovidSobreVentas!.split(", ");
-
-                          for (var entry
-                              in _dropdownOptions["afectacionesCovidSobreVentas"]!
-                                  .entries) {
-                            if (stringValues.contains(entry.value)) {
-                              _afectacionesCovidSobreVentasList.add(entry.key);
-                            }
-                          }
-                        }
-                      });
-                    }
-                  });
-            }
-          });
-    }
+    controller = PropiedadFormController(
+      formKey: _formKey,
+      formGlobalStatus: widget.formGlobalStatus,
+      formSetStateCallbackFunction: () => setState(() {}),
+    );
   }
-
-  // ++++++ Módulo Uso de suelo y Patentes Comerciales ++++++ //
-  bool changeEdificio = false;
-  int? idPredio;
-  int? noEdificio;
-  int? noLocal;
-  String? _nivelPiso;
-  String? _actividadPrimaria;
-  String? _actividadComplementaria;
-  int? _estadoNegocio;
-  String? _nombreNegocio;
-  int? _cantidadParqueos;
-  int? _documentoMostrado;
-  String? _nombrePatentado;
-  int? _numeroPatenteComercial;
-  int? _cedulaPatentado;
-  String? _nombreActividadPatente;
-  bool _tieneMasPatentes = false;
-  int? _numeroPatente_2;
-  bool _tienePermisoSalud = false;
-  String? _numeroPermisoSalud;
-  int? _fechaVigenciaPermisoSalud;
-  String? _codigoCIIUPermisoSalud;
-  bool _seTrataDeLocalMercado = false;
-  int? _numeroLocalMercado;
-  bool _tienePatenteLicores = false;
-  int? _numeroPatenteLicores;
-  int? _areaActividad;
-  int? _telefonoPatentado;
-  String? _correoElectronico;
-  int? _cantidadEmpleadosAntesCovid;
-  int? _cantidadEmpleadosActual;
-  String? _afectacionesCovidPersonalDesempennoEmpresa;
-  String? _afectacionesCovidSobreVentas;
-  List<int> _afectacionesCovidPersonalDesempennoEmpresaList = [];
-  List<int> _afectacionesCovidSobreVentasList = [];
-  String? _codigoCIIUActividadPrimaria;
-  String? _codigoCIIUActividadComplementaria;
-  String? _observacionesPatentes;
-  Uint8List? _imagenDocumentoLegal;
-  // int _imageVersion = Random().nextInt(2000000);
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +46,9 @@ class PropiedadFormState extends State<PropiedadForm> {
                   child: Icon(Icons.add_circle_outlined),
                 ),
 
-                ...(propiedadesDelEdificio.asMap().entries.map((entry) {
+                ...(controller.propiedadesDelEdificio.asMap().entries.map((
+                  entry,
+                ) {
                   var chipBackgroundColor = Colors.grey[100];
                   if (widget.formGlobalStatus["noEdificio"] != null &&
                       widget.formGlobalStatus["noLocal"] != null &&
@@ -265,48 +68,12 @@ class PropiedadFormState extends State<PropiedadForm> {
               ],
             ),
             SizedBox(height: 40),
-
-            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-            // ++++++++++++++++++++++   Cambio de Edificio a la propiedad   ++++++++++++++++++++++ //
-            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: TextFormField(
-            //         initialValue:
-            //             widget.formGlobalStatus["noEdificio"].toString(),
-            //         decoration: InputDecoration(labelText: 'noEdificio'),
-            //         enabled: changeEdificio,
-            //         validator: (value) {
-            //           final number = int.tryParse(value!);
-            //           if (number == null) {
-            //             return "Ingresa una numero de edificio válido";
-            //           }
-            //           noEdificio = number;
-            //         },
-            //       ),
-            //     ),
-            //     Column(
-            //       children: [
-            //         Icon(
-            //           Icons.edit,
-            //           color: Theme.of(context).colorScheme.secondary,
-            //         ),
-            //         Checkbox(
-            //           value: changeEdificio,
-            //           onChanged: (bool? newValue) {
-            //             setState(() {
-            //               changeEdificio = newValue!;
-            //             });
-            //           },
-            //         ),
-            //       ],
-            //     ),
-            //   ],
-            // ),
             TextFormField(
-              key: ValueKey("noLocal-$noLocal"),
-              initialValue: noLocal != null ? noLocal.toString() : "",
+              key: ValueKey("noLocal-${controller.noLocal}"),
+              initialValue:
+                  controller.noLocal != null
+                      ? controller.noLocal.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Numero Local'),
               validator: (value) {
@@ -317,16 +84,19 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                noLocal = number;
+                controller.noLocal = number;
                 return null;
               },
             ),
             TextFormField(
-              key: ValueKey("nivelPiso-$_nivelPiso"),
-              initialValue: _nivelPiso != null ? _nivelPiso.toString() : "",
+              key: ValueKey("nivelPiso-${controller.nivelPiso}"),
+              initialValue:
+                  controller.nivelPiso != null
+                      ? controller.nivelPiso.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Nivel piso'),
               onChanged: (value) {
-                _nivelPiso = value;
+                controller.nivelPiso = value;
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -336,14 +106,16 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
-              key: ValueKey("actividadPrimaria-$_actividadPrimaria"),
+              key: ValueKey(
+                "actividadPrimaria-${controller.actividadPrimaria}",
+              ),
               initialValue:
-                  _actividadPrimaria != null
-                      ? _actividadPrimaria.toString()
+                  controller.actividadPrimaria != null
+                      ? controller.actividadPrimaria.toString()
                       : "",
               decoration: InputDecoration(labelText: 'Actividad primaria'),
               onChanged: (value) {
-                _actividadPrimaria = value;
+                controller.actividadPrimaria = value;
               },
 
               validator: (value) {
@@ -355,17 +127,17 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             TextFormField(
               key: ValueKey(
-                "actividadComplementaria-$_actividadComplementaria",
+                "actividadComplementaria-${controller.actividadComplementaria}",
               ),
               initialValue:
-                  _actividadComplementaria != null
-                      ? _actividadComplementaria.toString()
+                  controller.actividadComplementaria != null
+                      ? controller.actividadComplementaria.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Actividad complementaria',
               ),
               onChanged: (value) {
-                _actividadComplementaria = value;
+                controller.actividadComplementaria = value;
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -375,8 +147,8 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             DropdownButtonFormField(
-              value: _estadoNegocio,
-              items: _dropdownOptions["estadoNegocio"]!.entries
+              value: controller.estadoNegocio,
+              items: controller.dropdownOptions["estadoNegocio"]!.entries
                   .map((estado) {
                     return DropdownMenuItem(
                       value: estado.key,
@@ -386,7 +158,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                   .toList(growable: false),
               onChanged: (value) {
                 setState(() {
-                  _estadoNegocio = value;
+                  controller.estadoNegocio = value;
                 });
               },
               decoration: InputDecoration(labelText: 'Estado Negocio'),
@@ -398,12 +170,14 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
-              key: ValueKey("nombreNegocio-$_nombreNegocio"),
+              key: ValueKey("nombreNegocio-${controller.nombreNegocio}"),
               initialValue:
-                  _nombreNegocio != null ? _nombreNegocio.toString() : "",
+                  controller.nombreNegocio != null
+                      ? controller.nombreNegocio.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Nombre negocio'),
               onChanged: (value) {
-                _nombreNegocio = value;
+                controller.nombreNegocio = value;
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -413,9 +187,11 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
-              key: ValueKey("cantidadParqueos-$_cantidadParqueos"),
+              key: ValueKey("cantidadParqueos-${controller.cantidadParqueos}"),
               initialValue:
-                  _cantidadParqueos != null ? _cantidadParqueos.toString() : "",
+                  controller.cantidadParqueos != null
+                      ? controller.cantidadParqueos.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad de parqueos'),
               validator: (value) {
@@ -426,13 +202,13 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _cantidadParqueos = number;
+                controller.cantidadParqueos = number;
                 return null;
               },
             ),
             DropdownButtonFormField(
-              value: _documentoMostrado,
-              items: _dropdownOptions["documentoMostrado"]!.entries
+              value: controller.documentoMostrado,
+              items: controller.dropdownOptions["documentoMostrado"]!.entries
                   .map((documento) {
                     return DropdownMenuItem(
                       value: documento.key,
@@ -441,7 +217,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                   })
                   .toList(growable: false),
               onChanged: (value) {
-                _documentoMostrado = value;
+                controller.documentoMostrado = value;
               },
               decoration: InputDecoration(labelText: 'Documento mostrado'),
               validator: (value) {
@@ -452,12 +228,14 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
-              key: ValueKey("nombrePatentado-$_nombrePatentado"),
+              key: ValueKey("nombrePatentado-${controller.nombrePatentado}"),
               initialValue:
-                  _nombrePatentado != null ? _nombrePatentado.toString() : "",
+                  controller.nombrePatentado != null
+                      ? controller.nombrePatentado.toString()
+                      : "",
               decoration: InputDecoration(labelText: 'Nombre del patentado'),
               onChanged: (value) {
-                _nombrePatentado = value;
+                controller.nombrePatentado = value;
               },
               validator:
                   (value) =>
@@ -466,10 +244,12 @@ class PropiedadFormState extends State<PropiedadForm> {
                           : "Ingrese el nombre del patentado",
             ),
             TextFormField(
-              key: ValueKey("numeroPatenteComercial-$_numeroPatenteComercial"),
+              key: ValueKey(
+                "numeroPatenteComercial-${controller.numeroPatenteComercial}",
+              ),
               initialValue:
-                  _numeroPatenteComercial != null
-                      ? _numeroPatenteComercial.toString()
+                  controller.numeroPatenteComercial != null
+                      ? controller.numeroPatenteComercial.toString()
                       : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
@@ -483,14 +263,16 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _numeroPatenteComercial = number;
+                controller.numeroPatenteComercial = number;
                 return null;
               },
             ),
             TextFormField(
-              key: ValueKey("cedulaPatentado-$_cedulaPatentado"),
+              key: ValueKey("cedulaPatentado-${controller.cedulaPatentado}"),
               initialValue:
-                  _cedulaPatentado != null ? _cedulaPatentado.toString() : "",
+                  controller.cedulaPatentado != null
+                      ? controller.cedulaPatentado.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cédula patentado'),
               validator: (value) {
@@ -501,21 +283,23 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _cedulaPatentado = number;
+                controller.cedulaPatentado = number;
                 return null;
               },
             ),
             TextFormField(
-              key: ValueKey("nombreActividadPatente-$_nombreActividadPatente"),
+              key: ValueKey(
+                "nombreActividadPatente-${controller.nombreActividadPatente}",
+              ),
               initialValue:
-                  _nombreActividadPatente != null
-                      ? _nombreActividadPatente.toString()
+                  controller.nombreActividadPatente != null
+                      ? controller.nombreActividadPatente.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Nombre de la actividad registrada en la patente',
               ),
               onChanged: (value) {
-                _nombreActividadPatente = value;
+                controller.nombreActividadPatente = value;
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -526,11 +310,11 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             SizedBox(height: 20),
             CheckboxListTile(
-              value: _tieneMasPatentes,
+              value: controller.tieneMasPatentes,
               title: Text("Tiene autorizadas más patentes"),
               onChanged: (bool? selected) {
                 setState(() {
-                  _tieneMasPatentes = selected!;
+                  controller.tieneMasPatentes = selected!;
                 });
               },
               activeColor: Colors.blue,
@@ -539,14 +323,16 @@ class PropiedadFormState extends State<PropiedadForm> {
               dense: true,
             ),
             TextFormField(
-              enabled: _tieneMasPatentes,
-              key: ValueKey("numeroPatente_2-$_numeroPatente_2"),
+              enabled: controller.tieneMasPatentes,
+              key: ValueKey("numeroPatente_2-${controller.numeroPatente_2}"),
               initialValue:
-                  _numeroPatente_2 != null ? _numeroPatente_2.toString() : "",
+                  controller.numeroPatente_2 != null
+                      ? controller.numeroPatente_2.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Número de patente 2'),
               validator: (value) {
-                if (_tieneMasPatentes) {
+                if (controller.tieneMasPatentes) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingresa el número de patente comercial 2';
                   }
@@ -554,18 +340,18 @@ class PropiedadFormState extends State<PropiedadForm> {
                   if (number == null) {
                     return 'Por favor ingresa un número válido';
                   }
-                  _numeroPatente_2 = number;
+                  controller.numeroPatente_2 = number;
                 }
                 return null;
               },
             ),
             SizedBox(height: 20),
             CheckboxListTile(
-              value: _tienePermisoSalud,
+              value: controller.tienePermisoSalud,
               title: Text("Tiene permiso de salud"),
               onChanged: (bool? selected) {
                 setState(() {
-                  _tienePermisoSalud = selected!;
+                  controller.tienePermisoSalud = selected!;
                 });
               },
               activeColor: Colors.blue,
@@ -574,20 +360,23 @@ class PropiedadFormState extends State<PropiedadForm> {
               dense: true,
             ),
             TextFormField(
-              enabled: _tienePermisoSalud,
-              key: ValueKey("numeroPermisoSalud-$_numeroPermisoSalud"),
+              enabled: controller.tienePermisoSalud,
+              key: ValueKey(
+                "numeroPermisoSalud-${controller.numeroPermisoSalud}",
+              ),
               initialValue:
-                  _numeroPermisoSalud != null
-                      ? _numeroPermisoSalud.toString()
+                  controller.numeroPermisoSalud != null
+                      ? controller.numeroPermisoSalud.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Número de permiso de salud',
               ),
               onChanged: (value) {
-                _numeroPermisoSalud = value;
+                controller.numeroPermisoSalud = value;
               },
               validator: (value) {
-                if (_tienePermisoSalud && (value == null || value.isEmpty)) {
+                if (controller.tienePermisoSalud &&
+                    (value == null || value.isEmpty)) {
                   return 'Por favor ingresa el número de permiso de salud';
                 }
                 return null;
@@ -595,42 +384,45 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             DateInput(
               key: ValueKey(
-                'fechaVigenciaPermisoSalud-$_tienePermisoSalud-$_fechaVigenciaPermisoSalud',
+                'fechaVigenciaPermisoSalud-${controller.tienePermisoSalud}-${controller.fechaVigenciaPermisoSalud}',
               ),
               initialValue:
-                  _fechaVigenciaPermisoSalud != null
-                      ? _fechaVigenciaPermisoSalud.toString()
+                  controller.fechaVigenciaPermisoSalud != null
+                      ? controller.fechaVigenciaPermisoSalud.toString()
                       : "",
               firstDate: DateTime(2000, 1, 1),
               lastDate: DateTime(2100),
               labelText: 'Fecha de vigencia del permiso de salud (AAAA-MM-DD)',
               onChanged: (value) {
-                _fechaVigenciaPermisoSalud = value;
+                controller.fechaVigenciaPermisoSalud = value;
               },
               validator: (value) {
-                if (!_tienePermisoSalud) return null;
+                if (!controller.tienePermisoSalud) return null;
                 if (value == null || value.isEmpty) {
                   return "Ingresa la fecha de vigencia del permiso de salud";
                 }
               },
-              enabled: () => _tienePermisoSalud,
-              // enabled: _tienePermisoSalud,
+              enabled: () => controller.tienePermisoSalud,
+              // enabled: controller.tienePermisoSalud,
             ),
             TextFormField(
-              enabled: _tienePermisoSalud,
-              key: ValueKey("codigoCIIUPermisoSalud-$_codigoCIIUPermisoSalud"),
+              enabled: controller.tienePermisoSalud,
+              key: ValueKey(
+                "codigoCIIUPermisoSalud-${controller.codigoCIIUPermisoSalud}",
+              ),
               initialValue:
-                  _codigoCIIUPermisoSalud != null
-                      ? _codigoCIIUPermisoSalud.toString()
+                  controller.codigoCIIUPermisoSalud != null
+                      ? controller.codigoCIIUPermisoSalud.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Código CIIU del permiso de salud',
               ),
               onChanged: (value) {
-                _codigoCIIUPermisoSalud = value;
+                controller.codigoCIIUPermisoSalud = value;
               },
               validator: (value) {
-                if (_tienePermisoSalud && (value == null || value.isEmpty)) {
+                if (controller.tienePermisoSalud &&
+                    (value == null || value.isEmpty)) {
                   return 'Por favor ingresa el código CIIU del permiso de salud';
                 }
                 return null;
@@ -638,11 +430,11 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             SizedBox(height: 20),
             CheckboxListTile(
-              value: _seTrataDeLocalMercado,
+              value: controller.seTrataDeLocalMercado,
               title: Text("Se trata de un local de mercado"),
               onChanged: (bool? selected) {
                 setState(() {
-                  _seTrataDeLocalMercado = selected!;
+                  controller.seTrataDeLocalMercado = selected!;
                 });
               },
               activeColor: Colors.blue,
@@ -651,16 +443,18 @@ class PropiedadFormState extends State<PropiedadForm> {
               dense: true,
             ),
             TextFormField(
-              enabled: _seTrataDeLocalMercado,
-              key: ValueKey("numeroLocalMercado-$_numeroLocalMercado"),
+              enabled: controller.seTrataDeLocalMercado,
+              key: ValueKey(
+                "numeroLocalMercado-${controller.numeroLocalMercado}",
+              ),
               initialValue:
-                  _numeroLocalMercado != null
-                      ? _numeroLocalMercado.toString()
+                  controller.numeroLocalMercado != null
+                      ? controller.numeroLocalMercado.toString()
                       : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Número de local mercado'),
               validator: (value) {
-                if (!_seTrataDeLocalMercado) return null;
+                if (!controller.seTrataDeLocalMercado) return null;
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingresa el número de local mercado';
                 }
@@ -668,17 +462,17 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _numeroLocalMercado = number;
+                controller.numeroLocalMercado = number;
                 return null;
               },
             ),
             SizedBox(height: 20),
             CheckboxListTile(
-              value: _tienePatenteLicores,
+              value: controller.tienePatenteLicores,
               title: Text("Tiene patente de licores"),
               onChanged: (bool? selected) {
                 setState(() {
-                  _tienePatenteLicores = selected!;
+                  controller.tienePatenteLicores = selected!;
                 });
               },
               activeColor: Colors.blue,
@@ -687,18 +481,20 @@ class PropiedadFormState extends State<PropiedadForm> {
               dense: true,
             ),
             TextFormField(
-              enabled: _tienePatenteLicores,
-              key: ValueKey("numeroPatenteLicores-$_numeroPatenteLicores"),
+              enabled: controller.tienePatenteLicores,
+              key: ValueKey(
+                "numeroPatenteLicores-${controller.numeroPatenteLicores}",
+              ),
               initialValue:
-                  _numeroPatenteLicores != null
-                      ? _numeroPatenteLicores.toString()
+                  controller.numeroPatenteLicores != null
+                      ? controller.numeroPatenteLicores.toString()
                       : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Número de patente licores',
               ),
               validator: (value) {
-                if (!_tienePatenteLicores) return null;
+                if (!controller.tienePatenteLicores) return null;
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingresa el número de patente licores';
                 }
@@ -706,13 +502,13 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _numeroPatenteLicores = number;
+                controller.numeroPatenteLicores = number;
                 return null;
               },
             ),
             DropdownButtonFormField(
-              value: _areaActividad,
-              items: _dropdownOptions["areaActividad"]!.entries
+              value: controller.areaActividad,
+              items: controller.dropdownOptions["areaActividad"]!.entries
                   .map((area) {
                     return DropdownMenuItem(
                       value: area.key,
@@ -722,7 +518,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                   .toList(growable: false),
               onChanged: (value) {
                 setState(() {
-                  _areaActividad = value;
+                  controller.areaActividad = value;
                 });
               },
               decoration: InputDecoration(labelText: 'Área de actividad'),
@@ -734,10 +530,12 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
             ),
             TextFormField(
-              key: ValueKey("telefonoPatentado-$_telefonoPatentado"),
+              key: ValueKey(
+                "telefonoPatentado-${controller.telefonoPatentado}",
+              ),
               initialValue:
-                  _telefonoPatentado != null
-                      ? _telefonoPatentado.toString()
+                  controller.telefonoPatentado != null
+                      ? controller.telefonoPatentado.toString()
                       : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Teléfono patentado'),
@@ -749,19 +547,21 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _telefonoPatentado = number;
+                controller.telefonoPatentado = number;
                 return null;
               },
             ),
             TextFormField(
-              key: ValueKey("correoElectronico-$_correoElectronico"),
+              key: ValueKey(
+                "correoElectronico-${controller.correoElectronico}",
+              ),
               initialValue:
-                  _correoElectronico != null
-                      ? _correoElectronico.toString()
+                  controller.correoElectronico != null
+                      ? controller.correoElectronico.toString()
                       : "",
               decoration: InputDecoration(labelText: 'Correo electrónico'),
               onChanged: (value) {
-                _correoElectronico = value;
+                controller.correoElectronico = value;
               },
               validator:
                   (value) =>
@@ -771,11 +571,11 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             TextFormField(
               key: ValueKey(
-                "cantidadEmpleadosAntesCovid-$_cantidadEmpleadosAntesCovid",
+                "cantidadEmpleadosAntesCovid-${controller.cantidadEmpleadosAntesCovid}",
               ),
               initialValue:
-                  _cantidadEmpleadosAntesCovid != null
-                      ? _cantidadEmpleadosAntesCovid.toString()
+                  controller.cantidadEmpleadosAntesCovid != null
+                      ? controller.cantidadEmpleadosAntesCovid.toString()
                       : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
@@ -789,17 +589,17 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _cantidadEmpleadosAntesCovid = number;
+                controller.cantidadEmpleadosAntesCovid = number;
                 return null;
               },
             ),
             TextFormField(
               key: ValueKey(
-                "cantidadEmpleadosActual-$_cantidadEmpleadosActual",
+                "cantidadEmpleadosActual-${controller.cantidadEmpleadosActual}",
               ),
               initialValue:
-                  _cantidadEmpleadosActual != null
-                      ? _cantidadEmpleadosActual.toString()
+                  controller.cantidadEmpleadosActual != null
+                      ? controller.cantidadEmpleadosActual.toString()
                       : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
@@ -813,7 +613,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _cantidadEmpleadosActual = number;
+                controller.cantidadEmpleadosActual = number;
                 return null;
               },
             ),
@@ -824,35 +624,41 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             ListView(
               key: ValueKey(
-                "afectacionesCovidPersonalDesempennoEmpresa-$_afectacionesCovidPersonalDesempennoEmpresa",
+                "afectacionesCovidPersonalDesempennoEmpresa-${controller.afectacionesCovidPersonalDesempennoEmpresa}",
               ),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children:
-                  _dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]!
+                  controller
+                      .dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]!
                       .entries
                       .map((e) {
                         return CheckboxListTile(
-                          value: _afectacionesCovidPersonalDesempennoEmpresaList
+                          value: controller
+                              .afectacionesCovidPersonalDesempennoEmpresaList
                               .contains(e.key),
                           title: Text(e.value),
                           controlAffinity: ListTileControlAffinity.leading,
                           dense: true,
                           onChanged: (bool? selected) {
                             if (selected == true) {
-                              _afectacionesCovidPersonalDesempennoEmpresaList
+                              controller
+                                  .afectacionesCovidPersonalDesempennoEmpresaList
                                   .add(e.key);
                             } else {
-                              _afectacionesCovidPersonalDesempennoEmpresaList
+                              controller
+                                  .afectacionesCovidPersonalDesempennoEmpresaList
                                   .remove(e.key);
                             }
                             setState(() {
-                              _afectacionesCovidPersonalDesempennoEmpresa =
-                                  _afectacionesCovidPersonalDesempennoEmpresaList
-                                      .map((key) {
-                                        return _dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]![key]!;
-                                      })
-                                      .join(', ');
+                              controller
+                                  .afectacionesCovidPersonalDesempennoEmpresa = controller
+                                  .afectacionesCovidPersonalDesempennoEmpresaList
+                                  .map((key) {
+                                    return controller
+                                        .dropdownOptions["afectacionesCovidPersonalDesempennoEmpresa"]![key]!;
+                                  })
+                                  .join(', ');
                             });
                           },
                         );
@@ -867,51 +673,59 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             ListView(
               key: ValueKey(
-                "afectacionesCovidSobreVentas-$_afectacionesCovidSobreVentas",
+                "afectacionesCovidSobreVentas-${controller.afectacionesCovidSobreVentas}",
               ),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children:
-                  _dropdownOptions["afectacionesCovidSobreVentas"]!.entries.map((
-                    e,
-                  ) {
-                    return CheckboxListTile(
-                      value: _afectacionesCovidSobreVentasList.contains(e.key),
-                      title: Text(e.value),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      dense: true,
-                      onChanged: (bool? selected) {
-                        if (selected == true) {
-                          _afectacionesCovidSobreVentasList.add(e.key);
-                        } else {
-                          _afectacionesCovidSobreVentasList.remove(e.key);
-                        }
-                        setState(() {
-                          _afectacionesCovidSobreVentas =
-                              _afectacionesCovidSobreVentasList
+                  controller
+                      .dropdownOptions["afectacionesCovidSobreVentas"]!
+                      .entries
+                      .map((e) {
+                        return CheckboxListTile(
+                          value: controller.afectacionesCovidSobreVentasList
+                              .contains(e.key),
+                          title: Text(e.value),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          dense: true,
+                          onChanged: (bool? selected) {
+                            if (selected == true) {
+                              controller.afectacionesCovidSobreVentasList.add(
+                                e.key,
+                              );
+                            } else {
+                              controller.afectacionesCovidSobreVentasList
+                                  .remove(e.key);
+                            }
+                            setState(() {
+                              controller
+                                  .afectacionesCovidSobreVentas = controller
+                                  .afectacionesCovidSobreVentasList
                                   .map((key) {
-                                    return _dropdownOptions["afectacionesCovidSobreVentas"]![key]!;
+                                    return controller
+                                        .dropdownOptions["afectacionesCovidSobreVentas"]![key]!;
                                   })
                                   .join(', ');
-                        });
-                      },
-                    );
-                  }).toList(),
+                            });
+                          },
+                        );
+                      })
+                      .toList(),
             ),
             TextFormField(
               key: ValueKey(
-                "codigoCIIUActividadPrimaria-$_codigoCIIUActividadPrimaria",
+                "codigoCIIUActividadPrimaria-${controller.codigoCIIUActividadPrimaria}",
               ),
               initialValue:
-                  _codigoCIIUActividadPrimaria != null
-                      ? _codigoCIIUActividadPrimaria.toString()
+                  controller.codigoCIIUActividadPrimaria != null
+                      ? controller.codigoCIIUActividadPrimaria.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Código CIIU actividad primaria',
               ),
               validator: (value) {
                 if (value != null && value.isNotEmpty) {
-                  _codigoCIIUActividadPrimaria = value;
+                  controller.codigoCIIUActividadPrimaria = value;
                   return null;
                 }
                 return "Ingrese el codigo CIIU de la actividad primaria";
@@ -919,45 +733,47 @@ class PropiedadFormState extends State<PropiedadForm> {
             ),
             TextFormField(
               key: ValueKey(
-                "_codigoCIIUActividadComplementaria-$_codigoCIIUActividadComplementaria",
+                "controller.codigoCIIUActividadComplementaria-${controller.codigoCIIUActividadComplementaria}",
               ),
               initialValue:
-                  _codigoCIIUActividadComplementaria != null
-                      ? _codigoCIIUActividadComplementaria.toString()
+                  controller.codigoCIIUActividadComplementaria != null
+                      ? controller.codigoCIIUActividadComplementaria.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Código CIIU actividad complementaria',
               ),
               validator: (value) {
                 if (value != null && value.isNotEmpty) {
-                  _codigoCIIUActividadComplementaria = value;
+                  controller.codigoCIIUActividadComplementaria = value;
                   return null;
                 }
                 return "Ingrese el codigo CIIU de la actividad complementaria";
               },
             ),
             TextFormField(
-              key: ValueKey("observacionesPatentes-$_observacionesPatentes"),
+              key: ValueKey(
+                "observacionesPatentes-${controller.observacionesPatentes}",
+              ),
               initialValue:
-                  _observacionesPatentes != null
-                      ? _observacionesPatentes.toString()
+                  controller.observacionesPatentes != null
+                      ? controller.observacionesPatentes.toString()
                       : "",
               decoration: InputDecoration(labelText: 'Observaciones patentes'),
               onChanged: (value) {
-                _observacionesPatentes = value;
+                controller.observacionesPatentes = value;
               },
             ),
             SizedBox(height: 20),
             MyImagePicker(
               key: ValueKey(
-                "imagenDocumentoLegal-${shortHash(_imagenDocumentoLegal ?? Uint8List(1))}",
+                "imagenDocumentoLegal-${shortHash(controller.imagenDocumentoLegal ?? Uint8List(1))}",
               ),
               label: "Imagen de documento legal",
-              initialValue: _imagenDocumentoLegal,
+              initialValue: controller.imagenDocumentoLegal,
               context: context,
               validator: (imagebytes) {
                 if (imagebytes == null) return "Selecciona una imagen";
-                _imagenDocumentoLegal = imagebytes;
+                controller.imagenDocumentoLegal = imagebytes;
                 return null;
               },
               onChanged: (imageBytes) {
@@ -979,171 +795,7 @@ class PropiedadFormState extends State<PropiedadForm> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    db.Propiedad? propiedadEnElNuevoLugar = await db
-                        .getPropiedad(
-                          idPredio: widget.formGlobalStatus["idPredio"]!,
-                          noEdificio: noEdificio!,
-                          noLocal: noLocal!,
-                        );
-
-                    ///\  /\  /\  /\  /\  /\  /\  /\  /\
-                    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
-                    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
-                    bool nuevoIngreso =
-                        widget.formGlobalStatus['noLocal'] == null;
-                    bool edicion = !nuevoIngreso;
-                    bool nadieEnElNuevoLugar = propiedadEnElNuevoLugar == null;
-                    bool alguienEnElNuevoLugar = !nadieEnElNuevoLugar;
-                    bool mismoLugarDeDestino =
-                        widget.formGlobalStatus["idPredio"] == idPredio &&
-                        widget.formGlobalStatus["noEdificio"] == noEdificio &&
-                        widget.formGlobalStatus["noLocal"] == noLocal;
-                    int casoEncontrado = -1;
-
-                    if (nuevoIngreso) {
-                      if (nadieEnElNuevoLugar) {
-                        casoEncontrado = 1;
-                      } else if (alguienEnElNuevoLugar) {
-                        casoEncontrado = 2;
-                      }
-                    } else if (edicion) {
-                      if (mismoLugarDeDestino) {
-                        casoEncontrado = 5;
-                      } else if (alguienEnElNuevoLugar) {
-                        casoEncontrado = 4;
-                      } else if (nadieEnElNuevoLugar) {
-                        casoEncontrado = 3;
-                      }
-                    }
-
-                    final newPropiedad = db.Propiedad(
-                      idPredio: idPredio!,
-                      noEdificio: noEdificio!,
-                      noLocal: noLocal!,
-                      nivelPiso: _nivelPiso!,
-                      actividadPrimaria: _actividadPrimaria!,
-                      actividadComplementaria: _actividadComplementaria,
-                      estadoNegocio: _estadoNegocio,
-                      nombreNegocio: _nombreNegocio,
-                      cantidadParqueos: _cantidadParqueos!,
-                      documentoMostrado: _documentoMostrado,
-                      nombrePatentado: _nombrePatentado,
-                      numeroPatenteComercial: _numeroPatenteComercial,
-                      cedulaPatentado: _cedulaPatentado,
-                      nombreActividadPatente: _nombreActividadPatente,
-                      tieneMasPatentes: _tieneMasPatentes,
-                      numeroPatente_2:
-                          _tieneMasPatentes ? _numeroPatente_2 : null,
-                      tienePermisoSalud: _tienePermisoSalud,
-                      numeroPermisoSalud:
-                          _tienePermisoSalud ? _numeroPermisoSalud : null,
-                      fechaVigenciaPermisoSalud:
-                          _tienePermisoSalud
-                              ? _fechaVigenciaPermisoSalud
-                              : null,
-                      codigoCIIUPermisoSalud:
-                          _tienePermisoSalud ? _codigoCIIUPermisoSalud : null,
-                      seTrataDeLocalMercado: _seTrataDeLocalMercado,
-                      numeroLocalMercado:
-                          _seTrataDeLocalMercado ? _numeroLocalMercado : null,
-                      tienePatenteLicores: _tienePatenteLicores,
-                      numeroPatenteLicores:
-                          _tienePatenteLicores ? _numeroPatenteLicores : null,
-                      areaActividad: _areaActividad,
-                      telefonoPatentado: _telefonoPatentado,
-                      correoElectronico: _correoElectronico,
-                      cantidadEmpleadosAntesCovid: _cantidadEmpleadosAntesCovid,
-                      cantidadEmpleadosActual: _cantidadEmpleadosActual,
-                      afectacionesCovidPersonalDesempennoEmpresa:
-                          _afectacionesCovidPersonalDesempennoEmpresa,
-                      afectacionesCovidSobreVentas:
-                          _afectacionesCovidSobreVentas,
-                      codigoCIUUActividadPrimaria: _codigoCIIUActividadPrimaria,
-                      codigoCIUUActividadComplementaria:
-                          _codigoCIIUActividadComplementaria,
-                      observacionesPatentes: _observacionesPatentes,
-                      imagenDocumentoLegal: _imagenDocumentoLegal!,
-                    );
-                    try {
-                      switch (casoEncontrado) {
-                        case 1:
-                          await newPropiedad.insertInDB();
-                        case 2:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Se va a sobrescribir una propiedad ya existente. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          await propiedadEnElNuevoLugar!.deleteInDB();
-                          await newPropiedad.insertInDB();
-                        case 3:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Se cambiará el numero de local de la propiedad actual. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          newPropiedad.updateInDB(
-                            where: "id_predio = ? and no_edificio = ?",
-                            whereArgs: [
-                              widget.formGlobalStatus["idPredio"],
-                              widget.formGlobalStatus["noEdificio"],
-                            ],
-                          );
-                        case 4:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Se va a sobrescribir una propiedad ya existente. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          await propiedadEnElNuevoLugar!.deleteInDB();
-                          newPropiedad.updateInDB(
-                            where: "id_predio = ? and no_edificio = ?",
-                            whereArgs: [
-                              widget.formGlobalStatus["idPredio"],
-                              widget.formGlobalStatus["noEdificio"],
-                            ],
-                          );
-                        case 5:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Se modificarán los datos de esta propiedad. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          newPropiedad.updateInDB();
-                          break;
-                        default:
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('✅ Datos guardados')),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('❌ Error al guardar los datos')),
-                      );
-                    }
-
-                    widget.formGlobalStatus["noLocal"] = null;
-                    // if (casoEncontrado != 5) {
-                    //   return;
-                    // }
-                    // db
-                    //     .getAllPropiedades(
-                    //       idPredio: widget.formGlobalStatus["idPredio"],
-                    //       noEdificio: widget.formGlobalStatus["noEdificio"],
-                    //     )
-                    //     .then((List<db.Propiedad> propiedades) {
-                    //       setState(() {
-                    //         propiedadesDelEdificio = propiedades;
-                    //       });
-                    //     });
-                  }
-                },
+                onPressed: () async => controller.validateForm(context),
                 child: Text('Guardar'),
               ),
             ),
@@ -1166,18 +818,19 @@ class PropiedadFormState extends State<PropiedadForm> {
 
   void _editarPropiedad(int idx) {
     // _imageVersion++;
-    widget.formGlobalStatus["noLocal"] = propiedadesDelEdificio[idx].noLocal;
+    widget.formGlobalStatus["noLocal"] =
+        controller.propiedadesDelEdificio[idx].noLocal;
   }
 
   void _eliminarPropiedad(BuildContext context, int idx) async {
-    var currentPropiedad = propiedadesDelEdificio[idx];
+    var currentPropiedad = controller.propiedadesDelEdificio[idx];
     bool dismissAction = false;
     bool iWasNotOverriden = true;
-    if (snackbaractions != null) {
-      overridingDelete = true;
-      snackbaractions!.close();
+    if (controller.snackbaractions != null) {
+      controller.overridingDelete = true;
+      controller.snackbaractions!.close();
     }
-    snackbaractions = ScaffoldMessenger.of(context).showSnackBar(
+    controller.snackbaractions = ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1208,14 +861,14 @@ class PropiedadFormState extends State<PropiedadForm> {
     final start = DateTime.now();
     while (DateTime.now().difference(start) < Duration(seconds: 5)) {
       await Future.delayed(Duration(milliseconds: 200));
-      if (overridingDelete) {
-        overridingDelete = false;
+      if (controller.overridingDelete) {
+        controller.overridingDelete = false;
         iWasNotOverriden = false;
         break;
       }
       if (dismissAction) {
-        snackbaractions!.close();
-        snackbaractions = null;
+        controller.snackbaractions!.close();
+        controller.snackbaractions = null;
         return;
       }
     }
@@ -1226,9 +879,9 @@ class PropiedadFormState extends State<PropiedadForm> {
     //            Acciones
     await currentPropiedad.deleteInDB();
     if (iWasNotOverriden) {
-      snackbaractions = null;
+      controller.snackbaractions = null;
       if (widget.formGlobalStatus["noLocal"] ==
-          propiedadesDelEdificio[idx].noLocal) {
+          controller.propiedadesDelEdificio[idx].noLocal) {
         widget.formGlobalStatus["noLocal"] = null;
       } else {
         widget.formGlobalStatus["noLocal"] = widget.formGlobalStatus["noLocal"];

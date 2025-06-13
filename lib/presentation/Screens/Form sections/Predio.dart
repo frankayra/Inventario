@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:inventario/Model/db_general_management.dart' as db;
 import 'package:inventario/Model/wrappers.dart';
 import 'package:inventario/presentation/Widgets/dialogs.dart';
 import 'package:inventario/Controller/PredioFormController.dart';
@@ -14,35 +13,19 @@ class PredioForm extends StatefulWidget {
   State<PredioForm> createState() => PredioFormState();
 }
 
-// TODO: No se deben crear predios si el idPredio no es valido.
-// DONE: Al presionar "Guardar", si se encuentra una tupla con el mismo ID, preguntar por confirmacion de cambio.
-// DONE: Cuando ya existe el predio en la BD, este formulario debe autorellenar sus campos con los datos de la tupla presentes en la BD.
 class PredioFormState extends State<PredioForm> {
   final _formKey = GlobalKey<FormState>();
-  final controller = PredioFormController();
-  final _dropdownOptions = {
-    "acera": {0: 'No existe', 1: 'Bueno', 2: 'Regular', 3: 'Malo'},
-  };
+  late PredioFormController controller;
   bool changePredio = false;
 
   @override
   void initState() {
+    controller = PredioFormController(
+      formKey: _formKey,
+      formGlobalStatus: widget.formGlobalStatus,
+      formSetStateCallbackFunction: () => setState(() {}),
+    );
     super.initState();
-    if (widget.formGlobalStatus["idPredio"] != null) {
-      controller.idPredio = widget.formGlobalStatus["idPredio"];
-      db.getPredio(idPredio: controller.idPredio!).then((predio) {
-        if (predio != null) {
-          setState(() {
-            controller.nivelPredio1 = predio.nivelPredio1;
-            controller.nivelPredio2 = predio.nivelPredio2;
-            controller.nivelPredio3 = predio.nivelPredio3;
-            controller.acera = predio.acera;
-            controller.anchoAcera = predio.anchoAcera;
-            controller.observacionesTerreno = predio.observacionesTerreno;
-          });
-        }
-      });
-    }
   }
 
   @override
@@ -116,7 +99,7 @@ class PredioFormState extends State<PredioForm> {
             ),
             DropdownButtonFormField(
               value: controller.acera,
-              items: _dropdownOptions["acera"]!.entries
+              items: controller.dropdownOptions["acera"]!.entries
                   .map((tipoAcera) {
                     return DropdownMenuItem(
                       value: tipoAcera.key,
@@ -173,12 +156,7 @@ class PredioFormState extends State<PredioForm> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
-                onPressed:
-                    () async => await controller.validateForm(
-                      _formKey,
-                      context,
-                      widget.formGlobalStatus,
-                    ),
+                onPressed: () async => await controller.validateForm(context),
                 child: Text('Guardar'),
               ),
             ),

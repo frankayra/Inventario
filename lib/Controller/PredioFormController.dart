@@ -4,10 +4,8 @@ import 'package:inventario/presentation/Widgets/dialogs.dart';
 import 'package:inventario/Model/wrappers.dart';
 
 class PredioFormController {
-  final _dropdownOptions = {
-    "acera": {0: 'No existe', 1: 'Bueno', 2: 'Regular', 3: 'Malo'},
-  };
   bool changePredio = false;
+  // +++++++++++++++++++++ Módulo Terreno +++++++++++++++++++++ //
   int? idPredio;
   double? nivelPredio1;
   double? nivelPredio2;
@@ -15,12 +13,44 @@ class PredioFormController {
   int? acera;
   double? anchoAcera;
   String? observacionesTerreno;
+  final dropdownOptions = {
+    "acera": {0: 'No existe', 1: 'Bueno', 2: 'Regular', 3: 'Malo'},
+  };
+  final GlobalKey<FormState> formKey;
+  final FormGlobalStatusWrapper<int> formGlobalStatus;
+  final void Function() formSetStateCallbackFunction;
+  PredioFormController({
+    required this.formKey,
+    required this.formGlobalStatus,
+    required this.formSetStateCallbackFunction,
+  }) {
+    if (formGlobalStatus["idPredio"] != null) {
+      idPredio = formGlobalStatus["idPredio"];
+      db.getPredio(idPredio: idPredio!).then((predio) {
+        if (predio != null) {
+          nivelPredio1 = predio.nivelPredio1;
+          nivelPredio2 = predio.nivelPredio2;
+          nivelPredio3 = predio.nivelPredio3;
+          acera = predio.acera;
+          anchoAcera = predio.anchoAcera;
+          observacionesTerreno = predio.observacionesTerreno;
+          formSetStateCallbackFunction();
+        }
+      });
+    }
+  }
 
-  Future<void> validateForm(
-    GlobalKey<FormState> formKey,
-    BuildContext context,
-    FormGlobalStatusWrapper<int> formGlobalStatus,
-  ) async {
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++               +++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++                 ++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++    Validacion   ++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++    Formulario   ++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++                 ++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++               +++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  Future<void> validateForm(BuildContext context) async {
     if (formKey.currentState!.validate()) {
       if (idPredio == null ||
           idPredio! < 1000000000 ||

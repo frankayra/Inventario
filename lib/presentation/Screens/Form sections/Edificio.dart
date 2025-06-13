@@ -2,11 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:inventario/presentation/Widgets/image_selection.dart';
-import 'package:inventario/presentation/Widgets/dialogs.dart';
-import 'package:inventario/presentation/Widgets/countdown_circle.dart';
-import 'package:inventario/Model/db_general_management.dart' as db;
 import 'package:inventario/Model/wrappers.dart';
 import 'package:inventario/Model/hash.dart';
+import 'package:inventario/Controller/EdificioFormController.dart';
 // import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 
 class EdificioForm extends StatefulWidget {
@@ -19,131 +17,18 @@ class EdificioForm extends StatefulWidget {
 }
 
 class EdificioFormState extends State<EdificioForm> {
-  List<db.Edificio> edificiosDelPredio = [];
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? snackbaractions;
-  bool overridingDelete = false;
   final _formKey = GlobalKey<FormState>();
-  final _dropdownOptions = {
-    "distrito": {
-      1: 'Carmen',
-      2: 'Merced',
-      3: 'Hospital',
-      4: 'Catedral',
-      5: 'Zapote',
-      6: 'San Francisco',
-      7: 'Uruca',
-      8: 'Mata Redonda',
-      9: 'Pavas',
-    },
-    "antejardin": {
-      0: 'No existe',
-      1: 'Si existe',
-      2: 'En construcción (Código 996)',
-      3: 'No aplica (Código 998)',
-    },
-    "material fachada": {
-      1: 'Bloques y Concreto',
-      2: 'Prefabricado',
-      3: 'Vidrio y Metal',
-      4: 'Ladrillo',
-      5: 'Madera',
-      6: 'Mixto',
-      998: 'No aplica (Código 998)',
-      999: 'No visible (Código 999)',
-    },
-    "canoas bajantes": {
-      0: 'No existe',
-      1: 'Cumple',
-      2: 'No cumple',
-      998: 'No aplica (Código 998)',
-    },
-    "estado inmueble": {
-      1: "Óptimo",
-      2: "Muy Bueno",
-      3: "Bueno",
-      4: "Intermedio",
-      5: "Regular",
-      6: "Deficiente",
-      7: "Malo",
-      8: "Muy Malo",
-      9: "Demolición",
-      998: "No Aplica (Código 998)",
-    },
-  };
+  late EdificioFormController controller;
   @override
   void initState() {
     super.initState();
-    if (widget.formGlobalStatus["idPredio"] != null) {
-      idPredio = widget.formGlobalStatus["idPredio"];
-      db.getAllEdificios(idPredio: widget.formGlobalStatus["idPredio"]).then((
-        List<db.Edificio> edificios,
-      ) {
-        setState(() {
-          edificiosDelPredio = edificios;
-        });
-        if (widget.formGlobalStatus["noEdificio"] != null) {
-          db
-              .getEdificio(
-                idPredio: idPredio!,
-                noEdificio: widget.formGlobalStatus["noEdificio"]!,
-              )
-              .then((currentEdificio) {
-                if (currentEdificio != null) {
-                  setState(() {
-                    noEdificio = widget.formGlobalStatus["noEdificio"];
-                    _distrito = currentEdificio.distrito;
-                    _cantidadPisos = currentEdificio.cantidadPisos;
-                    _cantidadSotanos = currentEdificio.cantidadSotanos;
-                    _antejardin = currentEdificio.antejardin;
-                    _materialFachada = currentEdificio.materialFachada;
-                    _canoasBajantes = currentEdificio.canoasBajantes;
-                    _observacionesEdificacion =
-                        currentEdificio.observacionesEdificacion;
-                    _estadoInmueble = currentEdificio.estadoInmueble;
-                    _imagenConstruccion = currentEdificio.imagenConstruccion;
-                    _observacionesConstruccion =
-                        currentEdificio.observacionesConstruccion;
-                    _cantidadMedidores = currentEdificio.cantidadMedidores;
-                    _observacionesMedidores =
-                        currentEdificio.observacionesMedidores;
-                  });
-                }
-              });
-        }
-      });
-    }
+    controller = EdificioFormController(
+      formKey: _formKey,
+      formGlobalStatus: widget.formGlobalStatus,
+      formSetStateCallbackFunction: () => setState(() {}),
+    );
   }
-  // DONE: Eliminar del diccionario el edificio que cambie de predio.
-  // DONE: Marcar como activo(en edicion) el edificio que me mandaron si es que me mandaron.
-  // DONE: Rellenar los campos de edificio si es que me mandaron un edificio.
-  // DONE: Al guardar un formulario, resetearlo hacia abajo por ende vaciar los campos
-  // DONE: Ver razon por la que cuando se rellena uno o varios campos de un subformulario, luego se despliega otro y se vuelve a desplegar el primero, no tiene nada rellenado.
-  // TODO: ver el tema de los edificios que se transfieren a predios inexistentes en la base de datos.
-  // TODO: Cuando se termina de agregar un edificio y se quedan los datos rellenados, estos deberian NO DESAPARECER automaticamente, sino cuando se aprieta el boton "+"
-  // TODO: Al Darle al boton "+", si el formulario tiene algun cambio, preguntar si se quieren perder los cambios hechos. Yo siempre preguntaria, aunque no hubiese cambios.
-  // DONE: Analizar el caso en que se este editando el noEdificio de un edificio que ya existia.
 
-  // ++++++++++++++++++ Módulo Edificación ++++++++++++++++++ //
-  bool changePredio = false;
-  int? idPredio;
-  int? noEdificio;
-  int? _distrito;
-  int? _cantidadPisos;
-  int? _cantidadSotanos;
-  int? _antejardin;
-  int? _materialFachada;
-  int? _canoasBajantes;
-  String? _observacionesEdificacion;
-
-  // ++++++++++++++++++ Módulo Construcción ++++++++++++++++++ //
-  int? _estadoInmueble;
-  Uint8List? _imagenConstruccion;
-  // int _imageVersion = Random().nextInt(2000000);
-  String? _observacionesConstruccion;
-
-  // ++++++++++++++ Módulo Medidores Eléctricos ++++++++++++++ //
-  int? _cantidadMedidores;
-  String? _observacionesMedidores;
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -154,15 +39,15 @@ class EdificioFormState extends State<EdificioForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Wrap(
-              key: ValueKey(edificiosDelPredio),
+              key: ValueKey(controller.edificiosDelPredio),
               spacing: 8,
               children: [
                 ElevatedButton(
-                  onPressed: _agregarEdificio,
+                  onPressed: controller.agregarEdificio,
                   child: Icon(Icons.add_circle_outlined),
                 ),
 
-                ...(edificiosDelPredio.asMap().entries.map((entry) {
+                ...(controller.edificiosDelPredio.asMap().entries.map((entry) {
                   var chipBackgroundColor = Colors.grey[100];
                   if (widget.formGlobalStatus["noEdificio"] != null &&
                       widget.formGlobalStatus["noEdificio"] ==
@@ -173,9 +58,9 @@ class EdificioFormState extends State<EdificioForm> {
                   return InputChip(
                     label: Text('Ed. ${entry.value.noEdificio}'),
                     backgroundColor: chipBackgroundColor,
-                    onDeleted: () => _eliminarEdificio(context, idx),
+                    onDeleted: () => controller.eliminarEdificio(context, idx),
                     deleteIcon: Icon(Icons.close),
-                    onPressed: () => _editarEdificio(idx),
+                    onPressed: () => controller.editarEdificio(idx),
                   );
                 }).toList()),
               ],
@@ -189,7 +74,7 @@ class EdificioFormState extends State<EdificioForm> {
                       initialValue:
                           widget.formGlobalStatus["idPredio"].toString(),
                       decoration: InputDecoration(labelText: 'Localización'),
-                      enabled: changePredio,
+                      enabled: controller.changePredio,
                       validator: (value) {
                         final number = int.tryParse(value!);
                         if (number == null ||
@@ -197,7 +82,7 @@ class EdificioFormState extends State<EdificioForm> {
                             number >= 10000000000) {
                           return "Ingresa una Localización válida";
                         }
-                        idPredio = number;
+                        controller.idPredio = number;
                       },
                     ),
                   ),
@@ -208,10 +93,10 @@ class EdificioFormState extends State<EdificioForm> {
                         color: Theme.of(context).colorScheme.secondary,
                       ),
                       Checkbox(
-                        value: changePredio,
+                        value: controller.changePredio,
                         onChanged: (bool? newValue) {
                           setState(() {
-                            changePredio = newValue!;
+                            controller.changePredio = newValue!;
                           });
                         },
                         // activeColor: Colors.blue,
@@ -231,8 +116,8 @@ class EdificioFormState extends State<EdificioForm> {
             // MyNumericInput(label: "Edificio", noValidValidationMessage: "Por favor ingresa el número de edificio"),
             TextFormField(
               // controller: _noEdificioController,
-              key: ValueKey('noEdificio-$noEdificio'),
-              initialValue: noEdificio?.toString(),
+              key: ValueKey('noEdificio-${controller.noEdificio}'),
+              initialValue: controller.noEdificio?.toString(),
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Edificio'),
               validator: (value) {
@@ -243,13 +128,13 @@ class EdificioFormState extends State<EdificioForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                noEdificio = number;
+                controller.noEdificio = number;
                 return null;
               },
             ),
             DropdownButtonFormField(
-              value: _distrito,
-              items: _dropdownOptions["distrito"]!.entries
+              value: controller.distrito,
+              items: controller.dropdownOptions["distrito"]!.entries
                   .map((distrito) {
                     return DropdownMenuItem(
                       value: distrito.key,
@@ -259,7 +144,7 @@ class EdificioFormState extends State<EdificioForm> {
                   .toList(growable: false),
               onChanged: (value) {
                 setState(() {
-                  _distrito = value;
+                  controller.distrito = value;
                 });
               },
               decoration: InputDecoration(labelText: 'Distrito'),
@@ -271,9 +156,11 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             TextFormField(
-              key: ValueKey("cantidadPisos-$_cantidadPisos"),
+              key: ValueKey("cantidadPisos-${controller.cantidadPisos}"),
               initialValue:
-                  _cantidadPisos != null ? _cantidadPisos.toString() : "",
+                  controller.cantidadPisos != null
+                      ? controller.cantidadPisos.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad pisos'),
               validator: (value) {
@@ -284,14 +171,16 @@ class EdificioFormState extends State<EdificioForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _cantidadPisos = number;
+                controller.cantidadPisos = number;
                 return null;
               },
             ),
             TextFormField(
-              key: ValueKey("cantidadSotanos-$_cantidadSotanos"),
+              key: ValueKey("cantidadSotanos-${controller.cantidadSotanos}"),
               initialValue:
-                  _cantidadSotanos != null ? _cantidadSotanos.toString() : "",
+                  controller.cantidadSotanos != null
+                      ? controller.cantidadSotanos.toString()
+                      : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad sótanos'),
               validator: (value) {
@@ -302,14 +191,16 @@ class EdificioFormState extends State<EdificioForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _cantidadSotanos = number;
+                controller.cantidadSotanos = number;
                 return null;
               },
             ),
             DropdownButtonFormField(
-              value: _antejardin,
+              value: controller.antejardin,
               items:
-                  _dropdownOptions["antejardin"]!.entries.map((option) {
+                  controller.dropdownOptions["antejardin"]!.entries.map((
+                    option,
+                  ) {
                     return DropdownMenuItem(
                       value: option.key,
                       child: Text(option.value),
@@ -317,7 +208,7 @@ class EdificioFormState extends State<EdificioForm> {
                   }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _antejardin = value;
+                  controller.antejardin = value;
                 });
               },
               decoration: InputDecoration(labelText: 'Antejardín'),
@@ -329,9 +220,11 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             DropdownButtonFormField(
-              value: _materialFachada,
+              value: controller.materialFachada,
               items:
-                  _dropdownOptions["material fachada"]!.entries.map((option) {
+                  controller.dropdownOptions["material fachada"]!.entries.map((
+                    option,
+                  ) {
                     return DropdownMenuItem(
                       value: option.key,
                       child: Text(option.value),
@@ -339,7 +232,7 @@ class EdificioFormState extends State<EdificioForm> {
                   }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _materialFachada = value;
+                  controller.materialFachada = value;
                 });
               },
               decoration: InputDecoration(labelText: 'Material fachada'),
@@ -351,9 +244,11 @@ class EdificioFormState extends State<EdificioForm> {
               },
             ),
             DropdownButtonFormField(
-              value: _canoasBajantes,
+              value: controller.canoasBajantes,
               items:
-                  _dropdownOptions["canoas bajantes"]!.entries.map((option) {
+                  controller.dropdownOptions["canoas bajantes"]!.entries.map((
+                    option,
+                  ) {
                     return DropdownMenuItem(
                       value: option.key,
                       child: Text(option.value),
@@ -361,7 +256,7 @@ class EdificioFormState extends State<EdificioForm> {
                   }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _canoasBajantes = value;
+                  controller.canoasBajantes = value;
                 });
               },
               decoration: InputDecoration(labelText: 'Canoas bajantes'),
@@ -374,17 +269,17 @@ class EdificioFormState extends State<EdificioForm> {
             ),
             TextFormField(
               key: ValueKey(
-                "observacionesEdificacion-$_observacionesEdificacion",
+                "observacionesEdificacion-${controller.observacionesEdificacion}",
               ),
               initialValue:
-                  _observacionesEdificacion != null
-                      ? _observacionesEdificacion.toString()
+                  controller.observacionesEdificacion != null
+                      ? controller.observacionesEdificacion.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Observaciones edificacion',
               ),
               onChanged: (value) {
-                _observacionesEdificacion = value;
+                controller.observacionesEdificacion = value;
               },
             ),
 
@@ -396,9 +291,11 @@ class EdificioFormState extends State<EdificioForm> {
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             DropdownButtonFormField(
-              value: _estadoInmueble,
+              value: controller.estadoInmueble,
               items:
-                  _dropdownOptions["estado inmueble"]!.entries.map((option) {
+                  controller.dropdownOptions["estado inmueble"]!.entries.map((
+                    option,
+                  ) {
                     return DropdownMenuItem(
                       value: option.key,
                       child: Text(option.value),
@@ -406,7 +303,7 @@ class EdificioFormState extends State<EdificioForm> {
                   }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _estadoInmueble = value;
+                  controller.estadoInmueble = value;
                 });
               },
               decoration: InputDecoration(labelText: 'Estado del inmueble'),
@@ -419,14 +316,14 @@ class EdificioFormState extends State<EdificioForm> {
             ),
             MyImagePicker(
               key: ValueKey(
-                "imagenConstruccion-${shortHash(_imagenConstruccion ?? Uint8List(1))}",
+                "imagenConstruccion-${shortHash(controller.imagenConstruccion ?? Uint8List(1))}",
               ),
               label: "Imagen de construcción",
-              initialValue: _imagenConstruccion,
+              initialValue: controller.imagenConstruccion,
               context: context,
               validator: (imagebytes) {
                 if (imagebytes == null) return "Selecciona una imagen";
-                _imagenConstruccion = imagebytes;
+                controller.imagenConstruccion = imagebytes;
                 return null;
               },
               onChanged: (imageBytes) {
@@ -437,17 +334,17 @@ class EdificioFormState extends State<EdificioForm> {
             ),
             TextFormField(
               key: ValueKey(
-                "observacionesConstruccion-$_observacionesConstruccion",
+                "observacionesConstruccion-${controller.observacionesConstruccion}",
               ),
               initialValue:
-                  _observacionesConstruccion != null
-                      ? _observacionesConstruccion.toString()
+                  controller.observacionesConstruccion != null
+                      ? controller.observacionesConstruccion.toString()
                       : "",
               decoration: InputDecoration(
                 labelText: 'Observaciones Construcción',
               ),
               onChanged: (value) {
-                _observacionesConstruccion = value;
+                controller.observacionesConstruccion = value;
               },
             ),
 
@@ -459,10 +356,12 @@ class EdificioFormState extends State<EdificioForm> {
             // +++++++++++++++++++++++++++            +++++++++++++++++++++++++++ //
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             TextFormField(
-              key: ValueKey("cantidadMedidores-$_cantidadMedidores"),
+              key: ValueKey(
+                "cantidadMedidores-${controller.cantidadMedidores}",
+              ),
               initialValue:
-                  _cantidadMedidores != null
-                      ? _cantidadMedidores.toString()
+                  controller.cantidadMedidores != null
+                      ? controller.cantidadMedidores.toString()
                       : "",
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: 'Cantidad Medidores'),
@@ -474,203 +373,28 @@ class EdificioFormState extends State<EdificioForm> {
                 if (number == null) {
                   return 'Por favor ingresa un número válido';
                 }
-                _cantidadMedidores = number;
+                controller.cantidadMedidores = number;
                 return null;
               },
             ),
             TextFormField(
-              key: ValueKey("observacionesMedidores-$_observacionesMedidores"),
+              key: ValueKey(
+                "observacionesMedidores-${controller.observacionesMedidores}",
+              ),
               initialValue:
-                  _observacionesMedidores != null
-                      ? _observacionesMedidores.toString()
+                  controller.observacionesMedidores != null
+                      ? controller.observacionesMedidores.toString()
                       : "",
               decoration: InputDecoration(labelText: 'Observaciones Medidores'),
               onChanged: (value) {
-                _observacionesMedidores = value;
+                controller.observacionesMedidores = value;
               },
             ),
 
-            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-            // +++++++++++++++++++++++++               +++++++++++++++++++++++++++ //
-            // ++++++++++++++++++++++++                 ++++++++++++++++++++++++++ //
-            // ++++++++++++++++++++++++    Validacion   ++++++++++++++++++++++++++ //
-            // ++++++++++++++++++++++++    Formulario   ++++++++++++++++++++++++++ //
-            // ++++++++++++++++++++++++                 ++++++++++++++++++++++++++ //
-            // +++++++++++++++++++++++++               +++++++++++++++++++++++++++ //
-            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    db.Edificio? edificioEnElNuevoLugar = await db.getEdificio(
-                      idPredio: idPredio!,
-                      noEdificio: noEdificio!,
-                    );
-                    db.Predio? newPredio = await db.getPredio(
-                      idPredio: idPredio!,
-                    );
-
-                    ///\  /\  /\  /\  /\  /\  /\  /\  /\
-                    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
-                    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
-                    bool nuevoIngreso =
-                        widget.formGlobalStatus['noEdificio'] == null;
-                    bool edicion = !nuevoIngreso;
-                    bool nadieEnElNuevoLugar = edificioEnElNuevoLugar == null;
-                    bool alguienEnElNuevoLugar = !nadieEnElNuevoLugar;
-                    bool mismoPredioDestino =
-                        widget.formGlobalStatus["idPredio"] == idPredio;
-                    bool mismoNoEdificioDestino =
-                        widget.formGlobalStatus["noEdificio"] == noEdificio;
-                    bool noExisteElNuevoPredio = newPredio == null;
-                    bool mismoLugarDeDestino =
-                        mismoPredioDestino && mismoNoEdificioDestino;
-                    int casoEncontrado = -1;
-
-                    if (nuevoIngreso) {
-                      if (noExisteElNuevoPredio) {
-                        casoEncontrado = 0;
-                      } else if (nadieEnElNuevoLugar) {
-                        casoEncontrado = 1;
-                      } else if (alguienEnElNuevoLugar) {
-                        casoEncontrado = 2;
-                      }
-                    } else if (edicion) {
-                      if (mismoLugarDeDestino) {
-                        casoEncontrado = 5;
-                      } else if (alguienEnElNuevoLugar) {
-                        casoEncontrado = 4;
-                      } else if (noExisteElNuevoPredio) {
-                        casoEncontrado = 6;
-                      } else if (nadieEnElNuevoLugar) {
-                        casoEncontrado = 3;
-                      }
-                    }
-
-                    final newEdificio = db.Edificio(
-                      idPredio: idPredio!,
-                      noEdificio: noEdificio!,
-                      distrito: _distrito!,
-                      cantidadPisos: _cantidadPisos!,
-                      cantidadSotanos: _cantidadSotanos!,
-                      antejardin: _antejardin!,
-                      materialFachada: _materialFachada!,
-                      canoasBajantes: _canoasBajantes!,
-                      observacionesEdificacion: _observacionesEdificacion,
-                      estadoInmueble: _estadoInmueble!,
-                      imagenConstruccion: _imagenConstruccion!,
-                      observacionesConstruccion: _observacionesConstruccion,
-                      cantidadMedidores: _cantidadMedidores!,
-                      observacionesMedidores: _observacionesMedidores,
-                    );
-                    try {
-                      switch (casoEncontrado) {
-                        case 0:
-                          await showDialog<bool>(
-                            context: context,
-                            barrierDismissible: true,
-                            builder:
-                                (dialogContext) => AlertDialog(
-                                  content: Text(
-                                    "El predio al que quiere agregar el edificio actual, aún no esta registrado en la BD. Agréguelo primeramente y luego vuelva a intentar agregar el edificio",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(dialogContext).pop(false);
-                                      },
-                                      child: Text('Cerrar'),
-                                    ),
-                                  ],
-                                ),
-                          );
-                          return;
-                        case 1:
-                          await newEdificio.insertInDB();
-                        case 2:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          await edificioEnElNuevoLugar!.deleteInDB();
-                          await newEdificio.insertInDB();
-                        case 3:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Se cambiará el numero de edificio del edificio actual. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          newEdificio.updateInDB(
-                            where: "id_predio = ? and no_edificio = ?",
-                            whereArgs: [
-                              widget.formGlobalStatus["idPredio"],
-                              widget.formGlobalStatus["noEdificio"],
-                            ],
-                          );
-                        case 4:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Vas a sobrescribir un edificio ya existente. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          await edificioEnElNuevoLugar!.deleteInDB();
-                          newEdificio.updateInDB(
-                            where: "id_predio = ? and no_edificio = ?",
-                            whereArgs: [
-                              widget.formGlobalStatus["idPredio"],
-                              widget.formGlobalStatus["noEdificio"],
-                            ],
-                          );
-                        case 5:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "Se modificarán los datos de este edificio. ¿Desea continuar?",
-                          );
-                          if (accepted == null || !accepted) return;
-                          newEdificio.updateInDB();
-                        case 6:
-                          bool? accepted = await showAcceptDismissAlertDialog(
-                            context,
-                            message:
-                                "El predio al que se desea mover el edificio actual aún no está en la BD . Debe introducirlo primeramente para luego agregarle edificios",
-                          );
-                          if (accepted == null || !accepted) return;
-                          newEdificio.updateInDB();
-                          break;
-                        default:
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('✅ Datos guardados')),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('❌ Error al guardar los datos')),
-                      );
-                    }
-
-                    widget.formGlobalStatus["noEdificio"] = null;
-                    // if (casoEncontrado != 5) {
-                    //   return;
-                    // }
-                    // db
-                    //     .getAllEdificios(
-                    //       idPredio: widget.formGlobalStatus["idPredio"],
-                    //     )
-                    //     .then((List<db.Edificio> edificios) {
-                    //       setState(() {
-                    //         edificiosDelPredio = edificios;
-                    //       });
-                    //     });
-                  }
-                },
+                onPressed: () async => controller.validateForm(context),
                 child: Text('Guardar'),
               ),
             ),
@@ -678,89 +402,5 @@ class EdificioFormState extends State<EdificioForm> {
         ),
       ),
     );
-  }
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
-  // ++++++++++++++++++++++++   Utiles   ++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
-  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
-  void _agregarEdificio() {
-    widget.formGlobalStatus["noEdificio"] = null;
-  }
-
-  void _editarEdificio(int idx) {
-    // _imageVersion++;
-    widget.formGlobalStatus["noEdificio"] = edificiosDelPredio[idx].noEdificio;
-  }
-
-  void _eliminarEdificio(BuildContext context, int idx) async {
-    var currentEdificio = edificiosDelPredio[idx];
-    bool dismissAction = false;
-    bool iWasNotOverriden = true;
-    if (snackbaractions != null) {
-      overridingDelete = true;
-      snackbaractions!.close();
-    }
-    snackbaractions = ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Edificio eliminado'),
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    dismissAction = true;
-                  },
-                  child: Text(
-                    "Deshacer",
-                    style: TextStyle(color: Colors.blue[400]),
-                  ),
-                ),
-                SizedBox(width: 15.0),
-                CountdownCircle(duration: Duration(seconds: 5)),
-              ],
-            ),
-          ],
-        ),
-      ),
-
-      // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
-    );
-    final start = DateTime.now();
-    while (DateTime.now().difference(start) < Duration(seconds: 5)) {
-      await Future.delayed(Duration(milliseconds: 200));
-      if (overridingDelete) {
-        overridingDelete = false;
-        iWasNotOverriden = false;
-        break;
-      }
-      if (dismissAction) {
-        snackbaractions!.close();
-        snackbaractions = null;
-        return;
-      }
-    }
-
-    ///\  /\  /\  /\  /\  /\  /\  /\  /\
-    ///\\//\\//\\//\\//\\//\\//\\//\\//\\
-    //  \/  \/  \/  \/  \/  \/  \/  \/  \\
-    //            Acciones
-    await currentEdificio.deleteInDB();
-    if (iWasNotOverriden) {
-      snackbaractions = null;
-      if (widget.formGlobalStatus["noEdificio"] ==
-          edificiosDelPredio[idx].noEdificio) {
-        widget.formGlobalStatus["noEdificio"] = null;
-      } else {
-        widget.formGlobalStatus["noEdificio"] =
-            widget.formGlobalStatus["noEdificio"];
-      }
-    }
   }
 }
