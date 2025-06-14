@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:inventario/Model/db_general_management.dart' as db;
-import 'package:inventario/presentation/Widgets/dialogs.dart';
-import 'package:inventario/Model/wrappers.dart';
-import 'package:inventario/presentation/Widgets/countdown_circle.dart';
+import 'package:inventario/View/Widgets/dialogs.dart';
+import 'package:inventario/ModelView/wrappers.dart';
+import 'package:inventario/View/Widgets/countdown_circle.dart';
 import 'dart:typed_data';
 
 class EdificioFormController {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:inventario/Model/wrappers.dart';
-import 'package:inventario/presentation/Widgets/dialogs.dart';
-import 'package:inventario/Controller/PredioFormController.dart';
+import 'package:inventario/ModelView/wrappers.dart';
+import 'package:inventario/View/Widgets/dialogs.dart';
+import 'package:inventario/ModelView/PredioFormController.dart';
 
 class PredioForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;

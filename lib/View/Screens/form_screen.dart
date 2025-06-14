@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Predio.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Edificio.dart';
-import 'package:inventario/presentation/Screens/Form%20sections/Propiedad.dart';
-import 'package:inventario/Model/wrappers.dart';
+import 'package:inventario/View/Screens/Form%20sections/Predio.dart';
+import 'package:inventario/View/Screens/Form%20sections/Edificio.dart';
+import 'package:inventario/View/Screens/Form%20sections/Propiedad.dart';
+import 'package:inventario/ModelView/wrappers.dart';
 
 const PREDIO = 'Predio';
 const EDIFICIOS = 'Edificios';

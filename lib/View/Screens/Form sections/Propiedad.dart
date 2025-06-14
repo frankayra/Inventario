@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Widgets/date_selection.dart';
-import 'package:inventario/presentation/Widgets/image_selection.dart';
-import 'package:inventario/Model/wrappers.dart';
-import 'package:inventario/Model/hash.dart';
-import 'package:inventario/presentation/Widgets/countdown_circle.dart';
-import 'package:inventario/Controller/PropiedadFormController.dart';
+import 'package:inventario/View/Widgets/date_selection.dart';
+import 'package:inventario/View/Widgets/image_selection.dart';
+import 'package:inventario/ModelView/wrappers.dart';
+import 'package:inventario/ModelView/hash.dart';
+import 'package:inventario/View/Widgets/countdown_circle.dart';
+import 'package:inventario/ModelView/PropiedadFormController.dart';
 
 class PropiedadForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;

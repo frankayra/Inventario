@@ -5,12 +5,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:inventario/Model/file_management.dart';
-import 'presentation/Screens/offline_map_screen.dart';
-import 'presentation/Screens/form_screen.dart';
+import 'View/Screens/offline_map_screen.dart';
+import 'View/Screens/form_screen.dart';
 import 'package:inventario/Model/db_general_management.dart' as db;
 import 'package:inventario/Model/db_debug.dart';
-import 'package:inventario/Controller/user_tools.dart';
-import 'package:inventario/presentation/Screens/Form sections/Encuestador.dart';
+import 'package:inventario/ModelView/user_tools.dart';
+import 'package:inventario/View/Screens/Form%20sections/Encuestador.dart';
 
 class AppContext {
   String customRootPath = "/storage/emulated/0/CADIC";

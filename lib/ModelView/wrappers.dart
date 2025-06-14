@@ -19,11 +19,6 @@ class FormGlobalStatusWrapper<T> {
     variables[key] = value;
     if (!listeningToChangeEvents) return;
     for (var onChagedFunction in _variablesOnChangedSuscribedFunctions[key]!) {
-      print("""
-        /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-        /\/\/\/\/\/\/\/\/\/\/\/\   ejecutando $onChagedFunction
-        /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-""");
       onChagedFunction(value);
     }
   }

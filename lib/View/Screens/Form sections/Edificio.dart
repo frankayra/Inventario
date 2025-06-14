@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:inventario/presentation/Widgets/image_selection.dart';
-import 'package:inventario/Model/wrappers.dart';
-import 'package:inventario/Model/hash.dart';
-import 'package:inventario/Controller/EdificioFormController.dart';
+import 'package:inventario/View/Widgets/image_selection.dart';
+import 'package:inventario/ModelView/wrappers.dart';
+import 'package:inventario/ModelView/hash.dart';
+import 'package:inventario/ModelView/EdificioFormController.dart';
 // import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 
 class EdificioForm extends StatefulWidget {

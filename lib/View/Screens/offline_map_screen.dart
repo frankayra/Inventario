@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:path/path.dart' as path;
 import 'package:inventario/Model/file_management.dart';
-import 'package:inventario/presentation/Screens/Map%20utilities/find_map_centroid.dart';
+import 'package:inventario/View/Screens/Map%20utilities/find_map_centroid.dart';
 import 'Map utilities/terrains_limits_layer.dart';
 
 const ALAMAR = LatLng(23.17053428523392, -82.27196563176855); // Alamar
