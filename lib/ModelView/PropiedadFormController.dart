@@ -151,7 +151,7 @@ class PropiedadFormController {
                           currentPropiedad.tienePatenteLicores;
                       numeroPatenteLicores =
                           currentPropiedad.numeroPatenteLicores;
-                      areaActividad = currentPropiedad!.areaActividad;
+                      areaActividad = currentPropiedad.areaActividad;
                       telefonoPatentado = currentPropiedad.telefonoPatentado;
                       correoElectronico = currentPropiedad.correoElectronico;
                       cantidadEmpleadosAntesCovid =

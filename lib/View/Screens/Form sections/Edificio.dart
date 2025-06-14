@@ -83,6 +83,7 @@ class EdificioFormState extends State<EdificioForm> {
                           return "Ingresa una Localización válida";
                         }
                         controller.idPredio = number;
+                        return null;
                       },
                     ),
                   ),

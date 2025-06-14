@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 class FormGlobalStatusWrapper<T> {
   bool listeningToChangeEvents = true;
   final Map<String, T?> variables = {

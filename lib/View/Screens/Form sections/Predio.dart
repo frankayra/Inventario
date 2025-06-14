@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 import 'package:inventario/ModelView/wrappers.dart';
-import 'package:inventario/View/Widgets/dialogs.dart';
 import 'package:inventario/ModelView/PredioFormController.dart';
 
 class PredioForm extends StatefulWidget {

@@ -134,6 +134,7 @@ class _FormularioInspeccionState extends State<FormularioInspeccion> {
                           number >= 10000000000) {
                         return "Ingresa una Localización válida";
                       }
+                      return null;
                     },
                   ),
                 ),

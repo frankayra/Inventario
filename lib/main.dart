@@ -79,7 +79,6 @@ class _MyScafoldState extends State<MyScafold> {
   int _selectedIndex = 0;
   int _tappedLocation = -1;
   List<int> prediosListos = [];
-  static late Widget offlineMap;
 
   @override
   void initState() {

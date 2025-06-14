@@ -5,10 +5,10 @@ import 'package:inventario/Model/file_management.dart';
 import 'package:inventario/View/Widgets/dialogs.dart';
 
 class ToolsSelection extends StatelessWidget {
-  String exportPath;
-  String importMapsPath;
-  String importDelimitationsPath;
-  void Function() clearDBFunction;
+  final String exportPath;
+  final String importMapsPath;
+  final String importDelimitationsPath;
+  final void Function() clearDBFunction;
   ToolsSelection({
     super.key,
     required this.exportPath,

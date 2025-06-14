@@ -1,9 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 Future<LatLng?> findMBTilesCentroid(String rutaMBTiles) async {
   // Abrimos el archivo MBTiles como base de datos SQLite

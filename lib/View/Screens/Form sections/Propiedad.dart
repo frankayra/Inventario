@@ -4,7 +4,6 @@ import 'package:inventario/View/Widgets/date_selection.dart';
 import 'package:inventario/View/Widgets/image_selection.dart';
 import 'package:inventario/ModelView/wrappers.dart';
 import 'package:inventario/ModelView/hash.dart';
-import 'package:inventario/View/Widgets/countdown_circle.dart';
 import 'package:inventario/ModelView/PropiedadFormController.dart';
 
 class PropiedadForm extends StatefulWidget {
@@ -336,7 +335,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingresa el número de patente comercial 2';
                   }
-                  final number = int.tryParse(value!);
+                  final number = int.tryParse(value);
                   if (number == null) {
                     return 'Por favor ingresa un número válido';
                   }
@@ -401,6 +400,7 @@ class PropiedadFormState extends State<PropiedadForm> {
                 if (value == null || value.isEmpty) {
                   return "Ingresa la fecha de vigencia del permiso de salud";
                 }
+                return null;
               },
               enabled: () => controller.tienePermisoSalud,
               // enabled: controller.tienePermisoSalud,

@@ -118,6 +118,7 @@ Future<String?> exportDBAsFile({required String exportPath}) async {
       return null;
     }
   }
+  return null;
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //

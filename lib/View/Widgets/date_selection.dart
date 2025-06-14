@@ -7,8 +7,8 @@ class DateInput extends StatefulWidget {
   final void Function(int date)? onChanged;
   final String? Function(String? value)? validator;
   final String? initialValue;
-  bool Function()? enabled;
-  DateInput({
+  final bool Function()? enabled;
+  const DateInput({
     super.key,
     required this.firstDate,
     required this.lastDate,
