@@ -256,12 +256,11 @@ abstract class InventarioDbTable {
     required this.primaryKeysWhere,
   });
 
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++ INSERT ++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++++++++++++++++++++++++++++ //
   Future<void> insertInDB({String? where, List<dynamic>? whereArgs}) async {
     final db = await openDB();
-    // dynamic tuple = await db.query(args.$1, where: args.$2, whereArgs: args.$3);
-    // if (tuple == null) {
-    //   await db.delete(args.$1, where: args.$2, whereArgs: args.$3);
-    // }
     await db.insert(
       tableName,
       toMap(),

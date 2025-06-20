@@ -41,8 +41,8 @@ class EdificioFormController {
     "antejardin": {
       0: 'No existe',
       1: 'Si existe',
-      2: 'En construcción (Código 996)',
-      3: 'No aplica (Código 998)',
+      996: 'En construcción (Código 996)',
+      998: 'No aplica (Código 998)',
     },
     "material fachada": {
       1: 'Bloques y Concreto',

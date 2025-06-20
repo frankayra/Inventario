@@ -317,10 +317,11 @@ class PropiedadFormController {
             );
             if (accepted == null || !accepted) return;
             newPropiedad.updateInDB(
-              where: "id_predio = ? and no_edificio = ?",
+              where: "id_predio = ? and no_edificio = ? and no_local = ?",
               whereArgs: [
                 formGlobalStatus["idPredio"],
                 formGlobalStatus["noEdificio"],
+                formGlobalStatus["noLocal"],
               ],
             );
           case 4:
@@ -332,10 +333,11 @@ class PropiedadFormController {
             if (accepted == null || !accepted) return;
             await propiedadEnElNuevoLugar!.deleteInDB();
             newPropiedad.updateInDB(
-              where: "id_predio = ? and no_edificio = ?",
+              where: "id_predio = ? and no_edificio = ? and no_local = ?",
               whereArgs: [
                 formGlobalStatus["idPredio"],
                 formGlobalStatus["noEdificio"],
+                formGlobalStatus["noLocal"],
               ],
             );
           case 5:
