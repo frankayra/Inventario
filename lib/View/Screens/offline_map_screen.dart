@@ -52,6 +52,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
   late Future<MbTilesTileProvider> _tileProviderFuture;
   bool _isTileProviderInitialized = false;
   LatLng? mapCentroid;
+  LatLng? currentCoords;
 
   _OfflineMapWidgetState({required this.mbtilesFilePath}) {
     if (OfflineMapWidget.newMapLoaded &&
@@ -137,6 +138,16 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                           )
                           .toList()
                       : []),
+
+                  if (currentCoords != null)
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: currentCoords!,
+                          child: Icon(Icons.location_history),
+                        ),
+                      ],
+                    ),
                 ],
               ),
               Positioned(
@@ -144,13 +155,10 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                 right: 16.0,
                 child: FloatingActionButton(
                   onPressed: () async {
-                    Position? currentPosition = await _determinePosition();
-                    if (currentPosition == null) return;
-                    LatLng currentCoords = LatLng(
-                      currentPosition.latitude,
-                      currentPosition.longitude,
-                    );
-                    _mapController.move(currentCoords, 18.0);
+                    if (currentCoords == null) return;
+                    _mapController.move(currentCoords!, 18.0);
+                    currentCoords = await _getCurrentPosition();
+                    setState(() {});
                   },
                   child: Icon(Icons.my_location),
                 ),
@@ -223,4 +231,10 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
 
   @override
   bool get wantKeepAlive => true;
+
+  Future<LatLng?> _getCurrentPosition() async {
+    Position? currentPosition = await _determinePosition();
+    if (currentPosition == null) return null;
+    return LatLng(currentPosition.latitude, currentPosition.longitude);
+  }
 }

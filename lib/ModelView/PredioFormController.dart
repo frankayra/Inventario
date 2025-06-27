@@ -82,7 +82,11 @@ class PredioFormController {
         observacionesTerreno: observacionesTerreno,
       );
       try {
-        await predio.insertInDB();
+        if (oldPredio != null) {
+          await predio.updateInDB();
+        } else {
+          await predio.insertInDB();
+        }
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('✅ Datos guardados')));
