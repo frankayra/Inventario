@@ -53,6 +53,7 @@ class _DateInputState extends State<DateInput> {
           initialDate: DateTime.now(),
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
+          helpText: 'Selecciona una fecha',
         );
 
         if (pickedDate != null) {

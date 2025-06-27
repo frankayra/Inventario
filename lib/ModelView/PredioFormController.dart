@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:inventario/Model/db_general_management.dart' as db;
-import 'package:inventario/View/Widgets/dialogs.dart';
 import 'package:inventario/ModelView/wrappers.dart';
+import 'package:inventario/View/Widgets/dialogs.dart';
+import 'package:inventario/View/Widgets/countdown_circle.dart';
 
 class PredioFormController {
+  bool currentValidPredio = false;
   bool changePredio = false;
   // +++++++++++++++++++++ Módulo Terreno +++++++++++++++++++++ //
   int? idPredio;
@@ -28,6 +30,7 @@ class PredioFormController {
       idPredio = formGlobalStatus["idPredio"];
       db.getPredio(idPredio: idPredio!).then((predio) {
         if (predio != null) {
+          currentValidPredio = true;
           nivelPredio1 = predio.nivelPredio1;
           nivelPredio2 = predio.nivelPredio2;
           nivelPredio3 = predio.nivelPredio3;
@@ -83,11 +86,73 @@ class PredioFormController {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('✅ Datos guardados')));
+        currentValidPredio = true;
+        formSetStateCallbackFunction();
       } catch (e) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('❌ Error al guardar los datos')));
       }
+    }
+  }
+
+  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++   Utiles   ++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++          +++++++++++++++++++++++++++++++ //
+  // +++++++++++++++++++++++++++      +++++++++++++++++++++++++++++++++ //
+  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
+  void deletePredio(BuildContext context) async {
+    bool dismissAction = false;
+    try {
+      final currentPredio = await db.getPredio(idPredio: idPredio!);
+      if (currentPredio == null) return;
+      final snakbaraction = ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Predio eliminado"),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      dismissAction = true;
+                    },
+                    child: Text(
+                      "Deshacer",
+                      style: TextStyle(color: Colors.blue[400]),
+                    ),
+                  ),
+                  SizedBox(width: 15.0),
+                  CountdownCircle(duration: Duration(seconds: 5)),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
+      );
+      final start = DateTime.now();
+      while (DateTime.now().difference(start) < Duration(seconds: 5)) {
+        await Future.delayed(Duration(milliseconds: 200));
+        if (dismissAction) {
+          snakbaraction.close();
+          return;
+        }
+      }
+
+      ///\  /\  /\  /\  /\  /\  /\  /\  /\
+      ///\\//\\//\\//\\//\\//\\//\\//\\//\\
+      //  \/  \/  \/  \/  \/  \/  \/  \/  \\
+      //            Acciones
+      await currentPredio.deleteInDB();
+      formGlobalStatus["idPredio"] = idPredio;
+    } catch (e) {
+      return;
     }
   }
 }

@@ -730,7 +730,11 @@ class PropiedadFormState extends State<PropiedadForm> {
                   controller.codigoCIIUActividadPrimaria = value;
                   return null;
                 }
-                return "Ingrese el codigo CIIU de la actividad primaria";
+                if (value == null || value.isEmpty) {
+                  // Provisional
+                  return null; // Provisional
+                } // Provisional
+                return "El código CIIU de la actividad primaria es incorrecto";
               },
             ),
             TextFormField(
@@ -750,7 +754,11 @@ class PropiedadFormState extends State<PropiedadForm> {
                   controller.codigoCIIUActividadComplementaria = value;
                   return null;
                 }
-                return "Ingrese el codigo CIIU de la actividad complementaria";
+                if (value == null || value.isEmpty) {
+                  // Provisional
+                  return null; // Provisional
+                } // Provisional
+                return "El código CIIU de la actividad complementaria es incorrecto";
               },
             ),
             TextFormField(

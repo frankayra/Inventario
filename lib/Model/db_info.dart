@@ -14,6 +14,7 @@ class _InquiryInfoState extends State<InquiryInfo> {
   var _predios = <db.Predio>[];
   var _edificios = <db.Edificio>[];
   var _propiedades = <db.Propiedad>[];
+  var prediosWidgets = <Widget>[];
   Widget? predioWidget;
   Widget? edificioWidget;
   Widget? propiedadWidget;
@@ -48,6 +49,11 @@ class _InquiryInfoState extends State<InquiryInfo> {
       propiedadWidget = Chip(
         label: Text('Propiedades consultados: ${_propiedades.length}'),
       );
+
+      prediosWidgets =
+          _predios.map((predio) {
+            return Chip(label: Text('Pred. ${predio.idPredio}'));
+          }).toList();
     } catch (e) {
       loadingError = e;
     }
@@ -68,6 +74,7 @@ class _InquiryInfoState extends State<InquiryInfo> {
           children: [
             Container(
               child: Chip(
+                avatar: Icon(Icons.location_on_sharp, color: Colors.white),
                 label: Text(
                   'Mapa: ${widget.mapName}',
                   style: TextStyle(color: Colors.white),
@@ -76,6 +83,10 @@ class _InquiryInfoState extends State<InquiryInfo> {
               ),
             ),
             Wrap(children: [predioWidget!, edificioWidget!, propiedadWidget!]),
+            SizedBox(height: 30),
+            Divider(height: 1, indent: 30, endIndent: 30, color: Colors.grey),
+            SizedBox(height: 30),
+            Wrap(children: prediosWidgets),
           ],
         ),
       );

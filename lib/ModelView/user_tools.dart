@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:inventario/Model/file_management.dart';
 import 'package:inventario/View/Widgets/dialogs.dart';
+import 'package:inventario/View/Widgets/countdown_circle.dart';
 
 class ToolsSelection extends StatelessWidget {
   final String exportPath;
@@ -110,12 +111,7 @@ class ToolsSelection extends StatelessWidget {
                           "Se va a limpiar la base de Datos completamente. Esto no tiene forma de revertirse. ¿Seguro que desea continuar?",
                     );
                     if (decision == null || !decision) return;
-                    clearDBFunction();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("✅ Se limpió la BD correctamente"),
-                      ),
-                    );
+                    clearDB(context, clearDBFunction);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -156,4 +152,50 @@ Widget BigButton(
       child: Text(label),
     ),
   );
+}
+
+void clearDB(BuildContext context, Function clearDBFunction) async {
+  bool dismissAction = false;
+  final snakbaraction = ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("✅ Se limpió la BD correctamente"),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () {
+                  dismissAction = true;
+                },
+                child: Text(
+                  "Deshacer",
+                  style: TextStyle(color: Colors.blue[400]),
+                ),
+              ),
+              SizedBox(width: 15.0),
+              CountdownCircle(duration: Duration(seconds: 5)),
+            ],
+          ),
+        ],
+      ),
+    ),
+
+    // snackBarAnimationStyle: AnimationStyle(duration: Duration(seconds: 7)),
+  );
+  final start = DateTime.now();
+  while (DateTime.now().difference(start) < Duration(seconds: 5)) {
+    await Future.delayed(Duration(milliseconds: 200));
+    if (dismissAction) {
+      snakbaraction.close();
+      return;
+    }
+  }
+
+  ///\  /\  /\  /\  /\  /\  /\  /\  /\
+  ///\\//\\//\\//\\//\\//\\//\\//\\//\\
+  //  \/  \/  \/  \/  \/  \/  \/  \/  \\
+  //            Acciones
+  await clearDBFunction();
 }

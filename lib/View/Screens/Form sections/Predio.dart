@@ -152,9 +152,27 @@ class PredioFormState extends State<PredioForm> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ElevatedButton(
-                onPressed: () async => await controller.validateForm(context),
-                child: Text('Guardar'),
+              child: Wrap(
+                children: [
+                  ElevatedButton(
+                    onPressed:
+                        () async => await controller.validateForm(context),
+                    child: Text('Guardar'),
+                  ),
+                  SizedBox(width: 20),
+                  if (controller.currentValidPredio)
+                    ElevatedButton(
+                      key: ValueKey(controller.currentValidPredio),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: () async => controller.deletePredio(context),
+                      child: Text(
+                        'Eliminar',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],

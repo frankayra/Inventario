@@ -193,7 +193,16 @@ List<({String path, Color color})> getAllDelimitations(
     recursive: true,
     followLinks: false,
   );
-  var colors = [Colors.black, Colors.blue, Colors.yellow];
+  var colors = [
+    Colors.black,
+    Colors.blue.shade700,
+    Colors.yellow,
+    Colors.indigo.shade700,
+    Colors.amber.shade800,
+    Colors.lightBlue,
+    const Color.fromARGB(255, 25, 240, 255),
+    const Color.fromARGB(255, 163, 154, 73),
+  ];
   int colorIndex = 0;
   var result = <({String path, Color color})>[];
   for (var file in filesInDirectory) {
@@ -203,8 +212,9 @@ List<({String path, Color color})> getAllDelimitations(
       } else {
         result.add((
           path: path.normalize(file.path),
-          color: colors[colorIndex++],
+          color: colors[colorIndex],
         ));
+        colorIndex = (colorIndex + 1) % colors.length;
       }
     }
   }
