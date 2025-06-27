@@ -146,29 +146,43 @@ class PropiedadFormState extends State<PropiedadForm> {
                 return null;
               },
             ),
-            DropdownButtonFormField(
-              value: controller.estadoNegocio,
-              items: controller.dropdownOptions["estadoNegocio"]!.entries
-                  .map((estado) {
-                    return DropdownMenuItem(
-                      value: estado.key,
-                      child: Text(estado.value),
-                    );
-                  })
-                  .toList(growable: false),
-              onChanged: (value) {
-                setState(() {
-                  controller.estadoNegocio = value;
-                });
-              },
-              decoration: InputDecoration(labelText: 'Estado Negocio'),
-              validator: (value) {
-                if (value == null) {
-                  return 'Por favor selecciona un estado';
-                }
-                return null;
-              },
+            SizedBox(height: 30),
+            Text(
+              'Estado del Negocio:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
+            ListView(
+              key: ValueKey("estadoNegocio-${controller.estadoNegocio}"),
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              children:
+                  controller.dropdownOptions["estadoNegocio"]!.entries.map((e) {
+                    return CheckboxListTile(
+                      value: controller.estadoNegocioList.contains(e.key),
+                      title: Text(e.value),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      dense: true,
+                      onChanged: (bool? selected) {
+                        if (selected == true) {
+                          controller.estadoNegocioList.add(e.key);
+                        } else {
+                          controller.estadoNegocioList.remove(e.key);
+                        }
+                        setState(() {
+                          controller.estadoNegocio = controller
+                              .estadoNegocioList
+                              .map((key) {
+                                return controller
+                                    .dropdownOptions["estadoNegocio"]![key]!;
+                              })
+                              .join(', ');
+                        });
+                      },
+                    );
+                  }).toList(),
+            ),
+
+            SizedBox(height: 30),
             TextFormField(
               key: ValueKey("nombreNegocio-${controller.nombreNegocio}"),
               initialValue:

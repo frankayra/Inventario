@@ -62,7 +62,7 @@ Future<Database> openDB({
         nivelPiso TEXT NOT NULL,
         actividadPrimaria TEXT NOT NULL,
         actividadComplementaria TEXT,
-        estadoNegocio INTEGER,
+        estadoNegocio TEXT,
         nombreNegocio TEXT,
         cantidadParqueos INTEGER NOT NULL,
         documentoMostrado INTEGER,
@@ -486,7 +486,7 @@ class Propiedad extends InventarioDbTable {
   final String nivelPiso;
   final String actividadPrimaria;
   final String? actividadComplementaria;
-  final int? estadoNegocio;
+  final String? estadoNegocio;
   final String? nombreNegocio;
   final int cantidadParqueos;
   final int? documentoMostrado;

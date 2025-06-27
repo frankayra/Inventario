@@ -14,7 +14,7 @@ class PropiedadFormController {
   String? nivelPiso;
   String? actividadPrimaria;
   String? actividadComplementaria;
-  int? estadoNegocio;
+  String? estadoNegocio;
   String? nombreNegocio;
   int? cantidadParqueos;
   int? documentoMostrado;
@@ -39,6 +39,7 @@ class PropiedadFormController {
   int? cantidadEmpleadosActual;
   String? afectacionesCovidPersonalDesempennoEmpresa;
   String? afectacionesCovidSobreVentas;
+  List<int> estadoNegocioList = [];
   List<int> afectacionesCovidPersonalDesempennoEmpresaList = [];
   List<int> afectacionesCovidSobreVentasList = [];
   String? codigoCIIUActividadPrimaria;
@@ -81,7 +82,7 @@ class PropiedadFormController {
       8: 'Planea contratar en los próximos 6 meses',
       9: 'Ha reinventado su negocio a pedidos virtuales',
       10:
-          'Aumento de precios de insumos y materias primas(combustibles, abarrotes, servicios públicos).',
+          'Aumento de precios de insumos y materias primas(combustibles | abarrotes | servicios públicos)',
     },
     "afectacionesCovidSobreVentas": {
       1: 'Ingresó "0" ante la afectación de una orden sanitaria',
@@ -174,6 +175,17 @@ class PropiedadFormController {
                           currentPropiedad.observacionesPatentes;
                       imagenDocumentoLegal =
                           currentPropiedad.imagenDocumentoLegal;
+
+                      if (estadoNegocio != null) {
+                        List<String> stringValues = estadoNegocio!.split(", ");
+
+                        for (var entry
+                            in dropdownOptions["estadoNegocio"]!.entries) {
+                          if (stringValues.contains(entry.value)) {
+                            estadoNegocioList.add(entry.key);
+                          }
+                        }
+                      }
 
                       if (afectacionesCovidPersonalDesempennoEmpresa != null) {
                         List<String> stringValues =
