@@ -97,7 +97,7 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                 mapController: _mapController,
                 options: MapOptions(
                   initialCenter: OfflineMapWidget.newMapCoords ?? MANAGUA2,
-                  initialZoom: 16.0,
+                  initialZoom: 14.0,
                   maxZoom: 20.0,
                   minZoom: 0.0,
                   // onTap: (TapPosition details, LatLng point) {
@@ -145,6 +145,9 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                         Marker(
                           point: currentCoords!,
                           child: Icon(Icons.location_history),
+                          alignment: Alignment.topCenter,
+                          height: 50,
+                          rotate: true,
                         ),
                       ],
                     ),
@@ -155,9 +158,9 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
                 right: 16.0,
                 child: FloatingActionButton(
                   onPressed: () async {
+                    currentCoords = await _getCurrentPosition();
                     if (currentCoords == null) return;
                     _mapController.move(currentCoords!, 18.0);
-                    currentCoords = await _getCurrentPosition();
                     setState(() {});
                   },
                   child: Icon(Icons.my_location),
@@ -195,7 +198,6 @@ class _OfflineMapWidgetState extends State<OfflineMapWidget>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("❌ No fue posible cargar el mapa")),
       );
-      print("El errorfue: $e");
       return Future.error("❌ No fue posible cargar el mapa");
     }
   }

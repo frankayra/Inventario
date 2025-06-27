@@ -41,13 +41,13 @@ class _InquiryInfoState extends State<InquiryInfo> {
       }
 
       predioWidget = Chip(
-        label: Text('Predios consultados: ${_predios.length}'),
+        label: Text('Predios registrados: ${_predios.length}'),
       );
       edificioWidget = Chip(
-        label: Text('Edificios consultados: ${_edificios.length}'),
+        label: Text('Edificios registrados: ${_edificios.length}'),
       );
       propiedadWidget = Chip(
-        label: Text('Propiedades consultados: ${_propiedades.length}'),
+        label: Text('Propiedades registradas: ${_propiedades.length}'),
       );
 
       prediosWidgets =
@@ -68,6 +68,7 @@ class _InquiryInfoState extends State<InquiryInfo> {
   Widget build(BuildContext context) {
     if (isLoaded) {
       return AlertDialog(
+        scrollable: true,
         title: const Text('Información de la encuesta'),
         content: Column(
           mainAxisAlignment: MainAxisAlignment.center,

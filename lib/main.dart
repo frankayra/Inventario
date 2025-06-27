@@ -45,7 +45,7 @@ class AppContext {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  var appContext = AppContext(mapName: "managua18.mbtiles");
+  var appContext = AppContext(mapName: "windsor.mbtiles");
   final foldersCreated = await initializeAppDirectories([
     appContext.customMapsPath,
     appContext.customDelimitationsPath,
