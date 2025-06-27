@@ -5,6 +5,7 @@ import 'package:inventario/View/Widgets/image_selection.dart';
 import 'package:inventario/ModelView/wrappers.dart';
 import 'package:inventario/ModelView/hash.dart';
 import 'package:inventario/ModelView/PropiedadFormController.dart';
+import 'package:inventario/ModelView/email.dart';
 
 class PropiedadForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;
@@ -565,9 +566,9 @@ class PropiedadFormState extends State<PropiedadForm> {
               },
               validator:
                   (value) =>
-                      value != null && value.isNotEmpty
+                      value != null && value.isNotEmpty && isValidEmail(value)
                           ? null
-                          : "Ingrese el correo electronico",
+                          : "Ingrese un correo válido",
             ),
             TextFormField(
               key: ValueKey(
@@ -723,6 +724,7 @@ class PropiedadFormState extends State<PropiedadForm> {
               decoration: InputDecoration(
                 labelText: 'Código CIIU actividad primaria',
               ),
+              enabled: false,
               validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   controller.codigoCIIUActividadPrimaria = value;
@@ -742,6 +744,7 @@ class PropiedadFormState extends State<PropiedadForm> {
               decoration: InputDecoration(
                 labelText: 'Código CIIU actividad complementaria',
               ),
+              enabled: false,
               validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   controller.codigoCIIUActividadComplementaria = value;

@@ -78,6 +78,10 @@ class PropiedadFormController {
       5: 'Se empezó a trabajar por turnos',
       6: 'Se aumentaron las jornadas',
       7: 'Se implementó modalidad de teletrabajo',
+      8: 'Planea contratar en los próximos 6 meses',
+      9: 'Ha reinventado su negocio a pedidos virtuales',
+      10:
+          'Aumento de precios de insumos y materias primas(combustibles, abarrotes, servicios públicos).',
     },
     "afectacionesCovidSobreVentas": {
       1: 'Ingresó "0" ante la afectación de una orden sanitaria',
@@ -85,8 +89,7 @@ class PropiedadFormController {
       3: 'Reducción de los ingresos entre un 20-50%',
       4: 'Se mantuvieron dentro de lo esperado',
       5: 'Aumentaron',
-      6: 'Ninguna',
-      7: 'NS-NR',
+      6: 'NS-NR',
     },
   };
   final GlobalKey<FormState> formKey;

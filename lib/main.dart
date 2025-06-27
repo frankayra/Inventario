@@ -9,6 +9,7 @@ import 'View/Screens/offline_map_screen.dart';
 import 'View/Screens/form_screen.dart';
 import 'package:inventario/Model/db_general_management.dart' as db;
 import 'package:inventario/Model/db_debug.dart';
+import 'package:inventario/Model/db_info.dart';
 import 'package:inventario/ModelView/user_tools.dart';
 import 'package:inventario/View/Screens/Form%20sections/Encuestador.dart';
 
@@ -140,7 +141,10 @@ class _MyScafoldState extends State<MyScafold> {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (context) => DBDebugDialog(),
+                  builder: (context) {
+                    // return DBDebugDialog();
+                    return InquiryInfo(mapName: widget.appContext.mapName);
+                  },
                 );
               },
             ),
