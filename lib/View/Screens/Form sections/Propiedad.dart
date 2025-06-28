@@ -6,6 +6,7 @@ import 'package:inventario/ModelView/wrappers.dart';
 import 'package:inventario/ModelView/hash.dart';
 import 'package:inventario/ModelView/PropiedadFormController.dart';
 import 'package:inventario/ModelView/email.dart';
+import 'package:inventario/View/Widgets/licences_browser.dart';
 
 class PropiedadForm extends StatefulWidget {
   final FormGlobalStatusWrapper<int> formGlobalStatus;
@@ -38,6 +39,17 @@ class PropiedadFormState extends State<PropiedadForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            licencesBrowser(
+              context: context,
+              onChange: (value) {
+                int? id = int.tryParse(value);
+                if (id == null) return;
+                controller.licenciaImputTextBoxValue = id;
+              },
+              onSearch: () async {
+                controller.importInfoFromLicenciaComercial();
+              },
+            ),
             Wrap(
               spacing: 8,
               children: [

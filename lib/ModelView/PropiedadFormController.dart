@@ -3,6 +3,7 @@ import 'package:inventario/Model/db_general_management.dart' as db;
 import 'package:inventario/View/Widgets/dialogs.dart';
 import 'package:inventario/ModelView/wrappers.dart';
 import 'package:inventario/View/Widgets/countdown_circle.dart';
+import 'package:inventario/Model/CSV_management.dart';
 import 'dart:typed_data';
 
 class PropiedadFormController {
@@ -99,11 +100,16 @@ class PropiedadFormController {
   List<db.Propiedad> propiedadesDelEdificio = [];
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? snackbaractions;
   bool overridingDelete = false;
+  LicenciaDB? licencias;
+  int? licenciaImputTextBoxValue;
   PropiedadFormController({
     required this.formKey,
     required this.formGlobalStatus,
     required this.formSetStateCallbackFunction,
   }) {
+    try {
+      licencias = LicenciaDB.fromCSV();
+    } catch (e) {}
     if (formGlobalStatus["idPredio"] != null &&
         formGlobalStatus["noEdificio"] != null) {
       idPredio = formGlobalStatus["idPredio"];
@@ -459,5 +465,15 @@ class PropiedadFormController {
         formGlobalStatus["noLocal"] = formGlobalStatus["noLocal"];
       }
     }
+  }
+
+  void importInfoFromLicenciaComercial() {
+    if (licenciaImputTextBoxValue == null || licencias == null) return;
+    Licencia? licencia = licencias![licenciaImputTextBoxValue!];
+    if (licencia == null) return;
+    actividadPrimaria = licencia.actividadPrimaria;
+    nombreNegocio = licencia.nombreNegocio;
+    cedulaPatentado = licencia.cedulaPatentado;
+    formSetStateCallbackFunction();
   }
 }

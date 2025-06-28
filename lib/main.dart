@@ -18,6 +18,7 @@ class AppContext {
   String customMapsPath = "/storage/emulated/0/CADIC/Maps";
   String customConfigPath = "/storage/emulated/0/CADIC/config";
   String customDBExportPath = "/storage/emulated/0/CADIC/Exportado";
+  String customLicencesPath = "/storage/emulated/0/CADIC/Licencias comerciales";
   String customDelimitationsPath = "/storage/emulated/0/CADIC/Delimitaciones";
   String _mapName;
   late String assetsMapPath;
@@ -30,6 +31,7 @@ class AppContext {
     customMapsPath = path.normalize(customMapsPath);
     customConfigPath = path.normalize(customConfigPath);
     customDBExportPath = path.normalize(customDBExportPath);
+    customLicencesPath = path.normalize(customLicencesPath);
     customDelimitationsPath = path.normalize(customDelimitationsPath);
     assetsMapPath = "assets/tiles/$mapName";
     customMapPath = path.join(customMapsPath, _mapName);
@@ -50,6 +52,7 @@ void main() async {
     appContext.customMapsPath,
     appContext.customDelimitationsPath,
     appContext.customDBExportPath,
+    appContext.customLicencesPath,
   ]);
 
   if (foldersCreated) {
